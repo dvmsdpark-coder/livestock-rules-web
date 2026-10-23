@@ -1,0 +1,13 @@
+{
+  "subpath": "http://localhost:4173/livestock-rules-web/",
+  "documents": 5,
+  "zoneQuestion": true,
+  "reportingScenarios": true,
+  "definitionPrecision": true,
+  "dateFilter": true,
+  "annex26": true,
+  "pdfLinks": true,
+  "mobileWidth": true,
+  "noDockerApiRequests": true,
+  "noPageErrors": true
+}
