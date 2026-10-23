@@ -69,9 +69,9 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
   mode='definition';for(const {doc,index} of entries)for(const d of index.definitions)if(compact(d.term)===compact(term))add(doc,d.part,{match:'정의 항목 일치'});
  }else if(fmd&&/방역지역|방역구역|방역대(?!책|본부)/u.test(q)&&/설정|정하|정해|나누|구분|반경|범위/u.test(q)&&!/해제|과태료|예외|소독/u.test(q)){
   mode='zone';for(const {doc,index} of entries){if(doc.type==='SOP'||doc.disease!=='구제역')continue;
-   for(const d of index.definitions)if(['관리지역','보호지역','예찰지역','방역지역'].includes(d.term))add(doc,d.part,{match:'방역지역 정의 연결'});
+   for(const term of ['방역지역','관리지역','보호지역','예찰지역'])for(const d of index.definitions)if(d.term===term)add(doc,d.part,{match:'방역지역 정의 연결'});
   }
-  articles(['시도지사의조치'],true);
+  articles(['시장군수구청장의조치'],true);
  }else if(intent){
   mode='procedure';const title={reporting:'죽거나병든가축의신고',movement_release:'이동제한해제등',farm_disinfection:'소독등조치'}[intent];articles([title],fmd);
   if(fmd)for(const {doc,index} of entries)if(doc.type==='SOP'&&doc.disease==='구제역')for(const p of index.procedures)if(p.intent===intent)for(const part of p.parts)add(doc,part,{match:'SOP 절차 연결'});

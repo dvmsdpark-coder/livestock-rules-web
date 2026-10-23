@@ -39,7 +39,7 @@ for(const q of ['구제역 발생농장은 어떻게 소독하나요?','구제�
  const r=run(q);assert.equal(r.mode,'procedure');assert.deepEqual(sopPages(r),[111,112,229,230,231,232,233,234,235]);
 });
 for(const q of ['구제역 방역대는 어떻게 설정되나요?','구제역 방역지역 설정 기준','구제역 방역구역은 어떻게 정하나요?','구제역 방역대의 범위가 궁금합니다'])test('zone concept and setting: '+q,()=>{
- const r=run(q);assert.equal(r.mode,'zone');assert(r.results.some(x=>x.heading.includes('관리지역')));assert(r.results.some(x=>x.heading.includes('보호지역')));assert(r.results.some(x=>x.heading.includes('예찰지역')));assert(r.results.some(x=>x.heading.includes('시ㆍ도지사의 조치')));assert(r.results.every(x=>x.docType==='고시'&&x.disease==='구제역'));
+ const r=run(q);assert.equal(r.mode,'zone');assert(r.results.some(x=>x.heading.includes('관리지역')));assert(r.results.some(x=>x.heading.includes('보호지역')));assert(r.results.some(x=>x.heading.includes('예찰지역')));assert(r.results.some(x=>x.heading.includes('시장ㆍ군수ㆍ구청장의 조치')));assert(r.results.some(x=>x.text.includes('방역지역을 다시 설정')));assert(r.results[0].heading.endsWith('방역지역'));assert(r.results.every(x=>x.docType==='고시'&&x.disease==='구제역'));
 });
 for(const q of ['구제역 신고를 안하면 과태료는?','구제역 농장 소독약은 몇 배 희석하나요?','구제역 이동제한 해제와 소독 방법을 알려주세요','구제역 방역대책은 무엇인가요?'])test('do not reduce different issues: '+q,()=>{
  assert(!['procedure','zone'].includes(run(q).mode));
