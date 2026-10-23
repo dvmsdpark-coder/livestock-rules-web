@@ -25,11 +25,11 @@ function words(question){
  }
  return results.slice(0,12);
 }
-function procedureIntent(question,fmd){
+function procedureIntent(question,disease){
  const q=compact(question);
  const excluded=/면제|예외|과태료|처벌|안하면|하지않|보상|살처분|위생관리업|입식|수입|고용|입국|출국|서식|별지|별표/u.test(q);
- if(!excluded&&q.includes('신고')&&!q.includes('이동제한')&&/어디|누구에게|어느기관|신고처|신고기관/u.test(q)&&/구제역|가축|의심축|아프리카돼지열병|조류인플루엔자|ASF|HPAI/iu.test(q))return 'reporting';
- if(!fmd||excluded||q.includes('신고'))return null;
+ if(!excluded&&q.includes('신고')&&!q.includes('이동제한')&&/어디|누구에게|어느기관|신고처|신고기관/u.test(q)&&(disease||/가축|의심축/u.test(q)))return 'reporting';
+ if(!disease||excluded||q.includes('신고'))return null;
  if(q.includes('이동제한')&&!q.includes('소독')&&/해제|언제|풀리|풀어|며칠/u.test(q))return 'movement_release';
  if(q.includes('소독')&&q.includes('농장')&&!/이동제한|희석|농도|배율|소독약|몇배|차량|거점|통제초소/u.test(q))return 'farm_disinfection';
  return null;
@@ -41,21 +41,23 @@ const messages={definition:'질문한 용어의 정의 항목을 찾았습니다
  annex:'번호·제목으로 찾은 별표·별지입니다. 표·그림·작성란의 배치는 PDF 원문으로 확인하세요.',
  related:'관련 단어가 포함된 원문 후보입니다. 질문에 대한 확정적인 답변은 아니며 해당 PDF의 전후 맥락을 확인하세요.'};
 export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
- const entries=corpus.filter(({doc})=>eligible(doc,filters)).sort((a,b)=>(priorities[a.doc.type]??9)-(priorities[b.doc.type]??9));
  const query=normalize(question),q=compact(query),term=definitionTerm(query);
- const explicitFmd=/구제역|\bFMD\b/iu.test(query),otherDisease=/아프리카돼지열병|조류인플루엔자|\bASF\b|\bHPAI\b/iu.test(query);
- const fmd=!otherDisease&&(explicitFmd||filters.disease==='구제역');
- if(explicitFmd&&!['전체','구제역','공통'].includes(filters.disease))return {mode:'related',results:[],message:'질문은 구제역인데 검색 범위가 다른 질병으로 선택되어 있습니다. 검색 범위를 확인하세요.'};
+ const named=[['구제역',/구제역|\bFMD\b/iu],['ASF',/아프리카\s*돼지\s*열병|\bASF\b/iu],['고병원성AI',/조류\s*인플루엔자|조류독감|\bHPAI\b|\bAI\b/iu]].filter(([,pattern])=>pattern.test(query)).map(([d])=>d);
+ if(named.length>1)return {mode:'related',results:[],message:'서로 다른 질병의 기준을 합쳐 제시하지 않습니다. 질병별로 나누어 검색해주세요.'};
+ const target=named[0]||(['구제역','ASF','고병원성AI'].includes(filters.disease)?filters.disease:null);
+ if(named.length&&!['전체','공통',target].includes(filters.disease))return {mode:'related',results:[],message:'질문과 선택한 질병이 다릅니다. 검색 범위를 확인하세요.'};
+ const entries=corpus.filter(({doc})=>eligible(doc,filters)&&(!target||doc.disease==='공통'||doc.disease===target)).sort((a,b)=>(priorities[a.doc.type]??9)-(priorities[b.doc.type]??9));
+ if(!target&&/방역지역|방역구역|방역대(?!책|본부)|이동제한.*(?:해제|풀리)/u.test(q))return {mode:'related',results:[],message:'질병별 적용 기준이 다릅니다. 질문에 질병명을 넣거나 질병을 선택해주세요.'};
  let results=[],mode='related';
  const add=(doc,part,extra={})=>results.push({documentId:doc.id,title:doc.title,docType:doc.type,disease:doc.disease,version:doc.version,
   from:doc.from,pdf:doc.pdf,dateNote:doc.date_note||'',...part,kind:part.kind||'body',...extra});
- const articles=(titles,restrictFmd=false)=>{
-  for(const {doc,index} of entries){if(doc.type==='SOP'||restrictFmd&&!['공통','구제역'].includes(doc.disease))continue;
+ const articles=(titles)=>{
+  for(const {doc,index} of entries){if(doc.type==='SOP')continue;
    for(const a of index.articles)if(titles.includes(compact(a.title)))for(const part of a.parts)add(doc,part,{match:'조문 일치'});
   }
  };
  const annexKind=/별지|서식/u.test(query)?'form':query.includes('별표')?'table':null;
- const intent=procedureIntent(query,fmd);
+ const intent=procedureIntent(query,target);
  if(annexKind){
   mode='annex';const number=query.match(/(?:별지|별표|제)\s*(?:제\s*)?(\d+)\s*호?(?:\s*의\s*(\d+))?/u);
   const terms=words(query.replace(/별지|별표|서식|제\d+호(?:의\d+)?|알려주세요|찾아주세요|보여주세요/gu,' '));
@@ -66,15 +68,15 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
   }
   results.sort((a,b)=>Number(a.deleted)-Number(b.deleted));results=results.slice(0,6);
  }else if(term){
-  mode='definition';for(const {doc,index} of entries)for(const d of index.definitions)if(compact(d.term)===compact(term))add(doc,d.part,{match:'정의 항목 일치'});
- }else if(fmd&&/방역지역|방역구역|방역대(?!책|본부)/u.test(q)&&/설정|정하|정해|나누|구분|반경|범위/u.test(q)&&!/해제|과태료|예외|소독/u.test(q)){
-  mode='zone';for(const {doc,index} of entries){if(doc.type==='SOP'||doc.disease!=='구제역')continue;
-   for(const term of ['방역지역','관리지역','보호지역','예찰지역'])for(const d of index.definitions)if(d.term===term)add(doc,d.part,{match:'방역지역 정의 연결'});
+  mode='definition';for(const {doc,index} of entries)for(const d of index.definitions)if(compact(d.term)===compact(term))for(const p of d.parts||[d.part])add(doc,p,{match:'정의 항목 일치'});
+ }else if(target&&/방역지역|방역구역|방역대(?!책|본부)/u.test(q)&&/설정|정하|정해|나누|구분|반경|범위/u.test(q)&&!/해제|과태료|예외|소독/u.test(q)){
+  mode='zone';for(const {doc,index} of entries){if(doc.type==='SOP'||doc.disease!==target)continue;
+   for(const term of ['방역지역','관리지역','보호지역','예찰지역'])for(const d of index.definitions)if(d.term===term)for(const p of d.parts||[d.part])add(doc,p,{match:'방역지역 정의 연결'});
   }
-  articles(['시장군수구청장의조치'],true);
+  articles(['시장군수구청장의조치','시장군수의조치']);
  }else if(intent){
-  mode='procedure';const title={reporting:'죽거나병든가축의신고',movement_release:'이동제한해제등',farm_disinfection:'소독등조치'}[intent];articles([title],fmd);
-  if(fmd)for(const {doc,index} of entries)if(doc.type==='SOP'&&doc.disease==='구제역')for(const p of index.procedures)if(p.intent===intent)for(const part of p.parts)add(doc,part,{match:'SOP 절차 연결'});
+  mode='procedure';const titles={reporting:['죽거나병든가축의신고'],movement_release:target==='ASF'?['방역지역전환및해제']:target==='고병원성AI'?['관리지역보호지역의방역','예찰지역의방역']:['이동제한해제등'],farm_disinfection:['소독등조치']}[intent];articles(titles);
+  if(target)for(const {doc,index} of entries)if(doc.type==='SOP'&&doc.disease===target)for(const p of index.procedures)if(p.intent===intent)for(const part of p.parts)add(doc,part,{match:'SOP 절차 연결'});
  }else{
   let topic=q.replace(/(?:알려주세요|설명해주세요|알려줘|무엇인가요|무엇입니까|어떻게되나요)$/u,'').replace(/[을를은는]$/u,'');
   const number=/^제\d+조(?:의\d+)?$/u.test(q)?q:null;

@@ -1,13 +1,13 @@
 {
-  "subpath": "http://localhost:4173/livestock-rules-web/",
-  "documents": 5,
-  "zoneQuestion": true,
-  "reportingScenarios": true,
-  "definitionPrecision": true,
-  "dateFilter": true,
-  "annex26": true,
+  "documents": 9,
+  "diseaseFilteredDocuments": 5,
+  "asfReportingPage": 40,
+  "hpaiReportingPage": 89,
+  "contextualExampleButtons": true,
+  "zoneMultiPageDefinition": true,
+  "hpaiSubnumberFormPage": 321,
   "pdfLinks": true,
   "mobileWidth": true,
-  "noDockerApiRequests": true,
+  "noExternalApiRequests": true,
   "noPageErrors": true
 }

@@ -7,7 +7,7 @@ import datetime,hashlib,json,re,sys,zipfile
 from pathlib import Path
 from app.db import db
 from app.articles import parse_articles
-from app.annexes import parse_annexes,HEADER
+from supplemental import PROFILES, excluded, curated_procedures, parse_annexes, ANNEX as HEADER
 from app.articles import page_body
 from app.procedures import parse_sop,reporting_parts,matching_section
 from app.core import readable_excerpt,chunk_page
@@ -71,6 +71,14 @@ def export():
                 'version':doc['version_label'],'from':str(doc['effective_from']),'to':str(doc['effective_to']) if doc['effective_to'] else None,
                 'pages':doc['pages'],'sha256':doc['sha256'],'pdf':f'pdf/{uid}.pdf','data':f'data/{uid}.json'}
             if doc['family_key']=='fmd-sop':public['date_note']='검색용 기준일은 파일명 기준이며 공식 시행일은 미확인입니다.'
+            if doc['family_key'] in ('asf-sop','hpai-sop'):
+                public['date_note']='SOP 발행 연월은 표지 기준입니다. 검색용 기준일은 제공 파일명 날짜이며 공식 시행일은 미확인입니다. 최신 고시와 함께 확인하세요.'
+            profile=PROFILES.get(doc['sha256'],{})
+            if doc['family_key'] in ('asf-sop','hpai-sop') and not profile:
+                raise ValueError('New SOP revision requires source-boundary and appendix review')
+            if doc['family_key']=='asf-sop':
+                public['search_note']='부록의 과거 고시·2019년 WOAH 번역문은 현행 근거로 검색하지 않습니다. 전체 자료는 PDF에서 볼 수 있습니다.'
+            search_pages=[p for p in pages if not excluded(profile,p['page'])]
             index={'pages':[],'articles':[],'definitions':[],'annexes':[],'procedures':[],'chunks':[]}
             by_page={p['page']:p['text_content'] for p in pages}
             reference='\n'.join(p['text_content'] for p in pages)
@@ -91,8 +99,26 @@ def export():
                         if not excerpt or signature in seen:continue
                         seen.add(signature)
                         index['definitions'].append({'term':term,'part':record({**page,'text_content':excerpt},'정의 · '+term)})
+                # A definition can continue onto the next physical PDF page.
+                # Parse across the complete article, then retain page-local source slices.
+                for article in index['articles']:
+                    if article['title']!='정의':continue
+                    joined='\n'.join(p['text'] for p in article['parts'])
+                    terms=set(re.findall(r'[“"「『]([^\n“”"「」『』]{1,60})[”"」』]\s*(?:이란|란|이라\s*함은|라\s*함은)',joined))
+                    for term in sorted(terms):
+                        if any(d['term']==term for d in index['definitions']):continue
+                        excerpt=definition(joined,term)
+                        if not excerpt:continue
+                        start=joined.find(excerpt);end=start+len(excerpt);offset=0;parts=[]
+                        for p in article['parts']:
+                            left=max(start,offset);right=min(end,offset+len(p['text']))
+                            if right>left:
+                                text=p['text'][left-offset:right-offset]
+                                parts.append(record({'page':p['page'],'text_content':text,'text_origin':p['origin']},'정의 · '+term,continued=bool(parts)))
+                            offset+=len(p['text'])+1
+                        if parts:index['definitions'].append({'term':term,'part':parts[0],'parts':parts})
             annex_pages=[]
-            for page in pages:
+            for page in search_pages:
                 body_text=page_body(page['text_content'],doc['title'])
                 headers=list(HEADER.finditer(body_text))
                 if len(headers)>=3 and not HEADER.sub('',body_text).strip():continue
@@ -110,15 +136,20 @@ def export():
                         parts=reporting_parts(section['parts']) if intent=='reporting' else section['parts']
                         index['procedures'].append({'intent':intent,'scenario':section['scenario'],
                             'parts':[record(p,section['heading'],scenario=section['scenario'],continued=i>0) for i,p in enumerate(parts)]})
+            for section in curated_procedures(pages,profile):
+                index['procedures'].append({'intent':section['intent'],'scenario':section['scenario'],
+                    'parts':[record(p,section['heading'],scenario=section['scenario'],continued=i>0) for i,p in enumerate(section['parts'])]})
             for page in pages:
                 index['pages'].append({'page':page['page'],'text':page['text_content']})
+                if excluded(profile,page['page']):continue
                 for heading,excerpt in chunk_page(page['text_content']):
                     index['chunks'].append(record({**page,'text_content':excerpt},heading))
             # Classify page candidates once rather than reparse for each chunk.
             page_kind={}
             for annex in index['annexes']:
                 for number in range(annex['part']['page'],annex['endPage']+1):page_kind[number]=annex['kind']
-            for chunk in index['chunks']:chunk['kind']=page_kind.get(chunk['page'],'body')
+            for chunk in index['chunks']:
+                chunk['kind']=page_kind.get(chunk['page'],'figure' if len(re.sub(r'\s','',by_page[chunk['page']]))<30 else 'body')
             encoded=json.dumps(index,ensure_ascii=False,separators=(',',':')).encode()
             if len(encoded)>25*1024*1024:raise ValueError('Index exceeds asset size limit')
             public['data_sha256']=hashlib.sha256(encoded).hexdigest();public['data_bytes']=len(encoded)

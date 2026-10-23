@@ -1,0 +1,59 @@
+{
+  "added_documents": [
+    {
+      "family": "asf-notice",
+      "id": "37899984-3bca-5e02-a322-9d29397f15a5",
+      "sha256": "0a0c00fe1712746c6ab57cfea30b5780a3ab5ce2e2be00f6983d34f5c719e2f0",
+      "date": "2026-02-02",
+      "reviewed_sparse": [
+        19
+      ]
+    },
+    {
+      "family": "hpai-notice",
+      "id": "e6d52b81-681d-5e59-aa4c-63e78798e41e",
+      "sha256": "c67e963d2c1730f017672c3a2e24b08628afac430ef2d2fa3814ff483418a744",
+      "date": "2026-02-02",
+      "reviewed_sparse": [
+        27
+      ]
+    },
+    {
+      "family": "asf-sop",
+      "id": "7b763e5d-e1f8-5711-aedc-19ec89ab044f",
+      "sha256": "8ca92a9774fa4ca4af353140f4fed9741297780d189aeadd5ac72e26153fec4a",
+      "date": "2024-12-09",
+      "reviewed_sparse": [
+        143,
+        144,
+        192,
+        224
+      ]
+    },
+    {
+      "family": "hpai-sop",
+      "id": "3d9ae693-1bb3-5f8c-af9e-0e3512252566",
+      "sha256": "a2b814c1053b54f9e772628e60f5dee7abe2e841b3ae69efedc026a6d5a9995d",
+      "date": "2025-11-18",
+      "reviewed_sparse": [
+        2,
+        7,
+        20,
+        191,
+        214,
+        304,
+        316,
+        362
+      ]
+    }
+  ],
+  "new_pdf_pages": 748,
+  "total_pdf_pages": 1507,
+  "all_new_page_text_matches_native_pdf_extraction": true,
+  "sparse_pages_visually_reviewed": true,
+  "curated_procedure_boundaries_checked": true,
+  "source_ocr_generated": false,
+  "legal_expert_review": false,
+  "search_tests_passed": 67,
+  "scope": "Source integrity, extraction equality, reviewed page boundaries and browser behavior; not legal interpretation validation."
+}

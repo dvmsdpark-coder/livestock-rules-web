@@ -13,13 +13,13 @@ const run=(q,filters={})=>search(corpus,q,{...defaults,...filters});
 const sopPages=result=>result.results.filter(r=>r.docType==='SOP').map(r=>r.page);
 
 test('published source hashes and full page provenance',()=>{
- assert.equal(manifest.schema,1);assert.equal(corpus.length,5);
+ assert.equal(manifest.schema,1);assert.equal(corpus.length,9);
  for(const {doc,index} of corpus){
   for(const [filename,digest] of [[doc.pdf,doc.sha256],[doc.data,doc.data_sha256]]){
    const bytes=fs.readFileSync(path.join(site,filename));assert(bytes.length<25*1024*1024);assert.equal(createHash('sha256').update(bytes).digest('hex'),digest);
   }
   const pages=new Map(index.pages.map(p=>[p.page,p.text]));assert.equal(pages.size,doc.pages);
-  const parts=[...index.articles.flatMap(a=>a.parts),...index.definitions.map(d=>d.part),...index.annexes.map(a=>a.part),...index.procedures.flatMap(p=>p.parts),...index.chunks];
+  const parts=[...index.articles.flatMap(a=>a.parts),...index.definitions.flatMap(d=>d.parts||[d.part]),...index.annexes.map(a=>a.part),...index.procedures.flatMap(p=>p.parts),...index.chunks];
   for(const part of parts){assert(pages.get(part.page)?.includes(part.text),`${doc.title} PDF ${part.page}`);assert.equal(part.display.replace(/\s/gu,''),part.text.replace(/\s/gu,''));}
  }
 });
@@ -67,4 +67,52 @@ test('no private fields in public JSON',()=>{
  const forbidden=new Set(['storage_path','review_note','raw_text','ocr_error','admin_sessions','session_secret','database_url','admin_password_hash']);
  function visit(x){if(!x||typeof x!=='object')return;for(const [k,v]of Object.entries(x)){assert(!forbidden.has(k.toLowerCase()),k);visit(v);}}
  visit(manifest);for(const {index} of corpus)visit(index);
+});
+
+const diseases=[
+ {name:'ASF',aliases:['ASF','아프리카돼지열병','아프리카 돼지 열병'],report:[40],release:[168,169],clean:[117,118,119,120,121,122,123,124]},
+ {name:'고병원성AI',aliases:['AI','HPAI','조류인플루엔자','조류독감'],report:[89],release:[179,180,181],clean:[158,159,160,161,162,163,164,165]},
+];
+for(const disease of diseases)for(const alias of disease.aliases){
+ test('disease reporting isolation: '+alias,()=>{
+  const r=run(alias+'가 발생하면 어디에 신고하나요?');assert.equal(r.mode,'procedure');assert.deepEqual(sopPages(r),disease.report);
+  assert(r.results.every(x=>['공통',disease.name].includes(x.disease)));assert(r.results.some(x=>x.text.includes('1588-4060')));
+ });
+ test('disease zone definitions: '+alias,()=>{
+  const r=run(alias+' 방역대는 어떻게 설정되나요?');assert.equal(r.mode,'zone');assert(r.results.every(x=>x.disease===disease.name&&x.docType==='고시'));
+  for(const t of ['방역지역','관리지역','보호지역','예찰지역'])assert(r.results.some(x=>x.heading.endsWith(t)),t);
+ });
+ test('disease complete release procedure: '+alias,()=>{
+  const r=run(alias+' 이동제한은 언제 풀리나요?');assert.equal(r.mode,'procedure');assert.deepEqual(sopPages(r),disease.release);assert(r.results.every(x=>x.disease===disease.name));
+ });
+ test('disease complete disinfection procedure: '+alias,()=>{
+  const r=run(alias+' 발생농장은 어떻게 소독하나요?');assert.equal(r.mode,'procedure');assert.deepEqual(sopPages(r),disease.clean);assert(r.results.every(x=>x.disease===disease.name));
+ });
+}
+test('HPAI definition spanning physical pages keeps both source slices',()=>{
+ const r=run('예찰지역의 정의',{disease:'고병원성AI',type:'고시'});assert.equal(r.mode,'definition');assert.deepEqual(r.results.map(x=>x.page),[2,3]);assert.equal(r.results[1].continued,true);
+ assert(r.results[0].text.includes('10킬로미터'));assert(r.results[1].text.includes('축소할 수 있다'));
+});
+test('question and selected disease conflict fail closed',()=>{
+ for(const q of ['ASF 방역대 설정','AI 이동제한 해제'])assert.equal(run(q,{disease:'구제역'}).results.length,0);
+});
+test('multi-disease and unspecified zone queries do not combine rules',()=>{
+ assert.equal(run('AI와 ASF 방역대 설정').results.length,0);assert.equal(run('방역대는 어떻게 설정되나요?').results.length,0);
+});
+test('selected disease supplies context for a general question',()=>{
+ assert.deepEqual(sopPages(run('신고는 어디에 해야 하나요?',{disease:'ASF'})),[40]);assert.deepEqual(sopPages(run('이동제한은 언제 풀리나요?',{disease:'고병원성AI'})),[179,180,181]);
+});
+test('SOP annexes share exact number semantics and PDF-only layout',()=>{
+ assert(run('ASF 별지 제1호서식',{type:'SOP'}).results.some(x=>x.page===195&&x.kind==='form'));
+ assert(run('AI 별지 제1호서식',{type:'SOP'}).results.some(x=>x.page===318&&x.kind==='form'));
+ const sub=run('AI 별지 제3호의1서식',{type:'SOP'});assert(sub.results.some(x=>x.page===321));assert(sub.results.every(x=>x.page!==320));
+ assert(run('ASF 별표 4',{type:'SOP'}).results.some(x=>x.page===192&&x.kind==='table'));
+});
+test('old reprinted ASF law is preserved in PDF pages but excluded from current search',()=>{
+ const item=corpus.find(x=>x.doc.family==='asf-sop');assert.equal(item.index.pages.length,281);assert(item.index.pages.some(x=>x.page===205&&x.text.includes('2023-56')));
+ assert(item.index.chunks.every(x=>x.page<205));assert(item.index.annexes.every(x=>x.endPage<205));
+});
+test('new notices use their source effective date and SOP dates are qualified',()=>{
+ for(const d of diseases){assert.equal(run(d.aliases[0]+' 방역대 설정',{asOf:'2026-02-01'}).results.length,0);assert(run(d.aliases[0]+' 방역대 설정',{asOf:'2026-02-02'}).results.length>0);}
+ for(const {doc} of corpus.filter(x=>x.doc.type==='SOP'))assert(doc.date_note.includes('미확인'));
 });
