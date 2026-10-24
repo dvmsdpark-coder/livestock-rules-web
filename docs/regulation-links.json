@@ -230,6 +230,26 @@
       ]
     }
   ],
+  "benefits": [
+    {
+      "name": "생계안정",
+      "lawParagraph": 1,
+      "decreeArticle": "제12조",
+      "law": true,
+      "delegation": true,
+      "decree": true,
+      "wrongScheme": false
+    },
+    {
+      "name": "소득안정",
+      "lawParagraph": 2,
+      "decreeArticle": "제12조의2",
+      "law": true,
+      "delegation": true,
+      "decree": true,
+      "wrongScheme": false
+    }
+  ],
   "versionReview": [
     {
       "sop": "아프리카돼지열병 긴급행동지침(SOP)",

@@ -432,9 +432,9 @@
     ]
   },
   "natural": {
-    "total": 31,
-    "hitInSix": 31,
-    "visibleHit": 25,
+    "total": 33,
+    "hitInSix": 33,
+    "visibleHit": 27,
     "cases": [
       {
         "id": "report-fmd",
@@ -1455,12 +1455,18 @@
         "mode": "ranked",
         "terms": [
           "보상",
-          "감액",
-          "지급"
+          "지원",
+          "감액"
         ],
         "hitInSix": true,
         "visibleHit": true,
         "top": [
+          {
+            "type": "시행령",
+            "disease": "공통",
+            "article": "제11조의5",
+            "primary": true
+          },
           {
             "type": "시행령",
             "disease": "공통",
@@ -1472,6 +1478,24 @@
             "disease": "공통",
             "article": "제48조",
             "primary": true
+          },
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제48조의3",
+            "primary": false
+          },
+          {
+            "type": "시행령",
+            "disease": "공통",
+            "article": "제11조의2",
+            "primary": false
+          },
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제52조",
+            "primary": false
           }
         ]
       },
@@ -1681,6 +1705,66 @@
             "disease": "ASF",
             "article": "제23조",
             "primary": false
+          }
+        ]
+      },
+      {
+        "id": "income-stability-funding",
+        "question": "소득안정자금 지급 근거",
+        "expected": {
+          "type": "법률",
+          "disease": "공통",
+          "article": "제49조"
+        },
+        "mode": "ranked",
+        "terms": [
+          "소득안정",
+          "지원"
+        ],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제49조",
+            "primary": true
+          },
+          {
+            "type": "시행령",
+            "disease": "공통",
+            "article": "제12조의2",
+            "primary": true
+          }
+        ]
+      },
+      {
+        "id": "livelihood-funding",
+        "question": "생계안정자금 지급 근거",
+        "expected": {
+          "type": "법률",
+          "disease": "공통",
+          "article": "제49조"
+        },
+        "mode": "ranked",
+        "terms": [
+          "생계안정",
+          "지원"
+        ],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제49조",
+            "primary": true
+          },
+          {
+            "type": "시행령",
+            "disease": "공통",
+            "article": "제12조",
+            "primary": true
           }
         ]
       }

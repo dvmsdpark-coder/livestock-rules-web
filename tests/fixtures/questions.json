@@ -277,5 +277,23 @@
       "disease": "ASF",
       "article": "제23조"
     }
+  },
+  {
+    "id": "income-stability-funding",
+    "question": "소득안정자금 지급 근거",
+    "expected": {
+      "type": "법률",
+      "disease": "공통",
+      "article": "제49조"
+    }
+  },
+  {
+    "id": "livelihood-funding",
+    "question": "생계안정자금 지급 근거",
+    "expected": {
+      "type": "법률",
+      "disease": "공통",
+      "article": "제49조"
+    }
   }
 ]

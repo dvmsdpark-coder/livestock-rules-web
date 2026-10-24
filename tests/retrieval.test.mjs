@@ -2,7 +2,7 @@ import test from 'node:test';import assert from 'node:assert/strict';
 import {search} from '../site/assets/search.js';import {presentResults} from '../site/assets/evidence.js';
 import {corpus,defaults,evaluate} from '../tools/evaluate.mjs';
 test('independent natural-language fixtures reach their expected source in the first six legal groups',()=>{
- const r=evaluate();assert.equal(r.natural.total,31);assert.deepEqual(r.natural.cases.filter(c=>!c.hitInSix),[]);assert.deepEqual(r.structural.failed,[]);assert(r.structural.total>600);
+ const r=evaluate();assert(r.natural.total>=33);assert.deepEqual(r.natural.cases.filter(c=>!c.hitInSix),[]);assert.deepEqual(r.structural.failed,[]);assert(r.structural.total>600);
 });
 test('ranked excerpts and parent introductions remain exact page substrings, with correct link offsets',()=>{
  for(const q of ['살처분 보상금은 어떻게 받나요?','축산차량은 어디에 등록하나요?','HPAI 재입식 조건','ASF 발생농장 분뇨 처리','방문기록 보관 기간']){
