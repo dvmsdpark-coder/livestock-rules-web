@@ -1,7 +1,7 @@
 // Corpus-derived clause retrieval; source excerpts, never a generated legal answer.
-import {activeArticles,searchableChunk} from './provisions.js?v=20261024-18';
-import {legalUnits,references} from './evidence.js?v=20261024-18';
-import {sopIndex} from './sop-index.js?v=20261024-18';
+import {activeArticles,searchableChunk} from './provisions.js?v=20261024-19';
+import {legalUnits,references} from './evidence.js?v=20261024-19';
+import {sopIndex} from './sop-index.js?v=20261024-19';
 const flat=s=>s.normalize('NFKC').replace(/[\sㆍ·“”"「」『』()（）,.:：]/gu,'').toLowerCase();
 const generic=new Set(['가축','전염병','가축전염병','방역','규정','관련','대한','대하여','위한','경우','사항','조치','방법','기준','요령','발생','발생시','대상','실시','관리','따른','따라','절차','등의','범위','의무','처리','구제역','아프리카돼지열병','조류인플루엔자','고병원성','농장','발생농장','가축의','지역','필요한','있는','없는','위하여','하여야','관한','어떤','검출시','고병원성ai','어떻게','어디에','어디','하나요','되나요','받나요','있나요','무엇','무엇인가요','조건','검출','확인','방역조치','언제','알려주세요','근거','비교','차이','차이점','종류','분류','목록','리스트','유형','구분','항목']);
 export const concepts=[
@@ -81,12 +81,13 @@ const requestTitle=s=>sectionTitle(s).replace(/^(?:hpai|ai|asf|fmd|구제역|아
 const matches=(text,a)=>a.aliases.some(alias=>(a.name==='처리'?text.replace(/처리업|처리시설|처리장/gu,''):text).includes(alias));
 export function retrieve(entries,question,asOf,target){
  const indexes=entries.map(e=>indexFor(e,asOf));
- const roleRequest=/역할|직무|권한|책무|업무(?!량)|하는\s*일|해야\s*할\s*일|무슨\s*일|어떤\s*일/u.test(question);
- const roleWords=new Set(['역할','업무','직무','권한','책무','하는일','해야할일','내용','무슨','정리','설명']);
- const anchors=anchorsFor(question,indexes).filter(a=>!roleRequest||!roleWords.has(a.name));
+ const obligationRequest=/의무|준수사항/u.test(question);
+ const roleRequest=/의무|준수사항|역할|직무|권한|책무|업무(?!량)|하는\s*일|해야\s*할\s*일|무슨\s*일|어떤\s*일/u.test(question);
+ const roleWords=new Set(['방역관리','의무','준수사항','역할','업무','직무','권한','책무','하는일','해야할일','내용','무슨','정리','설명']);
+ const anchors=anchorsFor(question,indexes).filter(a=>!roleRequest||!roleWords.has(a.name)).filter(a=>!roleRequest||!question.includes('축산계열화사업자')||a.name!=='가금');
  const actors=roleRequest?anchors.filter(a=>!concepts.some(c=>c.name===a.name)&&(indexes.some(i=>i.rows.some(r=>matches(r.heading,a)))||/관|사|본부|기관|위원회$/u.test(a.name))):[];
  const roleSearch=actors.length>0;
- const roleRoots=roleSearch?entries.filter(e=>e.doc.type==='법률').flatMap(e=>activeArticles(e,asOf).filter(a=>actors.some(actor=>actor.aliases.includes(flat(a.title)))).map(a=>({id:e.doc.id,number:a.number}))):[];
+ const roleRoots=roleSearch?entries.filter(e=>e.doc.type==='법률').flatMap(e=>activeArticles(e,asOf).filter(a=>actors.some(actor=>actor.aliases.includes(flat(a.title))||actor.name==='축산계열화사업자'&&matches(flat(a.title),actor))).map(a=>({id:e.doc.id,number:a.number}))):[];
  const penaltyRequest=anchors.some(a=>a.name==='처벌');
  const benefits=anchors.filter(a=>['생계안정','소득안정'].includes(a.name));
  const subjects=anchors.filter(a=>!actionNames.has(a.name)&&(!penaltyRequest||a.name!=='가축전염병')),required=subjects.length?subjects:anchors.filter(a=>!penaltyRequest||a.name!=='가축전염병'&&a.name!=='처벌');
@@ -98,7 +99,7 @@ export function retrieve(entries,question,asOf,target){
  for(const r of rows){
   const penalty=penaltyRequest&&/^(?:벌칙|과태료)$/u.test(r.article.title);
   if(penaltyRequest&&!penalty)continue;
-  const cited=penalty?references(r.unit.parts.map(p=>p.text).join(' '),r.entry.doc,entries).flatMap(ref=>{const e=entries.find(e=>e.doc.id===ref.documentId),a=e&&activeArticles(e,asOf).find(a=>a.number===ref.articleNumber);return a?[flat(a.title)]:[];}).join(' '):'';
+  const cited=penalty||roleSearch&&actors.some(a=>a.name==='축산계열화사업자')?references(r.unit.parts.map(p=>p.text).join(' '),r.entry.doc,entries).flatMap(ref=>{const e=entries.find(e=>e.doc.id===ref.documentId),a=e&&activeArticles(e,asOf).find(a=>a.number===ref.articleNumber);return a?[flat(a.title)]:[];}).join(' '):'';
   const subjectText=r.text+r.heading+r.context+cited;
   if(penaltyRequest&&anchors.some(a=>a.name==='가축전염병')&&anchors.some(a=>a.name==='신고')&&!cited.includes('죽거나병든가축의신고'))continue;
   if(roleSearch&&/벌칙|과태료|처벌/u.test(r.heading)&&!/벌칙|과태료|처벌/u.test(question))continue;
@@ -117,11 +118,13 @@ export function retrieve(entries,question,asOf,target){
   const matched=anchors.filter(a=>direct.includes(a)||heading.includes(a));
   const actorHeading=roleSearch&&actors.some(a=>matches(r.heading,a));
   const roleOwn=flat(r.unit.parts.map(p=>p.text).join(' ').replace(/^\s*제\s*\d+\s*조(?:\s*의\s*\d+)?\([^)]*\)/u,'').replace(/^\s*[①-⑳]\s*/u,''));
-  const actorSubject=roleSearch&&actors.some(a=>a.aliases.some(alias=>new RegExp('^'+alias+'(?:은|는|이(?!란)|가|ㆍ|ᆞ|또는|및)').test(roleOwn)));
+  const actorSubject=roleSearch&&(actors.some(a=>a.name==='축산계열화사업자')&&/(?:가금)?축산계열화사업자(?:은|는)/u.test(roleOwn)||actors.some(a=>a.aliases.some(alias=>new RegExp('^'+alias+'(?:은|는|이(?!란)|가|ㆍ|ᆞ|또는|및)').test(roleOwn))));
+  if(roleSearch&&actors.some(a=>a.name==='축산계열화사업자')&&r.entry.doc.type==='시행규칙'&&/^(?:검역본부장|농림축산식품부장관)/u.test(roleOwn))continue;
   const operational=roleSearch&&/업무|담당|수행|할수있|하여야|검사|질문|채취|지도|감독|예찰|조사/u.test(r.text);
-  if(roleSearch&&actorHeading&&!operational&&!/교육|증표/u.test(r.heading))continue;
+  if(roleSearch&&actorHeading&&!operational&&!/교육|증표/u.test(r.heading)&&!cited)continue;
+  if(roleSearch&&r.entry.doc.type==='법률'&&actors.some(a=>a.name==='축산계열화사업자')&&!actorSubject&&!(actorHeading&&r.unit.paragraph===1))continue;
   const roleDelegated=roleSearch&&references(r.unit.parts.map(p=>p.text).join(' '),r.entry.doc,entries).some(ref=>roleRoots.some(root=>root.id===ref.documentId&&root.number===ref.articleNumber));
-  const actorRoot=roleSearch&&actors.some(a=>a.aliases.includes(r.heading));
+  const actorRoot=roleSearch&&actors.some(a=>a.aliases.includes(r.heading)||a.name==='축산계열화사업자'&&matches(r.heading,a));
   const roleScore=roleSearch?(actorHeading?25:0)+(actorRoot?50:0)+(actorSubject?15:0)+(actorSubject&&operational?20:0)+(roleDelegated?20:0)-(!actorHeading&&/소유자|종사자/u.test(r.heading)?25:0)-(/자격|임명|위촉/u.test(r.text)&&!/담당|업무범위/u.test(r.text)?20:0):0;
   const score=roleScore+matched.reduce((n,a)=>n+weights.get(a.name),0)+heading.reduce((n,a)=>n+weights.get(a.name)*3,0)+matched.length/anchors.length*2;
   scored.push({...r,score,actorHeading,actorRoot,roleDelegated,matched:matched.map(a=>a.name)});
@@ -131,7 +134,7 @@ export function retrieve(entries,question,asOf,target){
  for(const row of scored){
   const key=row.entry.doc.id+':'+row.article.number;let group=groups.find(g=>g.key===key);
   if(!group){group={key,doc:row.entry.doc,article:row.article,score:row.score,actorHeading:row.actorHeading,actorRoot:row.actorRoot,roleDelegated:row.roleDelegated,scopes:[],matched:row.matched};groups.push(group);}
-  if(group.scopes.length<(benefits.length?3:2))group.scopes.push({paragraph:row.unit.paragraph,item:row.unit.item});
+  if(group.scopes.length<(actors.some(a=>a.name==='축산계열화사업자')?5:benefits.length?3:2))group.scopes.push({paragraph:row.unit.paragraph,item:row.unit.item});
  }
  if(roleSearch)groups.sort((a,b)=>Number(b.actorRoot)-Number(a.actorRoot)||Number(b.roleDelegated)-Number(a.roleDelegated)||({'법률':0,'시행령':1,'시행규칙':2,'고시':3}[a.doc.type]??9)-({'법률':0,'시행령':1,'시행규칙':2,'고시':3}[b.doc.type]??9)||b.score-a.score);
  if(target&&!roleSearch)groups.sort((a,b)=>Number(b.doc.disease===target)-Number(a.doc.disease===target)||b.score-a.score);
@@ -148,16 +151,17 @@ export function retrieve(entries,question,asOf,target){
  // filling additional slots; mentions in one layer cannot displace all others.
  let ordered=groups;
  if(roleSearch){
-  const representatives=['법률','시행령','시행규칙'].map(type=>groups.find(g=>g.doc.type===type)).filter(Boolean);
+  const representatives=actors.some(a=>a.name==='축산계열화사업자')?groups.filter(g=>g.actorRoot||g.roleDelegated):['법률','시행령','시행규칙'].map(type=>groups.find(g=>g.doc.type===type)).filter(Boolean);
   for(const disease of [...new Set(entries.filter(e=>e.doc.type==='고시'&&e.doc.disease!=='공통').map(e=>e.doc.disease))]){const g=groups.find(g=>g.doc.type==='고시'&&g.doc.disease===disease);if(g)representatives.push(g);}
   ordered=[...representatives,...groups.filter(g=>!representatives.includes(g))];
  }
+ if(actors.some(a=>a.name==='축산계열화사업자'))for(const g of ordered)g.scopes.sort((a,b)=>(a.paragraph||0)-(b.paragraph||0));
  const hits=ordered.slice(0,roleSearch?8:6);
  // Rank complete numbered SOP units, including page continuations, rather than page hits.
  const sopHits=[];
  const titleQuery=requestTitle(question),actionRequest=roleSearch||/조치|요령|어떻게|운영|운용|처리|소독|설정|해제|재입식|방역/u.test(question);
  const operational=/조치|요령|운영|운용|처리|소독|설정|해제|재입식|방역|채취|공급|교육|지원|제한|검사|진단|기본원칙/u;
- for(const entry of entries)if(!penaltyRequest&&entry.doc.type==='SOP')for(const section of sopIndex(entry).sections){
+ for(const entry of entries)if(!penaltyRequest&&!obligationRequest&&entry.doc.type==='SOP')for(const section of sopIndex(entry).sections){
   const exactTitle=sectionTitle(section.heading)===titleQuery;
   if(actionRequest&&!exactTitle&&!operational.test(section.heading))continue;
   const context=flat(section.heading+' '+section.scenario);

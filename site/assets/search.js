@@ -1,10 +1,10 @@
-import {normalizeQuestion,unmappedNouns} from './question.js?v=20261024-18';
-import {classificationRequest,classificationSources} from './classification.js?v=20261024-18';
+import {normalizeQuestion,unmappedNouns} from './question.js?v=20261024-19';
+import {classificationRequest,classificationSources} from './classification.js?v=20261024-19';
 // Browser and Node share this deterministic, model-free search implementation.
-import {activeArticles,searchableChunk} from './provisions.js?v=20261024-18';
-import {legalUnits} from './evidence.js?v=20261024-18';
-import {actualAnnexes,annexReferences} from './annexes.js?v=20261024-18';
-import {retrieve,concepts} from './retrieval.js?v=20261024-18';
+import {activeArticles,searchableChunk} from './provisions.js?v=20261024-19';
+import {legalUnits} from './evidence.js?v=20261024-19';
+import {actualAnnexes,annexReferences} from './annexes.js?v=20261024-19';
+import {retrieve,concepts} from './retrieval.js?v=20261024-19';
 const compact=s=>s.replace(/[\s“”"「」『』·ㆍ]/gu,'').replace(/[?？.]+$/u,'');
 const normalize=s=>s.replace(/\s+/gu,' ').trim();
 const stop=new Set(['구제역','FMD','ASF','HPAI','가축','경우','발생','규정','관련','대한','대하여','어떻게','무엇','언제','어디','해야','하나요','되나요','알려','주세요','합니까','인가요','방법','종류','분류','목록','리스트','유형','구분','항목','알려주세요','알려줘','설명해주세요','보여주세요','말해주세요']);
@@ -145,7 +145,7 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
     mode='ranked';
     for(const hit of found.hits)for(const part of hit.article.parts)add(hit.doc,part,{
      match:'질문어·조문 연결',retrievalScopes:hit.scopes,retrievalScore:hit.score,matchedTerms:hit.matched,
-     retrievalPrimary:!found.needsDetail&&found.hits.indexOf(hit)<3&&(found.roleSearch||!target||hit.doc.disease===target||!found.hits.some(h=>h.doc.disease===target))});
+     retrievalPrimary:!found.needsDetail&&(found.actors?.includes('축산계열화사업자')?hit.actorRoot||hit.roleDelegated&&hit.doc.type==='시행규칙':found.hits.indexOf(hit)<3)&&(found.roleSearch||!target||hit.doc.disease===target||!found.hits.some(h=>h.doc.disease===target))});
    }
    if(found.sopHits.length){
     mode='ranked';

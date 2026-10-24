@@ -1,9 +1,10 @@
 // Normalize only registered compound terms; keep the user's original query for display.
 // Whitespace normalization is not a synonym for unrelated subjects or conditions.
-const compounds=['가축방역관','가축방역사','방역관리책임자','국립가축방역기관','가축전염병','법정전염병','예방접종','이동제한','방역지역','방역대','관리지역','보호지역','예찰지역','축산차량','시설출입차량','출입기록','생계안정','소득안정','역학조사','야생조류','발생농장','재입식'];
+const compounds=['축산계열화사업자','계열화사업자','가축방역관','가축방역사','방역관리책임자','국립가축방역기관','가축전염병','법정전염병','예방접종','이동제한','방역지역','방역대','관리지역','보호지역','예찰지역','축산차량','시설출입차량','출입기록','생계안정','소득안정','역학조사','야생조류','발생농장','재입식'];
 export function normalizeQuestion(question){
  let q=question.normalize('NFC').replace(/\s+/gu,' ').trim().replace(/^안녕하세요[.!。]?\s*/u,'').replace(/(?:\s*알려\s*주세요){2,}$/u,' 알려주세요');
  for(const word of compounds.sort((a,b)=>b.length-a.length))q=q.replace(new RegExp([...word].join('\\s*'),'gu'),word);
+ q=q.replace(/축산\s*계열화\s*사업자|(?<!축산)계열화사업자|계열사/gu,'축산계열화사업자');
  // Contact is reporting only in an explicit disease/animal discovery context.
  if(/의심|발견/u.test(q)&&/구제역|ASF|HPAI|AI|가축|돼지|소를|닭/u.test(q)&&/어디|누구|어느/u.test(q))q=q.replace(/연락/gu,'신고');
  q=q.replace(/먹이/gu,'사료').replace(/방역\s*구역/gu,'방역지역');
