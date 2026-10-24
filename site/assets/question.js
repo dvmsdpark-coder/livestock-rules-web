@@ -20,3 +20,9 @@ export function unmappedNouns(corpus,question,aliases=[]){
   return stem.length>=2&&!body.includes(stem.toLowerCase())&&!/^(?:생계|소득)안정(?:자금|지원금|지원비)/u.test(stem);
  }))];
 }
+
+// Payment floor is distinct from reduction grounds and relief from reductions.
+export function compensationFloorRequest(question){
+ const q=question.replace(/\s/gu,'');
+ return /보상|별표2/u.test(q)&&/최소|최저|하한|20(?:%|퍼센트)|100분의20|이십(?:프로|퍼센트)/u.test(q);
+}

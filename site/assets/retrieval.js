@@ -1,7 +1,7 @@
 // Corpus-derived clause retrieval; source excerpts, never a generated legal answer.
-import {activeArticles,searchableChunk} from './provisions.js?v=20261024-17';
-import {legalUnits,references} from './evidence.js?v=20261024-17';
-import {sopIndex} from './sop-index.js?v=20261024-17';
+import {activeArticles,searchableChunk} from './provisions.js?v=20261024-18';
+import {legalUnits,references} from './evidence.js?v=20261024-18';
+import {sopIndex} from './sop-index.js?v=20261024-18';
 const flat=s=>s.normalize('NFKC').replace(/[\sㆍ·“”"「」『』()（）,.:：]/gu,'').toLowerCase();
 const generic=new Set(['가축','전염병','가축전염병','방역','규정','관련','대한','대하여','위한','경우','사항','조치','방법','기준','요령','발생','발생시','대상','실시','관리','따른','따라','절차','등의','범위','의무','처리','구제역','아프리카돼지열병','조류인플루엔자','고병원성','농장','발생농장','가축의','지역','필요한','있는','없는','위하여','하여야','관한','어떤','검출시','고병원성ai','어떻게','어디에','어디','하나요','되나요','받나요','있나요','무엇','무엇인가요','조건','검출','확인','방역조치','언제','알려주세요','근거','비교','차이','차이점','종류','분류','목록','리스트','유형','구분','항목']);
 export const concepts=[
@@ -38,11 +38,12 @@ export const concepts=[
  ['검역',['검역']],
  ['처리',['처리','폐기','소각','매몰','소독','화학적처리']],
  ['보존기간',['보존기간','보관기간','보관','보존','기간','기한']],
+ ['최저지급',['최소','최저','보장','하한']],
  ['경감',['경감','완화']],
  ['처벌',['처벌','벌칙','벌금','과태료']],
  ['감액',['감액','삭감','거부','지급하지','지급안']]
 ].map(([name,aliases])=>({name,aliases:aliases.map(flat)}));
-const actionNames=new Set(['해제','검사','소독','폐기','매몰','반입','반출','소각','신고','처리','보존기간','감액','지원','처벌','경감']);
+const actionNames=new Set(['해제','검사','소독','폐기','매몰','반입','반출','소각','신고','처리','보존기간','감액','지원','처벌','경감','최저지급']);
 const cache=new WeakMap();
 function indexFor(entry,asOf){
  let dates=cache.get(entry.index);if(!dates){dates=new Map();cache.set(entry.index,dates);}if(dates.has(asOf))return dates.get(asOf);

@@ -46,3 +46,12 @@ test('different relief grounds retain their own conditions',()=>{
  for(const [q,key] of [['질병관리등급 1등급 보상금 경감','3:가'],['발병증상이 최초로 나타난 날 신고 보상금 경감','3:다'],['백신 항체 양성률 보상금 경감','3:사'],['HACCP 인증 보상금 경감','3:바']])assert.deepEqual(annexExcerpt(decree,table,q).selected.map(u=>u.key),[key]);
  assert.deepEqual(annexExcerpt(decree,table,'보상금 경감 기준').selected.map(u=>u.key),['3']);
 });
+
+for(const q of ['보상금 최소 보장 기준','보상금이 감액당해도 최소 20%까지 지급하나요?','보상금 최저 지급 기준','보상금 하한','보상금 20퍼센트 보장','보상금 100분의 20 지급'])test('minimum compensation payment selects floors instead of reduction grounds: '+q,()=>{
+ const r=search(corpus,q,defaults),groups=presentResults(corpus,r,q).groups;
+ const excerpt=groups.find(g=>g.docType==='시행령'&&g.kind==='table')?.annexExcerpt;assert(excerpt,q);assert.deepEqual(excerpt.selected.map(u=>u.key),['4','5']);assert.equal(excerpt.common.length,0);assert.equal(excerpt.adjustment.length,0);
+ for(const u of excerpt.selected){const text=u.parts.map(p=>p.text).join('').replace(/\s/gu,'');assert(text.includes('제1호부터제3호까지에도불구하고'));assert(text.includes('적은경우'));assert(text.includes('100분의20'));assert(u.images?.length);assert.equal(u.intro.length,0);}
+});
+test('animal and object floors preserve their respective valuation bases and pages',()=>{
+ for(const [q,key,term,pages] of [['살처분 가축 보상금 최소 지급','4','가축평가액',[35]],['물건 보상금 최소 지급','5','물건평가액',[35,36]]]){const excerpt=annexExcerpt(decree,table,q);assert.deepEqual(excerpt.selected.map(u=>u.key),[key]);assert(excerpt.selected[0].parts.map(p=>p.text).join('').includes(term));assert.deepEqual(excerpt.selected[0].parts.map(p=>p.page),pages);}
+});

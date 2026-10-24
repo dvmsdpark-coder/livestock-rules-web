@@ -1,3 +1,4 @@
+import {compensationFloorRequest} from './question.js?v=20261024-18';
 // Exact native-text boundaries only. Dense grids/forms remain PDF layouts.
 const flat=s=>s.replace(/\s/gu,'');
 function cut(source,start,end){return source.spans.flatMap(p=>{
@@ -41,12 +42,15 @@ export function annexExcerpt(entry,annex,question){
 
  let selected=ranked.filter(u=>u.score===ranked[0]?.score).slice(0,2);
  if(relief&&!terms.length&&!requested.length){const parent=units.find(u=>u.root===3&&u.children);if(parent)selected=[parent];}
- const common=units.filter(u=>!u.children&&/제1호부터제3호까지에도불구/u.test(flat(u.parts.map(p=>p.text).join(''))));
- const adjustment=selected.some(u=>u.root===3)?[]:units.filter(u=>u.root===3&&u.children);
+ const floorUnits=units.filter(u=>!u.children&&/제1호부터제3호까지에도불구/u.test(flat(u.parts.map(p=>p.text).join('')))&&/100분의20/u.test(flat(u.parts.map(p=>p.text).join(''))));
+ const floor=compensationFloorRequest(question)&&floorUnits.length>0;
+ if(floor){const objects=/물건|물품|오염물/u.test(q),animals=/가축|살처분/u.test(q);selected=floorUnits.filter(u=>objects&&!animals?flat(u.parts.map(p=>p.text).join('')).includes('물건평가액'):animals&&!objects?flat(u.parts.map(p=>p.text).join('')).includes('가축평가액'):true).map(u=>({...u,intro:[]}));}
+ const common=floor?[]:units.filter(u=>!u.children&&/제1호부터제3호까지에도불구/u.test(flat(u.parts.map(p=>p.text).join(''))));
+ const adjustment=floor||selected.some(u=>u.root===3)?[]:units.filter(u=>u.root===3&&u.children);
  // Crops were visually reviewed against this immutable source PDF. Never reuse
  // them with a different revision or reinterpret the rate as an actual award.
  const reviewed=entry.doc.sha256==='728b40d149eb8ea1402518923138e1a83853598ecf333182c65ba5a1bd7097a5';
- for(const u of common)if(reviewed)u.images=u.key==='4'?[{page:35,path:'assets/annex/decree2-4-35.png'}]:u.key==='5'?[{page:35,path:'assets/annex/decree2-5-35.png'},{page:36,path:'assets/annex/decree2-5-36.png'}]:[];
+ for(const u of [...common,...selected].filter(u=>[4,5].includes(u.root)))if(reviewed)u.images=u.key==='4'?[{page:35,path:'assets/annex/decree2-4-35.png'}]:u.key==='5'?[{page:35,path:'assets/annex/decree2-5-35.png'},{page:36,path:'assets/annex/decree2-5-36.png'}]:[];
  for(const u of [...selected,...units])if(reviewed&&u.key==='2:카')u.images=[{page:32,path:'assets/annex/decree2-2-ka-32.png'},{page:33,path:'assets/annex/decree2-2-ka-33.png'}];
  return {label:'별표 '+annex.number.filter(Boolean).join('의'),selected,common,adjustment,choices:units.filter(u=>!u.children)};
 }
