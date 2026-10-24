@@ -11,7 +11,7 @@ export function normalizeQuestion(question){
 }
 
 const vocabularyCache=new WeakMap();
-const conversational=/^(?:안녕|알려|설명|보여|부탁|궁금|어떻|어떤|무슨|무엇|어디|누구|언제|얼마|몇|며칠|가능|필요|어느|해야|되나|하나|있나|없나|받나|맞히|맞추|줄어|깎|다시|관련|대한|대해|경우|근거|조건|기준|종류|분류|목록|리스트|유형|가축전염병|법정전염병|법정가축전염병|가축법정전염병)/u;
+const conversational=/^(?:최초|처음|안녕|알려|설명|보여|부탁|궁금|어떻|어떤|무슨|무엇|어디|누구|언제|얼마|몇|며칠|가능|필요|어느|해야|되나|하나|있나|없나|받나|맞히|맞추|줄어|깎|다시|관련|대한|대해|경우|근거|조건|기준|종류|분류|목록|리스트|유형|가축전염병|법정전염병|법정가축전염병|가축법정전염병)/u;
 export function unmappedNouns(corpus,question,aliases=[]){
  let body=vocabularyCache.get(corpus);if(!body){body=corpus.flatMap(e=>e.index.pages.map(p=>p.text)).join(' ').replace(/\s/gu,'').toLowerCase();vocabularyCache.set(corpus,body);}
  return [...new Set((question.match(/[가-힣A-Za-z]+/gu)||[]).filter(token=>{

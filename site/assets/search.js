@@ -1,10 +1,10 @@
-import {normalizeQuestion,unmappedNouns} from './question.js?v=20261024-16';
-import {classificationRequest,classificationSources} from './classification.js?v=20261024-16';
+import {normalizeQuestion,unmappedNouns} from './question.js?v=20261024-17';
+import {classificationRequest,classificationSources} from './classification.js?v=20261024-17';
 // Browser and Node share this deterministic, model-free search implementation.
-import {activeArticles,searchableChunk} from './provisions.js?v=20261024-16';
-import {legalUnits} from './evidence.js?v=20261024-16';
-import {actualAnnexes,annexReferences} from './annexes.js?v=20261024-16';
-import {retrieve,concepts} from './retrieval.js?v=20261024-16';
+import {activeArticles,searchableChunk} from './provisions.js?v=20261024-17';
+import {legalUnits} from './evidence.js?v=20261024-17';
+import {actualAnnexes,annexReferences} from './annexes.js?v=20261024-17';
+import {retrieve,concepts} from './retrieval.js?v=20261024-17';
 const compact=s=>s.replace(/[\s“”"「」『』·ㆍ]/gu,'').replace(/[?？.]+$/u,'');
 const normalize=s=>s.replace(/\s+/gu,' ').trim();
 const stop=new Set(['구제역','FMD','ASF','HPAI','가축','경우','발생','규정','관련','대한','대하여','어떻게','무엇','언제','어디','해야','하나요','되나요','알려','주세요','합니까','인가요','방법','종류','분류','목록','리스트','유형','구분','항목','알려주세요','알려줘','설명해주세요','보여주세요','말해주세요']);
@@ -171,7 +171,7 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
  // Financial compensation is anchored in decree 11(1), which explicitly
  // delegates payment/reduction criteria to annex 2. Delayed-order reductions
  // in 14-2 do not replace that primary source.
- if(!annexKind&&!term&&!directRequest&&/보상/u.test(q)&&(results.length||!diagnostics?.terms?.some(t=>!['보상','감액','지원','예방접종','살처분','명령','위반'].includes(t)))){
+ if(!annexKind&&!term&&!directRequest&&/보상/u.test(q)&&(results.length||/최초(?:로)?신고|처음(?:으로)?신고/u.test(q)||!diagnostics?.terms?.some(t=>!['보상','감액','지원','예방접종','살처분','명령','위반','경감','신고'].includes(t)))){
   const decree=entries.find(e=>e.doc.type==='시행령');
   const article=decree&&activeArticles(decree,filters.asOf).find(a=>a.number==='제11조');
   const law=entries.find(e=>e.doc.type==='법률'),basis=law&&activeArticles(law,filters.asOf).find(a=>a.number==='제48조');
@@ -181,7 +181,8 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
    if(basis){
     results=results.filter(r=>!(r.documentId===law.doc.id&&r.heading?.startsWith('제48조(')));
     const reduction=/감액|삭감|줄어|깎|미접종|맞히지않|맞추지않|접종하지|접종안|안맞|위반|불이행|거부/u.test(q);
-    const scopes=reduction?[{paragraph:3,item:/백신|예방접종|미접종/u.test(q)?2:null},{paragraph:4,item:null}]:[{paragraph:1,item:q.includes('살처분')?3:null}];
+    const relief=/경감|완화|최초(?:로)?신고|처음(?:으로)?신고/u.test(q);
+    const scopes=relief?[{paragraph:4,item:null}]:reduction?[{paragraph:3,item:/백신|예방접종|미접종/u.test(q)?2:null},{paragraph:4,item:null}]:[{paragraph:1,item:q.includes('살처분')?3:null}];
     for(const part of basis.parts)add(law.doc,part,{match:'보상금 법률 근거 연결',retrievalPrimary:true,retrievalScopes:scopes});
    }
    const parts=article?legalUnits(article).units.find(u=>u.paragraph===1&&!u.item)?.parts||[]:[];

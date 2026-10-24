@@ -29,16 +29,20 @@ export function annexExcerpt(entry,annex,question){
  let terms=concepts.filter(([,pattern])=>pattern.test(q)).map(([t])=>t);
  if(terms.includes('예방접종'))terms=terms.filter(t=>t!=='살처분');
 
+ const relief=/경감|완화|최초(?:로)?신고|처음(?:으로)?신고/u.test(q);
+ const reliefTopics=[[/최초(?:로)?신고|처음(?:으로)?신고/u,/최초로신고/u],[/증상.*(?:최초|나타)|(?:최초|나타).*증상/u,/발병증상이외관상최초/u],[/질병관리등급|[12]등급/u,/질병관리등급/u],[/항체|양성률/u,/항체양성률/u],[/교육|전화예찰|우수방역/u,/우수방역농가/u],[/HACCP|인증|무항생제|유기축산/iu,/인증/u]];
+ const requested=reliefTopics.filter(([pattern])=>pattern.test(q));
  const ranked=units.filter(u=>!u.children).map(u=>{
   const text=flat(u.parts.map(p=>p.text).join(''));
   const hits=terms.filter(t=>text.includes(t));
-  const score=hits.length*3+(negative&&terms.includes('예방접종')&&/예방접종명령을위반/u.test(text)?20:0);
+  const score=(relief?(u.root===3?30:-100):0)+requested.filter(([,pattern])=>pattern.test(text)).length*40+hits.length*3+(negative&&terms.includes('예방접종')&&/예방접종명령을위반/u.test(text)?20:0);
   return {...u,score};
  }).filter(u=>u.score>0).sort((a,b)=>b.score-a.score);
 
- const selected=ranked.filter(u=>u.score===ranked[0]?.score).slice(0,2);
+ let selected=ranked.filter(u=>u.score===ranked[0]?.score).slice(0,2);
+ if(relief&&!terms.length&&!requested.length){const parent=units.find(u=>u.root===3&&u.children);if(parent)selected=[parent];}
  const common=units.filter(u=>!u.children&&/제1호부터제3호까지에도불구/u.test(flat(u.parts.map(p=>p.text).join(''))));
- const adjustment=units.filter(u=>u.root===3&&u.children);
+ const adjustment=selected.some(u=>u.root===3)?[]:units.filter(u=>u.root===3&&u.children);
  // Crops were visually reviewed against this immutable source PDF. Never reuse
  // them with a different revision or reinterpret the rate as an actual award.
  const reviewed=entry.doc.sha256==='728b40d149eb8ea1402518923138e1a83853598ecf333182c65ba5a1bd7097a5';

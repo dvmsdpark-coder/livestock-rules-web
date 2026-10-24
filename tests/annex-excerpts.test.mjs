@@ -34,3 +34,15 @@ test('financial source expansion respects type and date and rejects unrelated qu
  assert.equal(search(corpus,q,{...defaults,asOf:'2020-01-01'}).results.length,0);
  assert.equal(search(corpus,'보상금 검역증명서',defaults).results.length,0);
 });
+
+for(const q of ['최초신고 시 보상금 경감은?','최초 신고 시 보상금 경감은?','처음 신고하면 보상금 경감되나요?','구제역 최초신고 보상금 경감','ASF 최초로 신고한 농가 보상금 경감','HPAI 최초 신고 보상금 경감'])test('first reporting relief selects the complete eligibility clause: '+q,()=>{
+ const r=search(corpus,q,defaults),groups=presentResults(corpus,r,q).groups;
+ const law=groups.find(g=>g.docType==='법률'&&g.articleNumber==='제48조');assert(law);assert.deepEqual(law.focus.map(u=>u.paragraph),[4]);
+ const excerpt=groups.find(g=>g.docType==='시행령'&&g.kind==='table')?.annexExcerpt;assert(excerpt,q);assert.deepEqual(excerpt.selected.map(u=>u.key),['3:나']);
+ const text=excerpt.selected[0].parts.map(p=>p.text).join('').replace(/\s/gu,'');for(const term of ['구제역','럼피스킨병','고병원성조류인플루엔자','아프리카돼지열병','브루셀라병','시ᆞ군ᆞ구','최초로신고한날','가축평가액및물건평가액','100분의10'])assert(text.includes(term),term);
+ assert(excerpt.selected[0].intro.map(p=>p.text).join('').includes('감액 보상금의 일부'));assert.equal(excerpt.adjustment.length,0);
+});
+test('different relief grounds retain their own conditions',()=>{
+ for(const [q,key] of [['질병관리등급 1등급 보상금 경감','3:가'],['발병증상이 최초로 나타난 날 신고 보상금 경감','3:다'],['백신 항체 양성률 보상금 경감','3:사'],['HACCP 인증 보상금 경감','3:바']])assert.deepEqual(annexExcerpt(decree,table,q).selected.map(u=>u.key),[key]);
+ assert.deepEqual(annexExcerpt(decree,table,'보상금 경감 기준').selected.map(u=>u.key),['3']);
+});
