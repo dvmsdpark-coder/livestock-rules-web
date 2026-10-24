@@ -1,5 +1,5 @@
 // Source-only presentation and internal legal references. No generated legal text.
-import {activeArticles} from './provisions.js?v=20261024-2';
+import {activeArticles} from './provisions.js?v=20261024-3';
 const squash=s=>s.replace(/\s+/gu,'');
 const clean=s=>s.replace(/[\sㆍ·]/gu,'');
 const circled='①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳';
@@ -140,6 +140,7 @@ function selectFocus(group,question,mode){
   return matched.length===1?matched:[];
  }
  const parents=parsed.units.filter(u=>!u.item);
+ if(mode==='topic')return parents.filter(u=>u.paragraph===1||!u.paragraph).slice(0,1);
  if(intent==='reporting')return parents.filter(u=>u.paragraph===1);
  const ranked=parents.map(u=>({...u,rank:score(u.parts.map(p=>p.text).join(' '),question)})).sort((a,b)=>b.rank-a.rank);
  if(ranked[0]?.rank>0)return ranked.slice(0,2).filter(u=>u.rank===ranked[0].rank);
@@ -174,6 +175,7 @@ export function presentResults(corpus,result,question){
   g.needsContext=g.docType==='SOP'&&g.focus.some(u=>/(?:아래|다음)[^.]{0,45}(?:검사|절차)/u.test(u.parts.map(p=>p.text).join(' ').replace(/\s+/gu,' ')));
   g.fullParts=addRefs(g.fullParts,g.doc,corpus);
   g.primary=result.mode==='procedure'?g.docType==='SOP':result.mode==='zone'?g.match==='방역지역 정의 연결':true;
+  if(result.mode==='topic')g.primary=g.topicPrimary;
   if(result.mode==='related')g.primary=false;
   delete g.article;
  }

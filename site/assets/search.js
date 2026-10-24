@@ -1,6 +1,6 @@
 // Browser and Node share this deterministic, model-free search implementation.
-import {activeArticles,searchableChunk} from './provisions.js?v=20261024-2';
-import {legalUnits} from './evidence.js?v=20261024-2';
+import {activeArticles,searchableChunk} from './provisions.js?v=20261024-3';
+import {legalUnits} from './evidence.js?v=20261024-3';
 const compact=s=>s.replace(/[\s“”"「」『』·ㆍ]/gu,'').replace(/[?？.]+$/u,'');
 const normalize=s=>s.replace(/\s+/gu,' ').trim();
 const stop=new Set(['구제역','FMD','ASF','HPAI','가축','경우','발생','규정','관련','대한','대하여','어떻게','무엇','언제','어디','해야','하나요','되나요','알려','주세요','합니까','인가요','방법']);
@@ -37,6 +37,7 @@ function procedureIntent(question,disease){
  return null;
 }
 const messages={definition:'질문한 용어의 정의 항목을 찾았습니다. 위임 규정과 적용 범위는 원문에서 함께 확인하세요.',
+ topic:'살처분 명령과 대상에 관한 조문입니다. 질병을 선택하면 해당 질병의 세부 기준을 함께 표시합니다. 예외와 적용 조건은 전체 조문에서 확인하세요.',
  article:'제목 또는 번호가 일치하는 조문입니다. 여러 쪽에 걸친 조문은 이어 표시합니다.',
  procedure:'관련 조문과 SOP 절차를 찾았습니다. 백신접종·미접종 유형과 원문의 적용 조건을 구분해 확인하세요.',
  zone:'‘방역대’를 방역지역에 관한 질문으로 연결했습니다. 지역의 정의와 설정 관련 조문을 제시합니다. 거리뿐 아니라 조정 조건과 발생 상황도 확인하세요.',
@@ -81,6 +82,12 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
    for(const term of ['방역지역','관리지역','보호지역','예찰지역'])for(const d of index.definitions)if(d.term===term)for(const p of d.parts||[d.part])add(doc,p,{match:'방역지역 정의 연결'});
   }
   articles(['시장군수구청장의조치','시장군수의조치']);
+ }else if(/^(?:(?:구제역|FMD|ASF|아프리카돼지열병|고병원성AI|HPAI|AI|조류인플루엔자|조류독감)(?:이발생하면|발생시|의|은|는)?)?살처분(?:(?:의)?(?:명령|대상|기준|범위|요건|조치|절차|방법))?(?:은|는|을|를)?(?:(?:어떻게|언제|누가)?(?:하나요|합니까|되나요|해야하나요|하죠)|알려주세요|알려줘)?$/iu.test(q)){
+  mode='topic';
+  articles(['살처분명령','살처분명령등','살처분등조치','살처분등']);
+  // Without a disease selection, show the common legal basis first.
+  // Disease-specific rules retain their separate source and scenario.
+  results=results.map(r=>({...r,topicPrimary:target?r.disease===target:r.docType==='법률'}));
  }else if(intent){
   mode='procedure';const titles={reporting:['죽거나병든가축의신고'],movement_release:target==='ASF'?['방역지역전환및해제']:target==='고병원성AI'?['관리지역보호지역의방역','예찰지역의방역']:['이동제한해제등'],farm_disinfection:['소독등조치']}[intent];articles(titles);
   if(target)for(const {doc,index} of entries)if(doc.type==='SOP'&&doc.disease===target)for(const p of index.procedures)if(p.intent===intent)for(const part of p.parts)add(doc,part,{match:'SOP 절차 연결'});

@@ -68,3 +68,26 @@ test('a destination is not guessed for unregistered delegation wording',()=>{
 test('a where-to-report question previews destinations rather than symptom descriptions',()=>{
  const {v}=run('구제역이 발생하면 어디에 신고하나요?');for(const g of v.groups.filter(g=>g.primary)){const u=g.focus[0],text=u.parts.map(p=>p.text).join('');assert(text.startsWith('즉시'));assert(!text.includes('물집'));assert(u.note.includes('신고처만 발췌'));assert(g.fullParts[0].text.includes('물집'));}
 });
+
+test('culling keyword opens the legal basis and separates disease-specific rules',()=>{
+ const {r,v}=run('살처분');assert.equal(r.mode,'topic');
+ const primary=v.groups.filter(g=>g.primary);assert.equal(primary.length,1);
+ assert.equal(primary[0].articleNumber,'제20조');assert.equal(primary[0].locator,'제20조 제1항');
+ assert(primary[0].focus[0].parts.map(p=>p.text).join('').includes('명하여야'));
+ assert(v.groups.some(g=>g.docType==='시행규칙'&&g.articleNumber==='제23조'));
+ assert(!v.groups.some(g=>g.articleTitle.includes('참여자')));
+});
+for(const disease of ['구제역','ASF','고병원성AI'])test(disease+' culling keeps only that disease and common law',()=>{
+ const {r,v}=run(disease+' 살처분 기준은 어떻게 되나요?');assert.equal(r.mode,'topic');
+ assert(v.groups.every(g=>g.disease==='공통'||g.disease===disease));
+ assert(v.groups.filter(g=>g.primary).every(g=>g.disease===disease));
+ assert(v.groups.some(g=>g.primary&&g.focus.length));
+ if(disease==='구제역')assert.equal(v.groups.filter(g=>g.primary).length,2);
+});
+test('specific compensation and definition requests are not relabelled as culling criteria',()=>{
+ for(const q of ['살처분 보상금','살처분 참여자 지원','살처분의 정의','살처분 면제'])assert.notEqual(run(q).r.mode,'topic');
+});
+test('culling topic respects document filters',()=>{
+ const c=corpus(),r=search(c,'살처분',{asOf:'2026-10-24',disease:'ASF',type:'고시'}),v=presentResults(c,r,'살처분');
+ assert.equal(v.groups.length,1);assert.equal(v.groups[0].articleNumber,'제18조');assert(v.groups[0].primary);
+});
