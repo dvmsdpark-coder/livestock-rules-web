@@ -17,6 +17,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PDF maintenance dependency
+        run: python -m pip install -r maintenance/requirements.txt
+      - name: Verify maintenance staging, review gates and rollback
+        run: npm run test:maintenance
       - name: Verify source hashes, search behavior and public data
         run: npm test
       - name: Evaluate natural-language fixtures and every legal article
@@ -25,6 +32,8 @@ jobs:
         run: npm run audit:links
       - name: Audit query wording, scope and negative controls
         run: npm run audit:questions
+      - name: Verify published revisions and every cutover date
+        run: npm run audit:release
       - name: Save search evaluation report
         if: always()
         uses: actions/upload-artifact@v4

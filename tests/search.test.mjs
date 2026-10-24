@@ -13,7 +13,7 @@ const run=(q,filters={})=>search(corpus,q,{...defaults,...filters});
 const sopPages=result=>result.results.filter(r=>r.docType==='SOP').map(r=>r.page);
 
 test('published source hashes and full page provenance',()=>{
- assert.equal(manifest.schema,1);assert.equal(corpus.length,11);
+ assert.equal(manifest.schema,1);assert.equal(new Set(corpus.map(e=>e.doc.family)).size,11);
  for(const {doc,index} of corpus){
   for(const [filename,digest] of [[doc.pdf,doc.sha256],[doc.data,doc.data_sha256]]){
    const bytes=fs.readFileSync(path.join(site,filename));assert(bytes.length<25*1024*1024);assert.equal(createHash('sha256').update(bytes).digest('hex'),digest);

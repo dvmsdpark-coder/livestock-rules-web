@@ -3,7 +3,11 @@
 PDF page numbers, not printed page numbers. Never reuse boundaries for a new hash.
 """
 import re
-from app.articles import page_body
+try:
+ from app.articles import page_body
+except ModuleNotFoundError as error:
+ if not error.name.startswith("app"):raise
+ from notice_parser import page_body
 
 PROFILES = {
  '8ca92a9774fa4ca4af353140f4fed9741297780d189aeadd5ac72e26153fec4a': {

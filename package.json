@@ -8,7 +8,10 @@
     "serve": "node tools/serve.mjs",
     "evaluate": "node tools/evaluate.mjs",
     "audit:questions": "node tools/audit-questions.mjs",
-    "audit:links": "node tools/audit-regulation-links.mjs"
+    "audit:links": "node tools/audit-regulation-links.mjs",
+    "audit:release": "node tools/check-release.mjs",
+    "test:maintenance": "python tests/update_workflow_test.py",
+    "maintain": "python tools/update_manager.py"
   },
   "engines": {
     "node": ">=22"

@@ -1,0 +1,138 @@
+{
+  "schema": 1,
+  "documents": [
+    {
+      "family": "animal-disease-law",
+      "title": "가축전염병 예방법",
+      "type": "법률",
+      "disease": "공통",
+      "baseline": {
+        "id": "284b2b92-ae1b-4c2b-a943-225fca48578e",
+        "sha256": "a7eec762ed408bfd2fe0f3fae4b030c6541fa6db603989a5bf95d71e0a07c8d9",
+        "data_sha256": "15f2f95e71009dc0605b57672d7315bb328e2d851c5ecf88631c8c5920d6d50c",
+        "from": "2026-10-01"
+      }
+    },
+    {
+      "family": "animal-disease-decree",
+      "title": "가축전염병 예방법 시행령",
+      "type": "시행령",
+      "disease": "공통",
+      "baseline": {
+        "id": "e8eee283-2857-40c5-8e0e-0d87750e4c1a",
+        "sha256": "728b40d149eb8ea1402518923138e1a83853598ecf333182c65ba5a1bd7097a5",
+        "data_sha256": "be2e2ae5246af4450242bc1f172378a3eea7c8efb92f5b96f7b6c76be8044897",
+        "from": "2026-04-21"
+      }
+    },
+    {
+      "family": "animal-disease-rules",
+      "title": "가축전염병 예방법 시행규칙",
+      "type": "시행규칙",
+      "disease": "공통",
+      "baseline": {
+        "id": "1265dc44-6eb2-4934-a5a8-85b1f2f3638f",
+        "sha256": "25ef0494687bf942ebabde909478e218baf7a4d2ec2efe269198d478cd0a6d11",
+        "data_sha256": "9f3085e13500166b3ad9f414f60aa989993b513e1db56f3221ef7ff298b0f541",
+        "from": "2026-10-01"
+      }
+    },
+    {
+      "family": "asf-notice",
+      "title": "아프리카돼지열병 방역실시요령",
+      "type": "고시",
+      "disease": "ASF",
+      "baseline": {
+        "id": "37899984-3bca-5e02-a322-9d29397f15a5",
+        "sha256": "0a0c00fe1712746c6ab57cfea30b5780a3ab5ce2e2be00f6983d34f5c719e2f0",
+        "data_sha256": "561c07342f8354ddd42d33d1e9fb311c8e20b7ff69f14b509ec6b1f7c48b7eb0",
+        "from": "2026-02-02"
+      }
+    },
+    {
+      "family": "hpai-notice",
+      "title": "조류인플루엔자 방역실시요령",
+      "type": "고시",
+      "disease": "고병원성AI",
+      "baseline": {
+        "id": "e6d52b81-681d-5e59-aa4c-63e78798e41e",
+        "sha256": "c67e963d2c1730f017672c3a2e24b08628afac430ef2d2fa3814ff483418a744",
+        "data_sha256": "e745758cefed41f247b4fb7daccd7e6e28436d34335eb9c79762e18a8c380307",
+        "from": "2026-02-02"
+      }
+    },
+    {
+      "family": "fmd-control-notice",
+      "title": "구제역 방역실시요령",
+      "type": "고시",
+      "disease": "구제역",
+      "baseline": {
+        "id": "56e4867e-a534-4ed4-a8ba-d46aadd3ed0a",
+        "sha256": "544f35dfbb842a39a752fe2cacd510207c3a24c167f0d2e374bd4610bc152ee9",
+        "data_sha256": "50fa306815be7d50782c92926af77ba2183d357865175ff28936d205f4ac8dfd",
+        "from": "2026-04-08"
+      }
+    },
+    {
+      "family": "asf-sop",
+      "title": "아프리카돼지열병 긴급행동지침(SOP)",
+      "type": "SOP",
+      "disease": "ASF",
+      "baseline": {
+        "id": "7b763e5d-e1f8-5711-aedc-19ec89ab044f",
+        "sha256": "8ca92a9774fa4ca4af353140f4fed9741297780d189aeadd5ac72e26153fec4a",
+        "data_sha256": "e0ff1f25f6b6c4172cba9937061d0340db8c65908d536fee440addba89de00e7",
+        "from": "2024-12-09"
+      }
+    },
+    {
+      "family": "hpai-sop",
+      "title": "조류인플루엔자 긴급행동지침(SOP)",
+      "type": "SOP",
+      "disease": "고병원성AI",
+      "baseline": {
+        "id": "3d9ae693-1bb3-5f8c-af9e-0e3512252566",
+        "sha256": "a2b814c1053b54f9e772628e60f5dee7abe2e841b3ae69efedc026a6d5a9995d",
+        "data_sha256": "00092fa209e19d167cc263715242b7726520a72e14ad569bb5111a82fd3e7b7c",
+        "from": "2025-11-18"
+      }
+    },
+    {
+      "family": "fmd-sop",
+      "title": "구제역 긴급행동지침(SOP)",
+      "type": "SOP",
+      "disease": "구제역",
+      "baseline": {
+        "id": "de2a0c26-cb9d-4f83-b3f9-4d31f29fbbef",
+        "sha256": "f317fe10748e2a09e84db8098071ee71a0d9609490a35428479e6caccb8f3e60",
+        "data_sha256": "89d16239a48d2e43108aed4cf3c23dc12d6366e583158450c40a43a83949b88e",
+        "from": "2026-05-06"
+      }
+    },
+    {
+      "family": "income-support-notice",
+      "title": "소득안정비용 지원 요령",
+      "type": "고시",
+      "disease": "공통",
+      "baseline": {
+        "id": "1dce0635-63a4-5b58-b3a0-63cd313ed189",
+        "sha256": "d50cfc573930e29631c9d924fbdd2cdf11b90a79a4306e9fd4d3fd238e2606a3",
+        "data_sha256": "d930f7da937f68234013e7aeef43e7d1e6ab64b0dc0d6ae3d6c1cb7a4ee53188",
+        "from": "2026-10-01"
+      }
+    },
+    {
+      "family": "compensation-notice",
+      "title": "살처분 가축 등에 대한 보상금 등 지급요령",
+      "type": "고시",
+      "disease": "공통",
+      "baseline": {
+        "id": "73aa19cc-15fb-5758-8a8c-10cc64ab8085",
+        "sha256": "a9c1d886c1dbe0c37fd6133b7552a5778b8b2ebd7bff3822a521e61389f6baf8",
+        "data_sha256": "eeca3bb524a4c882bc0d14a971d902013d6ac8be31ac9df3fb3a5a2a6f6bc495",
+        "from": "2026-06-02"
+      }
+    }
+  ],
+  "baseline_as_of": "2026-10-24"
+}

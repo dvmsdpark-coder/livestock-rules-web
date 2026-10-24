@@ -1,5 +1,5 @@
 import {annexReferences} from '../site/assets/annexes.js';
-import fs from 'node:fs';import {fileURLToPath} from 'node:url';
+import fs from 'node:fs';import {pathToFileURL,fileURLToPath} from 'node:url';
 import {corpus,defaults} from './evaluate.mjs';
 import {activeArticles} from '../site/assets/provisions.js';
 import {references,articleIn,legalUnits,presentResults} from '../site/assets/evidence.js';
@@ -51,7 +51,7 @@ export function auditLinks(){
  return {asOf:defaults.asOf,scope:'등록 문서의 인용 연결·신고 근거 누락·문서 버전 차이 점검. 법률 해석상 충돌 여부를 확정하는 감사가 아닙니다.',annexConnections,missingAttachments:corpus.filter(e=>e.doc.search_note?.includes('실제 첨부')).map(e=>({title:e.doc.title,note:e.doc.search_note})),resolvedReferences:links,invalidLinks:issues,documents:stats,reporting,roles,classificationChecks,annexQuestions,benefits,versionReview,limitations:['인용 해석기가 연결하지 못한 외부 법령·모호한 인용은 이 연결 검증 수에 포함되지 않습니다.','같은 조문 번호가 존재해도 개정 전후 내용이 같다는 뜻은 아닙니다.','SOP의 공식 시행일 미확인 사항과 표·그림의 의미는 별도 검토가 필요합니다.']};
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
- const r=auditLinks(),root=new URL('../docs/',import.meta.url);fs.mkdirSync(root,{recursive:true});
+ const r=auditLinks(),root=process.env.LIVESTOCK_REPORT_DIR?pathToFileURL(process.env.LIVESTOCK_REPORT_DIR.replace(/[\\/]?$/u,'/')):new URL('../docs/',import.meta.url);fs.mkdirSync(root,{recursive:true});
  fs.writeFileSync(new URL('regulation-links.json',root),JSON.stringify(r,null,2)+'\n');
  fs.writeFileSync(new URL('REGULATION_LINKS.md',root),[
  '# 규정 연결 및 버전 점검','',r.scope,'',

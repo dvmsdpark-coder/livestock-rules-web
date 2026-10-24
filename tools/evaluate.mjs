@@ -1,13 +1,14 @@
 import fs from 'node:fs';
-import {fileURLToPath} from 'node:url';
-import {search} from '../site/assets/search.js';
+import {pathToFileURL,fileURLToPath} from 'node:url';
+import {search,eligible} from '../site/assets/search.js';
 import {presentResults} from '../site/assets/evidence.js';
 import {activeArticles} from '../site/assets/provisions.js';
 import {sopIndex} from '../site/assets/sop-index.js';
-const root=new URL('../',import.meta.url),site=new URL('site/',root);
+const root=new URL('../',import.meta.url),site=process.env.LIVESTOCK_SITE_ROOT?pathToFileURL(process.env.LIVESTOCK_SITE_ROOT.replace(/[\\/]?$/u,'/')):new URL('site/',root);
+const reportRoot=process.env.LIVESTOCK_REPORT_DIR?pathToFileURL(process.env.LIVESTOCK_REPORT_DIR.replace(/[\\/]?$/u,'/')):new URL('docs/',root);
 export const manifest=JSON.parse(fs.readFileSync(new URL('data/manifest.json',site)));
-export const corpus=manifest.documents.map(doc=>({doc,index:JSON.parse(fs.readFileSync(new URL(doc.data,site))),asOf:'2026-10-24'}));
-export const defaults={asOf:'2026-10-24',disease:'전체',type:'전체'};
+export const corpus=manifest.documents.map(doc=>({doc,index:JSON.parse(fs.readFileSync(new URL(doc.data,site))),asOf:process.env.LIVESTOCK_AS_OF||'2026-10-24'})).filter(e=>eligible(e.doc,{asOf:process.env.LIVESTOCK_AS_OF||'2026-10-24',type:'전체',disease:'전체'}));
+export const defaults={asOf:process.env.LIVESTOCK_AS_OF||'2026-10-24',disease:'전체',type:'전체'};
 export const fixtures=JSON.parse(fs.readFileSync(new URL('tests/fixtures/questions.json',root)));
 export function evaluate(){
  const natural=fixtures.map(f=>{
@@ -41,9 +42,9 @@ export function evaluate(){
   limitations:['조문 번호·제목 자동 점검은 자연어 이해 정확도를 뜻하지 않습니다.','예시 질문의 기대 조문 도달 여부만 평가하며 법률 해석·완전성을 보증하지 않습니다.','SOP의 미검토 표·그림과 전체 절차의 의미 정확도는 별도 검토가 필요합니다.']};
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
- const result=evaluate();fs.mkdirSync(new URL('docs/',root),{recursive:true});
- fs.writeFileSync(new URL('docs/search-evaluation.json',root),JSON.stringify(result,null,2)+'\n');
- fs.writeFileSync(new URL('docs/SEARCH_EVALUATION.md',root),[
+ const result=evaluate();fs.mkdirSync(reportRoot,{recursive:true});
+ fs.writeFileSync(new URL('search-evaluation.json',reportRoot),JSON.stringify(result,null,2)+'\n');
+ fs.writeFileSync(new URL('SEARCH_EVALUATION.md',reportRoot),[
  '# 검색 자동 평가',
  '',
  '기준일: '+result.asOf+' · 등록 문서 '+result.sourceDocuments+'종',
