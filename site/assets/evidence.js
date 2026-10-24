@@ -1,5 +1,5 @@
 // Source-only presentation and internal legal references. No generated legal text.
-import {activeArticles} from './provisions.js?v=20261024-7';
+import {activeArticles} from './provisions.js?v=20261024-8';
 const squash=s=>s.replace(/\s+/gu,'');
 const clean=s=>s.replace(/[\sㆍ·]/gu,'');
 const circled='①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳';

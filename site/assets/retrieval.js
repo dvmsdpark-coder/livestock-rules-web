@@ -1,7 +1,7 @@
 // Corpus-derived clause retrieval; source excerpts, never a generated legal answer.
-import {activeArticles,searchableChunk} from './provisions.js?v=20261024-7';
-import {legalUnits} from './evidence.js?v=20261024-7';
-import {sopIndex} from './sop-index.js?v=20261024-7';
+import {activeArticles,searchableChunk} from './provisions.js?v=20261024-8';
+import {legalUnits} from './evidence.js?v=20261024-8';
+import {sopIndex} from './sop-index.js?v=20261024-8';
 const flat=s=>s.normalize('NFKC').replace(/[\sㆍ·“”"「」『』()（）,.:：]/gu,'').toLowerCase();
 const generic=new Set(['가축','전염병','가축전염병','방역','규정','관련','대한','대하여','위한','경우','사항','조치','방법','기준','요령','발생','발생시','대상','실시','관리','따른','따라','절차','등의','범위','의무','처리','구제역','아프리카돼지열병','조류인플루엔자','고병원성','농장','발생농장','가축의','지역','필요한','있는','없는','위하여','하여야','관한','어떤','검출시','고병원성ai','어떻게','어디에','어디','하나요','되나요','받나요','있나요','무엇','무엇인가요','조건','검출','확인','방역조치','언제','알려주세요']);
 export const concepts=[
@@ -18,6 +18,7 @@ export const concepts=[
  ['신고',['신고','신고처','신고기관']],
  ['역학조사',['역학조사','역학조사란']],
  ['검사',['검사','검사받']],
+ ['확진',['확진','확진시','확진된','확진될']],
  ['사료',['사료','먹이']],
  ['원유',['원유','집유']],
  ['축산차량',['시설출입차량','축산차량','차량등록','차량의등록']],
@@ -68,6 +69,8 @@ function anchorsFor(question,indexes){
   .sort((a,b)=>b.length-a.length).filter((t,i,a)=>!a.slice(0,i).some(long=>long.includes(t)));
  return [...found,...extra.slice(0,6).map(t=>({name:t,aliases:[t]}))];
 }
+const sectionTitle=s=>flat(s).replace(/^\d+(?:\.\d+)*[.]?/u,'').replace(/[?？]/gu,'');
+const requestTitle=s=>sectionTitle(s).replace(/^(?:hpai|ai|asf|fmd|구제역|아프리카돼지열병|조류인플루엔자)/u,'').replace(/(?:을|를|은|는)?(?:알려주세요|설명해주세요|알려줘)$/u,'').replace(/[을를은는]$/u,'');
 const matches=(text,a)=>a.aliases.some(alias=>(a.name==='처리'?text.replace(/처리업|처리시설|처리장/gu,''):text).includes(alias));
 export function retrieve(entries,question,asOf,target){
  const indexes=entries.map(e=>indexFor(e,asOf)),anchors=anchorsFor(question,indexes);
@@ -100,26 +103,33 @@ export function retrieve(entries,question,asOf,target){
  const hits=groups.slice(0,6);
  // Rank complete numbered SOP units, including page continuations, rather than page hits.
  const sopHits=[];
+ const titleQuery=requestTitle(question),actionRequest=/조치|요령|어떻게|운영|운용|처리|소독|설정|해제|재입식|방역/u.test(question);
+ const operational=/조치|요령|운영|운용|처리|소독|설정|해제|재입식|방역|채취|공급|교육|지원|제한|검사|진단|기본원칙/u;
  for(const entry of entries)if(entry.doc.type==='SOP')for(const section of sopIndex(entry).sections){
+  const exactTitle=sectionTitle(section.heading)===titleQuery;
+  if(actionRequest&&!exactTitle&&!operational.test(section.heading))continue;
   const context=flat(section.heading+' '+section.scenario);
   for(const unit of section.units){
    const own=flat(unit.parts.map(p=>p.text).join(' '));
-   if(!own||!required.every(a=>matches(own+context,a)))continue;
+   if(own.length<50||!required.every(a=>matches(own+context,a)))continue;
    if(actions.length&&!actions.some(a=>matches(own+context,a)))continue;
    const direct=anchors.filter(a=>matches(own,a));if(!direct.length)continue;
    const headingHits=anchors.filter(a=>matches(context,a));
-   const exactHeading=flat(question).includes(flat(section.heading))?30:0;
+   const exactHeading=exactTitle?40:0;
    const stageBoost=/고병원성|확진/u.test(question)&&/고병원성.*확진|확진.*조치/u.test(section.heading)?8:0;
-   sopHits.push({doc:entry.doc,section,unit,score:direct.length*2+headingHits.length*4+direct.length/anchors.length+stageBoost+exactHeading-(section.layout==='table'?20:0)});
+   sopHits.push({doc:entry.doc,section,unit,exactTitle,stageBoost,affinity:subjects.filter(a=>matches(flat(section.heading),a)).length,score:direct.length*2+headingHits.length*4+direct.length/anchors.length+stageBoost+exactHeading-(section.layout==='table'?20:0)});
   }
  }
  sopHits.sort((a,b)=>b.score-a.score||a.section.parts[0].page-b.section.parts[0].page);
  const sopGroups=[];
  for(const hit of sopHits){let g=sopGroups.find(g=>g.section.key===hit.section.key);
-  if(!g){g={doc:hit.doc,section:hit.section,units:[],score:hit.score};sopGroups.push(g);}
+  if(!g){g={doc:hit.doc,section:hit.section,units:[],score:hit.score,exactTitle:hit.exactTitle,affinity:hit.affinity,stageBoost:hit.stageBoost};sopGroups.push(g);}
   if(g.units.length<2)g.units.push(hit.unit);
  }
+ const exactGroups=sopGroups.filter(g=>g.exactTitle);
+ const selectedSop=exactGroups.length?exactGroups:sopGroups.filter(g=>g.score>=Math.max(5,(sopGroups[0]?.score||0)*0.65));
+ for(const [i,g] of selectedSop.entries())g.primary=i===0||g.exactTitle||g.stageBoost>0||g.affinity>0&&g.score>=selectedSop[0].score*0.85;
  const supplement=[];
  const needsDetail=/희석|몇\s*배|농도|용량/u.test(question);
- return {needsDetail,status:needsDetail?'needs_detail':hits.length||sopGroups.length?'matched':'no_match',anchors:anchors.map(a=>a.name),hits,sopHits:sopGroups.slice(0,4),supplement};
+ return {needsDetail,status:needsDetail?'needs_detail':hits.length||selectedSop.length?'matched':'no_match',anchors:anchors.map(a=>a.name),hits,sopHits:selectedSop.slice(0,4),supplement};
 }

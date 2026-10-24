@@ -67,6 +67,124 @@
       "chunks": 474
     }
   ],
+  "precision": {
+    "total": 10,
+    "passed": 10,
+    "cases": [
+      {
+        "id": "confirmed-title",
+        "question": "고병원성 확진 시 조치",
+        "allowed": [
+          "3 고병원성 확진 시 조치"
+        ],
+        "pass": true,
+        "visible": [
+          "3 고병원성 확진 시 조치"
+        ]
+      },
+      {
+        "id": "confirmed-spacing",
+        "question": "고병원성 확진시 조치",
+        "allowed": [
+          "3 고병원성 확진 시 조치"
+        ],
+        "pass": true,
+        "visible": [
+          "3 고병원성 확진 시 조치"
+        ]
+      },
+      {
+        "id": "confirmed-polite",
+        "question": "고병원성 확진 시 조치를 알려주세요",
+        "allowed": [
+          "3 고병원성 확진 시 조치"
+        ],
+        "pass": true,
+        "visible": [
+          "3 고병원성 확진 시 조치"
+        ]
+      },
+      {
+        "id": "confirmed-prefix",
+        "question": "HPAI 고병원성 확진 시 조치",
+        "allowed": [
+          "3 고병원성 확진 시 조치"
+        ],
+        "pass": true,
+        "visible": [
+          "3 고병원성 확진 시 조치"
+        ]
+      },
+      {
+        "id": "wild-natural",
+        "question": "야생조류에서 고병원성AI 검출시 어떤 방역조치?",
+        "allowed": [
+          "3 고병원성 확진 시 조치"
+        ],
+        "pass": true,
+        "visible": [
+          "3 고병원성 확진 시 조치"
+        ]
+      },
+      {
+        "id": "feed",
+        "question": "ASF 사료 공급 요령",
+        "allowed": [
+          "16. 사료 공급 요령"
+        ],
+        "pass": true,
+        "visible": [
+          "16. 사료 공급 요령"
+        ]
+      },
+      {
+        "id": "manure",
+        "question": "ASF 가축분뇨 처리",
+        "allowed": [
+          "17. 가축분뇨 처리요령"
+        ],
+        "pass": true,
+        "visible": [
+          "17. 가축분뇨 처리요령"
+        ]
+      },
+      {
+        "id": "checkpoint",
+        "question": "HPAI 이동통제초소 운영",
+        "allowed": [
+          "11 이동통제초소 및 거점소독시설 운용요령"
+        ],
+        "pass": true,
+        "visible": [
+          "11 이동통제초소 및 거점소독시설 운용요령"
+        ]
+      },
+      {
+        "id": "restock",
+        "question": "구제역 재입식 요령",
+        "allowed": [
+          "20 살처분 농장의 가축 재입식 요령",
+          "24 살처분 농장의 가축 재입식 요령"
+        ],
+        "pass": true,
+        "visible": [
+          "20 살처분 농장의 가축 재입식 요령",
+          "24 살처분 농장의 가축 재입식 요령"
+        ]
+      },
+      {
+        "id": "antigen",
+        "question": "HPAI 야생조류 H5 H7 항원 확인 시 조치",
+        "allowed": [
+          "2 H5･H7형 항원 확인 시 조치"
+        ],
+        "pass": true,
+        "visible": [
+          "2 H5･H7형 항원 확인 시 조치"
+        ]
+      }
+    ]
+  },
   "sop": {
     "total": 15,
     "passed": 15,

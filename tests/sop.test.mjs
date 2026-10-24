@@ -34,3 +34,14 @@ test('blank pages, tables and missing SOP topics do not become authoritative pro
  const none=search(corpus,'외계인 우주선',{...defaults,type:'SOP'});assert.equal(none.results.length,0);
  const conflict=search(corpus,'야생조류 고병원성AI 검출',{...defaults,type:'SOP',disease:'ASF'});assert.equal(conflict.results.length,0);
 });
+
+const precisionCases=JSON.parse(fs.readFileSync(new URL('./fixtures/sop-precision.json',import.meta.url)));
+for(const f of precisionCases)test('SOP excludes distractors: '+f.id,()=>{
+ const result=search(corpus,f.question,{...defaults,type:'SOP'}),view=presentResults(corpus,result,f.question),primary=view.groups.filter(g=>g.primary);
+ assert(primary.length);assert(primary.every(g=>f.allowed.includes(g.heading)),primary.map(g=>g.heading).join('; '));
+ if(f.id.startsWith('confirmed')){
+  assert.equal(view.groups.length,1);
+  const text=primary.flatMap(g=>g.focus.flatMap(u=>u.parts)).map(p=>p.text).join('');
+  assert(text.includes('21일간'));assert(!/부검소견|인체 감염|철새 도래 단계|관리지역 :/u.test(text));
+ }
+});

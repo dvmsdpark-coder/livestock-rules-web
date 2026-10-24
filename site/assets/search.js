@@ -1,7 +1,7 @@
 // Browser and Node share this deterministic, model-free search implementation.
-import {activeArticles,searchableChunk} from './provisions.js?v=20261024-7';
-import {legalUnits} from './evidence.js?v=20261024-7';
-import {retrieve} from './retrieval.js?v=20261024-7';
+import {activeArticles,searchableChunk} from './provisions.js?v=20261024-8';
+import {legalUnits} from './evidence.js?v=20261024-8';
+import {retrieve} from './retrieval.js?v=20261024-8';
 const compact=s=>s.replace(/[\s“”"「」『』·ㆍ]/gu,'').replace(/[?？.]+$/u,'');
 const normalize=s=>s.replace(/\s+/gu,' ').trim();
 const stop=new Set(['구제역','FMD','ASF','HPAI','가축','경우','발생','규정','관련','대한','대하여','어떻게','무엇','언제','어디','해야','하나요','되나요','알려','주세요','합니까','인가요','방법']);
@@ -137,7 +137,7 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
     mode='ranked';
     for(const hit of found.sopHits)for(const part of hit.section.parts)add(hit.doc,part,{
      heading:hit.section.heading,scenario:hit.section.scenario,match:'SOP 절·항목 검색',
-     kind:hit.section.layout||'body',sopKey:hit.section.key,sopFocus:hit.units,retrievalPrimary:!found.needsDetail&&hit.section.layout!=='table'&&found.sopHits.indexOf(hit)<3,
+     kind:hit.section.layout||'body',sopKey:hit.section.key,sopFocus:hit.units,retrievalPrimary:!found.needsDetail&&hit.section.layout!=='table'&&hit.primary&&found.sopHits.indexOf(hit)<3,
      matchedTerms:found.anchors});
    }
    for(const hit of found.supplement)add(hit.doc,hit.part,{match:'SOP 관련 후보',retrievalPrimary:false,matchedTerms:found.anchors});

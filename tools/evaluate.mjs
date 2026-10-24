@@ -15,6 +15,10 @@ export function evaluate(){
   const found=view.groups.filter(g=>g.articleNumber),expected=g=>g.docType===f.expected.type&&g.disease===f.expected.disease&&g.articleNumber===f.expected.article;
   return {id:f.id,question:f.question,expected:f.expected,mode:result.mode,terms:result.diagnostics?.terms||[],hitInSix:found.slice(0,6).some(expected),visibleHit:found.some(g=>g.primary&&expected(g)),top:found.slice(0,6).map(g=>({type:g.docType,disease:g.disease,article:g.articleNumber,primary:g.primary}))};
  });
+ const precisionCases=JSON.parse(fs.readFileSync(new URL('tests/fixtures/sop-precision.json',root))).map(f=>{
+  const r=search(corpus,f.question,{...defaults,type:'SOP'}),v=presentResults(corpus,r,f.question),primary=v.groups.filter(g=>g.primary);
+  return {...f,pass:primary.length>0&&primary.every(g=>f.allowed.includes(g.heading)),visible:primary.map(g=>g.heading)};
+ });
  const sopCases=JSON.parse(fs.readFileSync(new URL('tests/fixtures/sop-questions.json',root))).map(f=>{
   const r=search(corpus,f.question,{...defaults,type:'SOP'}),v=presentResults(corpus,r,f.question);
   const hit=v.groups.find(g=>g.heading===f.heading&&g.disease===f.disease&&g.parts.some(p=>p.page===f.page));
@@ -30,6 +34,7 @@ export function evaluate(){
   }
  }
  return {schema:1,asOf:defaults.asOf,sourceDocuments:corpus.length,sourceSnapshot:corpus.map(e=>({id:e.doc.id,sha256:e.doc.sha256,dataSha256:e.doc.data_sha256,activeArticles:activeArticles(e,defaults.asOf).length,chunks:e.index.chunks.length})),
+  precision:{total:precisionCases.length,passed:precisionCases.filter(c=>c.pass).length,cases:precisionCases},
   sop:{total:sopCases.length,passed:sopCases.filter(c=>c.hit&&c.visibleHit).length,cases:sopCases,coverage:sopCoverage},
   natural:{total:natural.length,hitInSix:natural.filter(r=>r.hitInSix).length,visibleHit:natural.filter(r=>r.visibleHit).length,cases:natural},
   structural:{total:structural.length,passed:structural.filter(r=>r.pass).length,failed:structural.filter(r=>!r.pass)},
@@ -47,6 +52,7 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
  '| --- | --- | --- |',
  '| 대표 자연어 질문 | '+result.natural.hitInSix+'/'+result.natural.total+' | 기대 조문이 상위 6개 조문 안에 존재 |',
  '| 대표 자연어 질문의 기본 표시 | '+result.natural.visibleHit+'/'+result.natural.total+' | 기대 조문이 접힌 추가 근거 밖에 표시됨 |',
+ '| SOP 무관 결과 배제 | '+result.precision.passed+'/'+result.precision.total+' | 기본 표시가 기대 절 목록 안에 한정됨 |',
  '| SOP 상세 질문 | '+result.sop.passed+'/'+result.sop.total+' | 기대한 절과 PDF 페이지가 기본 결과에 표시 |',
  '| 조문 번호·제목 도달성 | '+result.structural.passed+'/'+result.structural.total+' | 현행 법령·고시에서 자동 생성한 구조 검사 |',
  '',
@@ -67,6 +73,6 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
  '- 전문가가 확정한 법률 해석·정답 데이터로 검증한 결과는 아닙니다.',
  ''
  ].join('\n'));
- console.log(JSON.stringify({sop:{total:result.sop.total,passed:result.sop.passed},natural:{total:result.natural.total,hitInSix:result.natural.hitInSix,visibleHit:result.natural.visibleHit},structural:{total:result.structural.total,passed:result.structural.passed},failures:result.natural.cases.filter(c=>!c.hitInSix),structuralFailures:result.structural.failed},null,2));
- if(result.sop.passed!==result.sop.total||result.natural.hitInSix!==result.natural.total||result.structural.passed!==result.structural.total)process.exitCode=1;
+ console.log(JSON.stringify({precision:{total:result.precision.total,passed:result.precision.passed},sop:{total:result.sop.total,passed:result.sop.passed},natural:{total:result.natural.total,hitInSix:result.natural.hitInSix,visibleHit:result.natural.visibleHit},structural:{total:result.structural.total,passed:result.structural.passed},failures:result.natural.cases.filter(c=>!c.hitInSix),structuralFailures:result.structural.failed},null,2));
+ if(result.precision.passed!==result.precision.total||result.sop.passed!==result.sop.total||result.natural.hitInSix!==result.natural.total||result.structural.passed!==result.structural.total)process.exitCode=1;
 }
