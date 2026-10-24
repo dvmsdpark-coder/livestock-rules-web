@@ -1,7 +1,7 @@
 // CI checks both the historical baseline and all published revision cutover dates.
 import fs from 'node:fs';import path from 'node:path';
 import {spawnSync} from 'node:child_process';import {fileURLToPath} from 'node:url';
-import {integrity} from './validate-update.mjs';
+import {integrity,criticalCoverage,loadSnapshot} from './validate-update.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url)),site=path.join(root,'site');
 const issues=integrity(site);if(issues.length)throw Error(issues.join('\n'));
 const catalog=JSON.parse(fs.readFileSync(path.join(root,'maintenance/catalog.json'),'utf8'));
@@ -22,6 +22,7 @@ for(const d of manifest.documents)if(!catalog.documents.some(row=>row.baseline?.
 const reportBase=path.join(root,'private/release-checks');fs.mkdirSync(reportBase,{recursive:true});
 const reports=fs.mkdtempSync(path.join(reportBase,'run-'));
 for(const asOf of dates){
+ const missing=criticalCoverage(loadSnapshot(site,asOf),asOf);if(missing.length)throw Error('Critical revision coverage missing: '+missing.join(', '));
  const reportDir=path.join(reports,asOf);fs.mkdirSync(reportDir);
  for(const tool of ['evaluate.mjs','audit-regulation-links.mjs','audit-questions.mjs']){
   const r=spawnSync(process.execPath,[path.join(root,'tools',tool)],{cwd:root,env:{...process.env,LIVESTOCK_AS_OF:asOf,LIVESTOCK_SITE_ROOT:site,LIVESTOCK_REPORT_DIR:reportDir},encoding:'utf8',timeout:120000,maxBuffer:8*1024*1024});

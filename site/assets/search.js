@@ -1,10 +1,10 @@
-import {normalizeQuestion,unmappedNouns} from './question.js?v=20261024-20';
-import {classificationRequest,classificationSources} from './classification.js?v=20261024-20';
+import {normalizeQuestion,unmappedNouns} from './question.js?v=20261024-21';
+import {classificationRequest,classificationSources} from './classification.js?v=20261024-21';
 // Browser and Node share this deterministic, model-free search implementation.
-import {activeArticles,searchableChunk} from './provisions.js?v=20261024-20';
-import {legalUnits} from './evidence.js?v=20261024-20';
-import {actualAnnexes,annexReferences} from './annexes.js?v=20261024-20';
-import {retrieve,concepts} from './retrieval.js?v=20261024-20';
+import {activeArticles,searchableChunk} from './provisions.js?v=20261024-21';
+import {legalUnits} from './evidence.js?v=20261024-21';
+import {actualAnnexes,annexReferences} from './annexes.js?v=20261024-21';
+import {retrieve,concepts} from './retrieval.js?v=20261024-21';
 const compact=s=>s.replace(/[\s“”"「」『』·ㆍ]/gu,'').replace(/[?？.]+$/u,'');
 const normalize=s=>s.replace(/\s+/gu,' ').trim();
 const stop=new Set(['구제역','FMD','ASF','HPAI','가축','경우','발생','규정','관련','대한','대하여','어떻게','무엇','언제','어디','해야','하나요','되나요','알려','주세요','합니까','인가요','방법','종류','분류','목록','리스트','유형','구분','항목','알려주세요','알려줘','설명해주세요','보여주세요','말해주세요']);
@@ -84,7 +84,7 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
  }else if(classification&&!directRequest){
   mode='classification';const sources=classificationSources(entries,classification,filters.asOf);
   for(const hit of sources)for(const part of hit.parts)add(hit.entry.doc,{...part,heading:hit.article.number+'('+hit.article.title+')'},{match:'대상 정의·분류 일치',classificationFocus:hit.focus});
-  diagnostics={status:results.length?'classification':entries.length?'unresolved_subject':'no_documents',terms:[classification.subject],subject:classification.subject,grade:classification.grade,grades:classification.grades||[],alias:classification.alias};
+  diagnostics={status:results.length?'classification':entries.length?'unresolved_subject':'no_documents',terms:[classification.subject],subject:classification.subject,purpose:classification.purpose,grade:classification.grade,grades:classification.grades||[],alias:classification.alias};
  }else if(term){
   mode='definition';
   for(const entry of entries)for(const a of activeArticles(entry,filters.asOf).filter(a=>a.title==='정의')){
@@ -208,5 +208,5 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
  const unmapped=unmappedNouns(corpus,query,concepts.flatMap(c=>c.aliases));
  if(unmapped.length&&results.length)return {mode:'related',results:[],diagnostics:{status:'unmapped_subject',terms:[],unmapped},message:'다음 표현을 등록 원문과 연결하지 못했습니다: '+unmapped.join(', ')+'. 대상이나 조건을 확인해주세요. 이 표현을 생략한 다른 근거를 답으로 제시하지 않습니다.'};
  const seen=new Set();results=results.filter(r=>{const k=r.documentId+':'+r.page+':'+compact(r.text);if(seen.has(k))return false;seen.add(k);return true;});
- return {mode,results,diagnostics:diagnostics||{status:results.length?'structured':'no_match',terms:[]},asOf:filters.asOf,message:diagnostics?.status==='unresolved_subject'?'질문의 분류 대상을 선택한 등록 원문에서 확인하지 못했습니다. 대상명·문서 종류·기준일을 확인해주세요. 다른 주제의 조문으로 대신 제시하지 않습니다.':diagnostics?.status==='no_documents'?'선택한 문서 종류·질병·기준일에 적용되는 등록 문서가 없습니다. 과거 버전의 미등록과 규정 부존재는 다릅니다.':results.length?(diagnostics?.status==='needs_detail'?'약품·제품과 희석 조건을 특정하지 못했습니다. 일반 소독 조문을 희석배율의 답으로 제시하지 않습니다. 관련 후보의 원문과 제품 기준을 확인하세요.':mode==='classification'&&diagnostics?.subject!=='가축전염병'?'질문한 대상의 분류·목록을 원문에서 확인했습니다. 포함 범위와 위임 사항은 전체 조문에서 함께 확인하세요.':messages[mode]):term?`‘${term}’의 완결된 정의를 선택 조건에서 찾지 못했습니다. 다른 조문을 정의로 대신 제시하지 않습니다.`:diagnostics?.status==='no_terms'?'질문에서 등록 문서의 검색 용어를 연결하지 못했습니다. 대상이나 조치를 구체적으로 입력해주세요. 규정이 없다는 뜻은 아닙니다.':'선택 조건에서 근거를 찾지 못했습니다. 문서 종류·기준일을 확인하거나 질문 표현을 바꿔주세요. 검색 실패가 규정 부존재를 뜻하지는 않습니다.'};
+ return {mode,results,diagnostics:diagnostics||{status:results.length?'structured':'no_match',terms:[]},asOf:filters.asOf,message:diagnostics?.status==='unresolved_subject'?'질문의 분류 대상을 선택한 등록 원문에서 확인하지 못했습니다. 대상명·문서 종류·기준일을 확인해주세요. 다른 주제의 조문으로 대신 제시하지 않습니다.':diagnostics?.status==='no_documents'?'선택한 문서 종류·질병·기준일에 적용되는 등록 문서가 없습니다. 과거 버전의 미등록과 규정 부존재는 다릅니다.':results.length?(diagnostics?.status==='needs_detail'?'약품·제품과 희석 조건을 특정하지 못했습니다. 일반 소독 조문을 희석배율의 답으로 제시하지 않습니다. 관련 후보의 원문과 제품 기준을 확인하세요.':diagnostics?.purpose==='culling-diseases'?'살처분 대상 질병을 정한 시행규칙의 제1종·제2종 목록과 추가 지정 조건을 함께 제시합니다. 법률의 명령 요건과 제2종 준용 범위도 원문에서 확인하세요.':mode==='classification'&&diagnostics?.subject!=='가축전염병'?'질문한 대상의 분류·목록을 원문에서 확인했습니다. 포함 범위와 위임 사항은 전체 조문에서 함께 확인하세요.':messages[mode]):term?`‘${term}’의 완결된 정의를 선택 조건에서 찾지 못했습니다. 다른 조문을 정의로 대신 제시하지 않습니다.`:diagnostics?.status==='no_terms'?'질문에서 등록 문서의 검색 용어를 연결하지 못했습니다. 대상이나 조치를 구체적으로 입력해주세요. 규정이 없다는 뜻은 아닙니다.':'선택 조건에서 근거를 찾지 못했습니다. 문서 종류·기준일을 확인하거나 질문 표현을 바꿔주세요. 검색 실패가 규정 부존재를 뜻하지는 않습니다.'};
 }

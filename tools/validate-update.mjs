@@ -37,7 +37,7 @@ export function integrity(site){
  return [...new Set(issues)];
 }
 export const criticalQuestions=[
- '최초신고 시 보상금 경감은?','보상금 최소 보장 기준','가금 계열사의 의무','가축방역사의 자격 요건',
+ '살처분 대상 질병','최초신고 시 보상금 경감은?','보상금 최소 보장 기준','가금 계열사의 의무','가축방역사의 자격 요건',
  '법정전염병의 종류','소득안정자금 지원 대상','생계안정자금 지급 근거','구제역 백신 미접종 시 보상금은 어떻게 되죠?'
 ];
 function answer(corpus,question,asOf){
@@ -54,6 +54,9 @@ function compareArticles(before,after){
  for(const b of next)if(!old.some(a=>a.family===b.family&&a.number===b.number))changes.push({kind:'added',family:b.family,newNumber:b.number,title:b.title});
  return changes;
 }
+export function criticalCoverage(corpus,asOf){
+ return criticalQuestions.filter(q=>{const rows=answer(corpus,q,asOf);if(!rows.length)return true;if(q==='살처분 대상 질병'){const rule=rows.find(g=>g.type==='시행규칙');const body=rule?.scopes.map(u=>flat(u.text)).join('')||'';return !body.includes('제1종가축전염병')||!body.includes('제2종가축전염병')||!body.includes('농림축산식품부장관이정하는');}return false;});
+}
 export function validateUpdate(stage){
  const plan=read(path.join(stage,'plan.json')),site=path.join(stage,'site'),reports=path.join(stage,'reports');fs.mkdirSync(reports,{recursive:true});
  const before=loadSnapshot(plan.source_site,plan.new_from),after=loadSnapshot(site,plan.new_from),checks=[];
@@ -68,7 +71,7 @@ export function validateUpdate(stage){
  const questions=[...new Set([...fixtures.map(f=>f.question),...criticalQuestions])];
  const fingerprint=rows=>JSON.stringify(rows.map(g=>({...g,scopes:g.scopes.map(u=>({...u,text:flat(u.text)})),annex:g.annex?.map(u=>({...u,text:flat(u.text)}))})));
  const questionChanges=questions.flatMap((question,i)=>{const a=answer(before,question,plan.new_from),b=answer(after,question,plan.new_from);return fingerprint(a)===fingerprint(b)?[]:[{id:'q-'+i,question,before:a,after:b}];});
- const missing=criticalQuestions.filter(q=>!answer(after,q,plan.new_from).length);
+ const missing=criticalCoverage(after,plan.new_from);
  checks.push({name:'사용자 제보 핵심 질문의 근거 유지',passed:missing.length===0,issues:missing});
  const report={schema:1,asOf:plan.new_from,passed:checks.every(c=>c.passed),checks,
   article_changes:compareArticles(before,after),question_changes:questionChanges,

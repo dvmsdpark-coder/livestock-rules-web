@@ -1,8 +1,8 @@
-import {normalizeQuestion} from './question.js?v=20261024-20';
-import {annexExcerpt} from './annex-excerpts.js?v=20261024-20';
-import {annexReferences} from './annexes.js?v=20261024-20';
+import {normalizeQuestion} from './question.js?v=20261024-21';
+import {annexExcerpt} from './annex-excerpts.js?v=20261024-21';
+import {annexReferences} from './annexes.js?v=20261024-21';
 // Source-only presentation and internal legal references. No generated legal text.
-import {activeArticles} from './provisions.js?v=20261024-20';
+import {activeArticles} from './provisions.js?v=20261024-21';
 const squash=s=>s.replace(/\s+/gu,'');
 const clean=s=>s.replace(/[\sㆍ·]/gu,'');
 const circled='①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳';
