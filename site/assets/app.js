@@ -1,4 +1,4 @@
-import {eligible} from './search.js?v=20261024-21';
+import {eligible} from './search.js?v=20261024-22';
 const $=id=>document.getElementById(id);
 const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
 const labels={classification:'정의·분류 검색',definition:'용어 정의',ranked:'조문·용어 검색',material:'사료 관련 조치',topic:'살처분 근거',article:'조문 검색',procedure:'절차 검색',zone:'방역지역',annex:'서식·별표',related:'관련 후보'};
@@ -157,8 +157,8 @@ for(const button of document.querySelectorAll('[data-question]'))button.onclick=
 for(const id of ['disease','docType','asOf'])$(id).addEventListener('change',()=>{requestId++;if(dialog.open)dialog.close();$('submit').disabled=!manifest;document.querySelector('.results-panel').setAttribute('aria-busy','false');library();updateExamples();$('message').textContent='검색 조건이 바뀌었습니다. 다시 검색해주세요.';$('results').replaceChildren();});
 function updateExamples(){const name={ASF:'아프리카돼지열병',고병원성AI:'고병원성 조류인플루엔자'}[$('disease').value]||'구제역';for(const b of document.querySelectorAll('[data-question]')){b.dataset.baseQuestion??=b.dataset.question;b.dataset.question=b.dataset.baseQuestion.replace(/^구제역/u,name);}}
 try{
- const response=await fetch(new URL('../data/manifest.json?v=20261024-21',import.meta.url));if(!response.ok)throw Error();manifest=await response.json();if(manifest.schema!==1)throw Error();
- worker=new Worker(new URL('./worker.js?v=20261024-21',import.meta.url),{type:'module'});
+ const response=await fetch(new URL('../data/manifest.json?v=20261024-22',import.meta.url));if(!response.ok)throw Error();manifest=await response.json();if(manifest.schema!==1)throw Error();
+ worker=new Worker(new URL('./worker.js?v=20261024-22',import.meta.url),{type:'module'});
  worker.onmessage=({data})=>{
   if(data.action==='article'){if(data.id!==navId||!dialog.open)return;renderArticle(data.error?{error:data.error}:data.detail);return;}
   if(data.id!==requestId)return;$('submit').disabled=false;document.querySelector('.results-panel').setAttribute('aria-busy','false');if(data.error){$('message').textContent=data.error;return;}render(data.result);

@@ -16,3 +16,5 @@ main,.masthead,footer{max-width:1320px}.hero{padding:34px 0 28px}.hero h1{font-s
 .annex-image-scroll{max-width:100%;overflow-x:auto}.annex-image-scroll .annex-crop{min-width:600px}.annex-original-images>summary{cursor:pointer;color:#086d75;font-size:12px}
 
 .annex-unit .excerpt{white-space:pre-line}
+
+.maintenance-guide{max-width:900px}.maintenance-card{background:white;border:1px solid var(--line);border-radius:18px;padding:28px;margin-bottom:24px;line-height:1.85;overflow-wrap:anywhere}.maintenance-card h2{margin-bottom:16px}.maintenance-card ol{padding-left:24px}.maintenance-card li{margin:10px 0}.maintenance-launch{display:inline-block;background:var(--accent);color:white;border-radius:9px;padding:12px 18px;text-decoration:none;font-weight:700;margin:12px 0}.maintenance-note{font-size:13px;color:var(--muted)}.maintenance-card code{font-size:.9em}@media(max-width:600px){.maintenance-card{padding:20px}.maintenance-guide .hero h1{font-size:28px}.maintenance-guide .lead{font-size:14px}.maintenance-launch{width:100%;text-align:center}}
