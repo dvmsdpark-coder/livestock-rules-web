@@ -21,12 +21,16 @@ jobs:
         run: npm test
       - name: Evaluate natural-language fixtures and every legal article
         run: npm run evaluate
+      - name: Audit registered regulation links and reporting coverage
+        run: npm run audit:links
       - name: Save search evaluation report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: search-evaluation
-          path: docs/search-evaluation.json
+          path: |
+            docs/search-evaluation.json
+            docs/regulation-links.json
   deploy:
     if: github.event_name != 'pull_request'
     needs: test

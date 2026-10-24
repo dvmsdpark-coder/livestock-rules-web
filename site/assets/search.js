@@ -1,7 +1,7 @@
 // Browser and Node share this deterministic, model-free search implementation.
-import {activeArticles,searchableChunk} from './provisions.js?v=20261024-8';
-import {legalUnits} from './evidence.js?v=20261024-8';
-import {retrieve} from './retrieval.js?v=20261024-8';
+import {activeArticles,searchableChunk} from './provisions.js?v=20261024-9';
+import {legalUnits} from './evidence.js?v=20261024-9';
+import {retrieve} from './retrieval.js?v=20261024-9';
 const compact=s=>s.replace(/[\s“”"「」『』·ㆍ]/gu,'').replace(/[?？.]+$/u,'');
 const normalize=s=>s.replace(/\s+/gu,' ').trim();
 const stop=new Set(['구제역','FMD','ASF','HPAI','가축','경우','발생','규정','관련','대한','대하여','어떻게','무엇','언제','어디','해야','하나요','되나요','알려','주세요','합니까','인가요','방법']);
@@ -31,7 +31,7 @@ function words(question){
 function procedureIntent(question,disease){
  const q=compact(question);
  const excluded=/야생|철새|전통시장|동물원|면제|예외|과태료|처벌|안하면|하지않|보상|살처분|위생관리업|입식|수입|고용|입국|출국|서식|별지|별표/u.test(q);
- if(!excluded&&q.includes('신고')&&!q.includes('이동제한')&&/어디|누구에게|어느기관|신고처|신고기관/u.test(q)&&(disease||/가축|의심축/u.test(q)))return 'reporting';
+ if(!excluded&&q.includes('신고')&&!q.includes('이동제한')&&/어디|누구에게|어느기관|신고처|신고기관|방법|절차|어떻게|무슨내용|신고사항/u.test(q)&&(disease||/가축|의심축|^신고/u.test(q)))return 'reporting';
  if(!disease||excluded||q.includes('신고'))return null;
  if(q.includes('이동제한')&&!q.includes('소독')&&/해제|언제|풀리|풀어|며칠/u.test(q))return 'movement_release';
  if(q.includes('소독')&&q.includes('농장')&&!/이동제한|희석|농도|배율|소독약|몇배|차량|거점|통제초소/u.test(q))return 'farm_disinfection';
@@ -63,7 +63,9 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
   }
  };
  const annexKind=/별지|서식/u.test(query)?'form':query.includes('별표')?'table':null;
- const intent=procedureIntent(query,target);
+ const directTitle=q.replace(/(?:알려주세요|설명해주세요|알려줘|무엇인가요|무엇입니까|어떻게되나요)$/u,'').replace(/[을를은는]$/u,'');
+ const directRequest=/제\d+조/u.test(q)||catalog.some(d=>(d.article_titles||[]).some(t=>compact(t)===directTitle));
+ const intent=directRequest?null:procedureIntent(query,target);
  if(annexKind){
   mode='annex';const number=query.match(/(?:별지|별표|제)\s*(?:제\s*)?(\d+)\s*호?(?:\s*의\s*(\d+))?/u);
   const terms=words(query.replace(/별지|별표|서식|제\d+호(?:의\d+)?|알려주세요|찾아주세요|보여주세요/gu,' '));
@@ -117,6 +119,7 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
   }
  }else if(intent){
   mode='procedure';const titles={reporting:['죽거나병든가축의신고'],movement_release:target==='ASF'?['방역지역전환및해제']:target==='고병원성AI'?['관리지역보호지역의방역','예찰지역의방역']:['이동제한해제등'],farm_disinfection:['소독등조치']}[intent];articles(titles);
+  if(intent==='reporting'&&target)for(const entry of entries.filter(e=>e.doc.type==='고시'&&e.doc.disease===target))for(const a of activeArticles(entry,filters.asOf))if(compact(a.title)==='의심축발생시조치')for(const part of a.parts)add(entry.doc,part,{match:'신고 관련 고시'});
   if(target)for(const {doc,index} of entries)if(doc.type==='SOP'&&doc.disease===target)for(const p of index.procedures)if(p.intent===intent)for(const part of p.parts)add(doc,part,{match:'SOP 절차 연결'});
  }else{
   let topic=q.replace(/(?:알려주세요|설명해주세요|알려줘|무엇인가요|무엇입니까|어떻게되나요)$/u,'').replace(/[을를은는]$/u,'');

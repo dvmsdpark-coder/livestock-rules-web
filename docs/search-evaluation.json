@@ -460,6 +460,12 @@
             "disease": "공통",
             "article": "제13조",
             "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제9조",
+            "primary": false
           }
         ]
       },
@@ -487,6 +493,12 @@
             "disease": "공통",
             "article": "제13조",
             "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "ASF",
+            "article": "제8조",
+            "primary": false
           }
         ]
       },
@@ -513,6 +525,12 @@
             "type": "시행규칙",
             "disease": "공통",
             "article": "제13조",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "고병원성AI",
+            "article": "제10조",
             "primary": false
           }
         ]

@@ -1,0 +1,256 @@
+{
+  "asOf": "2026-10-24",
+  "scope": "등록 문서의 인용 연결·신고 근거 누락·문서 버전 차이 점검. 법률 해석상 충돌 여부를 확정하는 감사가 아닙니다.",
+  "resolvedReferences": 840,
+  "invalidLinks": [],
+  "documents": [
+    {
+      "document": "284b2b92-ae1b-4c2b-a943-225fca48578e",
+      "title": "가축전염병 예방법",
+      "type": "법률",
+      "sourceDate": "2026-10-01",
+      "dateNote": "",
+      "checkedParts": 122,
+      "resolvedReferences": 237
+    },
+    {
+      "document": "e8eee283-2857-40c5-8e0e-0d87750e4c1a",
+      "title": "가축전염병 예방법 시행령",
+      "type": "시행령",
+      "sourceDate": "2026-04-21",
+      "dateNote": "",
+      "checkedParts": 38,
+      "resolvedReferences": 98
+    },
+    {
+      "document": "1265dc44-6eb2-4934-a5a8-85b1f2f3638f",
+      "title": "가축전염병 예방법 시행규칙",
+      "type": "시행규칙",
+      "sourceDate": "2026-10-01",
+      "dateNote": "",
+      "checkedParts": 124,
+      "resolvedReferences": 270
+    },
+    {
+      "document": "37899984-3bca-5e02-a322-9d29397f15a5",
+      "title": "아프리카돼지열병 방역실시요령",
+      "type": "고시",
+      "sourceDate": "2026-02-02",
+      "dateNote": "",
+      "checkedParts": 44,
+      "resolvedReferences": 50
+    },
+    {
+      "document": "e6d52b81-681d-5e59-aa4c-63e78798e41e",
+      "title": "조류인플루엔자 방역실시요령",
+      "type": "고시",
+      "sourceDate": "2026-02-02",
+      "dateNote": "",
+      "checkedParts": 52,
+      "resolvedReferences": 53
+    },
+    {
+      "document": "56e4867e-a534-4ed4-a8ba-d46aadd3ed0a",
+      "title": "구제역 방역실시요령",
+      "type": "고시",
+      "sourceDate": "2026-04-08",
+      "dateNote": "",
+      "checkedParts": 57,
+      "resolvedReferences": 66
+    },
+    {
+      "document": "7b763e5d-e1f8-5711-aedc-19ec89ab044f",
+      "title": "아프리카돼지열병 긴급행동지침(SOP)",
+      "type": "SOP",
+      "sourceDate": "2024-12-09",
+      "dateNote": "SOP 발행 연월은 표지 기준입니다. 검색용 기준일은 제공 파일명 날짜이며 공식 시행일은 미확인입니다. 최신 고시와 함께 확인하세요.",
+      "checkedParts": 711,
+      "resolvedReferences": 3
+    },
+    {
+      "document": "3d9ae693-1bb3-5f8c-af9e-0e3512252566",
+      "title": "조류인플루엔자 긴급행동지침(SOP)",
+      "type": "SOP",
+      "sourceDate": "2025-11-18",
+      "dateNote": "SOP 발행 연월은 표지 기준입니다. 검색용 기준일은 제공 파일명 날짜이며 공식 시행일은 미확인입니다. 최신 고시와 함께 확인하세요.",
+      "checkedParts": 1181,
+      "resolvedReferences": 51
+    },
+    {
+      "document": "de2a0c26-cb9d-4f83-b3f9-4d31f29fbbef",
+      "title": "구제역 긴급행동지침(SOP)",
+      "type": "SOP",
+      "sourceDate": "2026-05-06",
+      "dateNote": "검색용 기준일은 파일명 기준이며 공식 시행일은 미확인입니다.",
+      "checkedParts": 1814,
+      "resolvedReferences": 12
+    }
+  ],
+  "reporting": [
+    {
+      "disease": "구제역",
+      "question": "구제역 신고 방법과 절차는 어떻게 되나요?",
+      "law": true,
+      "rule": true,
+      "sop": true,
+      "oralWrittenElectronic": true,
+      "requiredFields": true,
+      "afterReceipt": true,
+      "sources": [
+        {
+          "type": "법률",
+          "title": "가축전염병 예방법",
+          "article": "제11조",
+          "pages": [
+            15
+          ]
+        },
+        {
+          "type": "시행규칙",
+          "title": "가축전염병 예방법 시행규칙",
+          "article": "제13조",
+          "pages": [
+            15
+          ]
+        },
+        {
+          "type": "고시",
+          "title": "구제역 방역실시요령",
+          "article": "제9조",
+          "pages": [
+            6,
+            7
+          ]
+        },
+        {
+          "type": "SOP",
+          "title": "구제역 긴급행동지침(SOP)",
+          "article": null,
+          "pages": [
+            69
+          ]
+        },
+        {
+          "type": "SOP",
+          "title": "구제역 긴급행동지침(SOP)",
+          "article": null,
+          "pages": [
+            159
+          ]
+        }
+      ]
+    },
+    {
+      "disease": "ASF",
+      "question": "ASF 신고 방법과 절차는 어떻게 되나요?",
+      "law": true,
+      "rule": true,
+      "sop": true,
+      "oralWrittenElectronic": true,
+      "requiredFields": true,
+      "afterReceipt": true,
+      "sources": [
+        {
+          "type": "법률",
+          "title": "가축전염병 예방법",
+          "article": "제11조",
+          "pages": [
+            15
+          ]
+        },
+        {
+          "type": "시행규칙",
+          "title": "가축전염병 예방법 시행규칙",
+          "article": "제13조",
+          "pages": [
+            15
+          ]
+        },
+        {
+          "type": "고시",
+          "title": "아프리카돼지열병 방역실시요령",
+          "article": "제8조",
+          "pages": [
+            4,
+            5
+          ]
+        },
+        {
+          "type": "SOP",
+          "title": "아프리카돼지열병 긴급행동지침(SOP)",
+          "article": null,
+          "pages": [
+            40
+          ]
+        }
+      ]
+    },
+    {
+      "disease": "고병원성AI",
+      "question": "고병원성AI 신고 방법과 절차는 어떻게 되나요?",
+      "law": true,
+      "rule": true,
+      "sop": true,
+      "oralWrittenElectronic": true,
+      "requiredFields": true,
+      "afterReceipt": true,
+      "sources": [
+        {
+          "type": "법률",
+          "title": "가축전염병 예방법",
+          "article": "제11조",
+          "pages": [
+            15
+          ]
+        },
+        {
+          "type": "시행규칙",
+          "title": "가축전염병 예방법 시행규칙",
+          "article": "제13조",
+          "pages": [
+            15
+          ]
+        },
+        {
+          "type": "고시",
+          "title": "조류인플루엔자 방역실시요령",
+          "article": "제10조",
+          "pages": [
+            6
+          ]
+        },
+        {
+          "type": "SOP",
+          "title": "조류인플루엔자 긴급행동지침(SOP)",
+          "article": null,
+          "pages": [
+            89
+          ]
+        }
+      ]
+    }
+  ],
+  "versionReview": [
+    {
+      "sop": "아프리카돼지열병 긴급행동지침(SOP)",
+      "sopDate": "2024-12-09",
+      "sopDateNote": "SOP 발행 연월은 표지 기준입니다. 검색용 기준일은 제공 파일명 날짜이며 공식 시행일은 미확인입니다. 최신 고시와 함께 확인하세요.",
+      "notice": "아프리카돼지열병 방역실시요령",
+      "noticeDate": "2026-02-02",
+      "reason": "SOP 검색 기준일 이후 고시가 개정되었습니다. 변경 내용과 SOP 적용 문구의 대조 검토가 필요합니다. 이 날짜 차이만으로 충돌을 판정하지 않습니다."
+    },
+    {
+      "sop": "조류인플루엔자 긴급행동지침(SOP)",
+      "sopDate": "2025-11-18",
+      "sopDateNote": "SOP 발행 연월은 표지 기준입니다. 검색용 기준일은 제공 파일명 날짜이며 공식 시행일은 미확인입니다. 최신 고시와 함께 확인하세요.",
+      "notice": "조류인플루엔자 방역실시요령",
+      "noticeDate": "2026-02-02",
+      "reason": "SOP 검색 기준일 이후 고시가 개정되었습니다. 변경 내용과 SOP 적용 문구의 대조 검토가 필요합니다. 이 날짜 차이만으로 충돌을 판정하지 않습니다."
+    }
+  ],
+  "limitations": [
+    "인용 해석기가 연결하지 못한 외부 법령·모호한 인용은 이 연결 검증 수에 포함되지 않습니다.",
+    "같은 조문 번호가 존재해도 개정 전후 내용이 같다는 뜻은 아닙니다.",
+    "SOP의 공식 시행일 미확인 사항과 표·그림의 의미는 별도 검토가 필요합니다."
+  ]
+}

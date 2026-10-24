@@ -1,5 +1,5 @@
 // Source-only presentation and internal legal references. No generated legal text.
-import {activeArticles} from './provisions.js?v=20261024-8';
+import {activeArticles} from './provisions.js?v=20261024-9';
 const squash=s=>s.replace(/\s+/gu,'');
 const clean=s=>s.replace(/[\sㆍ·]/gu,'');
 const circled='①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳';
@@ -100,6 +100,7 @@ function sopUnits(parts){
  });
 }
 function questionIntent(question){
+ if(/신고/u.test(question)&&/방법|절차|어떻게|신고사항|무슨내용/u.test(question))return 'reporting-method';
  if(/신고/u.test(question)&&/어디|누구|기관|신고처/u.test(question))return 'reporting';
  if(/이동제한/u.test(question)&&/해제|언제|풀리|며칠/u.test(question))return 'release';
  if(/농장/u.test(question)&&/소독/u.test(question))return 'cleaning';
@@ -120,9 +121,9 @@ function selectFocus(group,question,mode){
    if(start){const tail=src.text.slice(start.index+start[0].length),end=tail.search(/\n[ \t]*\d+\.[ \t]+[가-힣]/u);return [{label:'기본원칙',parts:slices(src,start.index,end<0?src.text.length:start.index+start[0].length+end)}];}
   }
   const units=sopUnits(group.parts);
-  if(intent==='reporting'){
+  if(intent==='reporting'||intent==='reporting-method'){
    const u=units.find(u=>u.number==='1.1');if(!u)return [];
-   const src=source(u.parts),at=src.text.match(/즉시\s*(?:구제역\s*)?신고/u);
+   const src=source(u.parts),at=intent==='reporting'?src.text.match(/즉시\s*(?:구제역\s*)?신고/u):null;
    return [{...u,parts:at?slices(src,at.index,src.text.length):u.parts,note:at?'신고처만 발췌 · 신고요건과 후속 조치는 전체 원문에서 확인하세요.':null}];
   }
   if(intent==='release'||intent==='cleaning'){
@@ -151,7 +152,7 @@ function selectFocus(group,question,mode){
  }
  const parents=parsed.units.filter(u=>!u.item);
  if(mode==='topic')return parents.filter(u=>u.paragraph===1||!u.paragraph).slice(0,1);
- if(intent==='reporting')return parents.filter(u=>u.paragraph===1);
+ if(intent==='reporting'||intent==='reporting-method')return parents.filter(u=>u.paragraph===1||intent==='reporting-method'&&group.docType==='시행규칙'&&[3,4].includes(u.paragraph));
  const ranked=parents.map(u=>({...u,rank:score(u.parts.map(p=>p.text).join(' '),question)})).sort((a,b)=>b.rank-a.rank);
  if(ranked[0]?.rank>0)return ranked.slice(0,2).filter(u=>u.rank===ranked[0].rank);
  if(parents.length===1)return parents;
