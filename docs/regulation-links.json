@@ -1894,6 +1894,20 @@
       "wrongDisease": false
     }
   ],
+  "classificationChecks": [
+    {
+      "question": "법정전염병의 종류",
+      "law": true,
+      "rule": true,
+      "unrelated": false
+    },
+    {
+      "question": "가축전염병의 분류",
+      "law": true,
+      "rule": true,
+      "unrelated": false
+    }
+  ],
   "annexQuestions": [
     {
       "question": "구제역 백신 미접종 시 보상금은 어떻게 되죠?",

@@ -2,7 +2,7 @@ import test from 'node:test';import assert from 'node:assert/strict';
 import {auditLinks} from '../tools/audit-regulation-links.mjs';
 import {corpus,defaults} from '../tools/evaluate.mjs';import {search} from '../site/assets/search.js';import {presentResults} from '../site/assets/evidence.js';
 test('registered citation targets and reporting source chain remain valid',()=>{
- const r=auditLinks();assert(r.resolvedReferences>100);assert.equal(r.documents.length,11);assert.deepEqual(r.invalidLinks,[]);assert(r.roles.every(x=>x.law&&x.decree&&x.rule&&x.notice&&x.sop&&!x.wrongDisease));
+ const r=auditLinks();assert(r.resolvedReferences>100);assert.equal(r.documents.length,11);assert.deepEqual(r.invalidLinks,[]);assert(r.classificationChecks.every(x=>x.law&&x.rule&&!x.unrelated));assert(r.roles.every(x=>x.law&&x.decree&&x.rule&&x.notice&&x.sop&&!x.wrongDisease));
  assert(r.reporting.every(x=>x.law&&x.rule&&x.sop&&x.oralWrittenElectronic&&x.requiredFields&&x.afterReceipt));
  assert(r.versionReview.some(x=>x.sop.includes('아프리카돼지열병')));assert(r.versionReview.some(x=>x.sop.includes('조류인플루엔자')));
 });

@@ -446,9 +446,9 @@
     ]
   },
   "natural": {
-    "total": 33,
-    "hitInSix": 33,
-    "visibleHit": 27,
+    "total": 36,
+    "hitInSix": 36,
+    "visibleHit": 30,
     "cases": [
       {
         "id": "report-fmd",
@@ -1863,6 +1863,93 @@
             "disease": "공통",
             "article": "제1조",
             "primary": false
+          }
+        ]
+      },
+      {
+        "id": "disease-classification",
+        "question": "법정전염병의 종류",
+        "expected": {
+          "type": "법률",
+          "disease": "공통",
+          "article": "제2조"
+        },
+        "mode": "classification",
+        "terms": [
+          "가축전염병"
+        ],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제2조",
+            "primary": true
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제2조",
+            "primary": true
+          }
+        ]
+      },
+      {
+        "id": "disease-grades",
+        "question": "가축전염병의 분류",
+        "expected": {
+          "type": "법률",
+          "disease": "공통",
+          "article": "제2조"
+        },
+        "mode": "classification",
+        "terms": [
+          "가축전염병"
+        ],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제2조",
+            "primary": true
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제2조",
+            "primary": true
+          }
+        ]
+      },
+      {
+        "id": "disease-grade-three",
+        "question": "제3종 가축전염병 종류",
+        "expected": {
+          "type": "법률",
+          "disease": "공통",
+          "article": "제2조"
+        },
+        "mode": "classification",
+        "terms": [
+          "가축전염병"
+        ],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제2조",
+            "primary": true
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제2조",
+            "primary": true
           }
         ]
       }

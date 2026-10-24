@@ -1,7 +1,7 @@
-import {annexExcerpt} from './annex-excerpts.js?v=20261024-14';
-import {annexReferences} from './annexes.js?v=20261024-14';
+import {annexExcerpt} from './annex-excerpts.js?v=20261024-15';
+import {annexReferences} from './annexes.js?v=20261024-15';
 // Source-only presentation and internal legal references. No generated legal text.
-import {activeArticles} from './provisions.js?v=20261024-14';
+import {activeArticles} from './provisions.js?v=20261024-15';
 const squash=s=>s.replace(/\s+/gu,'');
 const clean=s=>s.replace(/[\sㆍ·]/gu,'');
 const circled='①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳';
@@ -113,6 +113,7 @@ function score(text,question){
  return terms.filter(t=>t.length>1&&!['어디','어떻게','무엇','알려','주세요','구제역','발생하면'].includes(t)&&squash(text).includes(t)).length;
 }
 function selectFocus(group,question,mode){
+ if(mode==='classification')return group.classificationFocus||[];
  if(mode==='definition'||group.match==='방역지역 정의 연결')return [{label:group.locator||group.heading,parts:group.parts}];
  if(['form','table','figure'].includes(group.kind))return [];
  const intent=questionIntent(question);

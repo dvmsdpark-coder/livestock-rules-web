@@ -295,5 +295,32 @@
       "disease": "공통",
       "article": "제49조"
     }
+  },
+  {
+    "id": "disease-classification",
+    "question": "법정전염병의 종류",
+    "expected": {
+      "type": "법률",
+      "disease": "공통",
+      "article": "제2조"
+    }
+  },
+  {
+    "id": "disease-grades",
+    "question": "가축전염병의 분류",
+    "expected": {
+      "type": "법률",
+      "disease": "공통",
+      "article": "제2조"
+    }
+  },
+  {
+    "id": "disease-grade-three",
+    "question": "제3종 가축전염병 종류",
+    "expected": {
+      "type": "법률",
+      "disease": "공통",
+      "article": "제2조"
+    }
   }
 ]

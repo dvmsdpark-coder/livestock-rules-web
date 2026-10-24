@@ -1,11 +1,12 @@
+import {classificationRequest,classificationSources} from './classification.js?v=20261024-15';
 // Browser and Node share this deterministic, model-free search implementation.
-import {activeArticles,searchableChunk} from './provisions.js?v=20261024-14';
-import {legalUnits} from './evidence.js?v=20261024-14';
-import {actualAnnexes,annexReferences} from './annexes.js?v=20261024-14';
-import {retrieve} from './retrieval.js?v=20261024-14';
+import {activeArticles,searchableChunk} from './provisions.js?v=20261024-15';
+import {legalUnits} from './evidence.js?v=20261024-15';
+import {actualAnnexes,annexReferences} from './annexes.js?v=20261024-15';
+import {retrieve} from './retrieval.js?v=20261024-15';
 const compact=s=>s.replace(/[\s“”"「」『』·ㆍ]/gu,'').replace(/[?？.]+$/u,'');
 const normalize=s=>s.replace(/\s+/gu,' ').trim();
-const stop=new Set(['구제역','FMD','ASF','HPAI','가축','경우','발생','규정','관련','대한','대하여','어떻게','무엇','언제','어디','해야','하나요','되나요','알려','주세요','합니까','인가요','방법']);
+const stop=new Set(['구제역','FMD','ASF','HPAI','가축','경우','발생','규정','관련','대한','대하여','어떻게','무엇','언제','어디','해야','하나요','되나요','알려','주세요','합니까','인가요','방법','종류','분류','목록','리스트','유형','구분','항목','알려주세요','알려줘','설명해주세요','보여주세요','말해주세요']);
 const priorities={'법률':0,'시행령':1,'시행규칙':2,'고시':3,'SOP':4};
 export function eligible(doc,filters){
  return doc.from<=filters.asOf&&(!doc.to||filters.asOf<doc.to)
@@ -38,7 +39,7 @@ function procedureIntent(question,disease){
  if(q.includes('소독')&&q.includes('농장')&&!/이동제한|희석|농도|배율|소독약|몇배|차량|거점|통제초소/u.test(q))return 'farm_disinfection';
  return null;
 }
-const messages={definition:'질문한 용어의 정의 항목을 찾았습니다. 위임 규정과 적용 범위는 원문에서 함께 확인하세요.',
+const messages={classification:'질문한 대상의 분류·목록을 원문에서 확인했습니다. 가축전염병은 법률에 열거된 질병과 시행규칙의 추가 지정 목록을 함께 제시합니다.',definition:'질문한 용어의 정의 항목을 찾았습니다. 위임 규정과 적용 범위는 원문에서 함께 확인하세요.',
  ranked:'질문 속 용어와 연결된 조문을 검색했습니다. 법적 판단이나 답변 확정이 아니며, 발췌한 항·호의 적용 조건과 전체 원문을 확인하세요.',
  material:'사료의 오염물건 처리와 이동·공급 관련 근거입니다. 질병을 선택하면 해당 고시를 먼저 표시합니다. 발생농장·방역지역 및 예외 조건을 구분해 확인하세요. 등록된 법령·고시에서 찾은 결과이며 SOP 전체 절차를 대신하지 않습니다.',
  topic:'살처분 명령과 대상에 관한 조문입니다. 질병을 선택하면 해당 질병의 세부 기준을 함께 표시합니다. 예외와 적용 조건은 전체 조문에서 확인하세요.',
@@ -48,7 +49,7 @@ const messages={definition:'질문한 용어의 정의 항목을 찾았습니다
  annex:'번호·제목으로 찾은 별표·별지입니다. 표·그림·작성란의 배치는 PDF 원문으로 확인하세요.',
  related:'관련 단어가 포함된 원문 후보입니다. 질문에 대한 확정적인 답변은 아니며 해당 PDF의 전후 맥락을 확인하세요.'};
 export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
- const query=normalize(question),q=compact(query),term=definitionTerm(query);
+ const query=normalize(question),canonicalQuery=/사람|인체|인간|식물/u.test(query)?query:query.replace(/법정\s*가축\s*전염병|가축\s*법정\s*전염병|법정\s*전염병/gu,'가축전염병'),q=compact(canonicalQuery),term=definitionTerm(canonicalQuery);
  const named=[['구제역',/구제역|\bFMD\b/iu],['ASF',/아프리카\s*돼지\s*열병|\bASF\b/iu],['고병원성AI',/조류\s*인플루엔자|조류독감|고병원성\s*AI|\bHPAI\b|\bAI\b/iu]].filter(([,pattern])=>pattern.test(query)).map(([d])=>d);
  if(named.length>1)return {mode:'related',results:[],message:'서로 다른 질병의 기준을 합쳐 제시하지 않습니다. 질병별로 나누어 검색해주세요.'};
  const target=named[0]||(['구제역','ASF','고병원성AI'].includes(filters.disease)?filters.disease:null);
@@ -63,10 +64,11 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
    for(const a of activeArticles({doc,index},filters.asOf))if(titles.includes(compact(a.title)))for(const part of a.parts)add(doc,part,{match:'조문 일치'});
   }
  };
+ const classification=classificationRequest(query);
  const annexKind=/별지|서식/u.test(query)?'form':query.includes('별표')?'table':null;
  const directTitle=q.replace(/(?:알려주세요|설명해주세요|알려줘|무엇인가요|무엇입니까|어떻게되나요)$/u,'').replace(/[을를은는]$/u,'');
  const directRequest=/제\d+조/u.test(q)||catalog.some(d=>(d.article_titles||[]).some(t=>compact(t)===directTitle));
- const intent=directRequest?null:procedureIntent(query,target);
+ const intent=directRequest?null:procedureIntent(canonicalQuery,target);
  if(annexKind){
   mode='annex';const number=query.match(/(?:별지|별표|제)\s*(?:제\s*)?(\d+)\s*호?(?:\s*의\s*(\d+))?/u);
   const terms=words(query.replace(/별지|별표|서식|제\d+호(?:의\d+)?|알려주세요|찾아주세요|보여주세요/gu,' '));
@@ -78,6 +80,10 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
    add(doc,a.part,{kind:a.kind,endPage:a.endPage,deleted:a.deleted,match:'자료 번호·제목 일치'});
   }
   results.sort((a,b)=>Number(a.deleted)-Number(b.deleted));results=results.slice(0,6);
+ }else if(classification&&!directRequest){
+  mode='classification';const sources=classificationSources(entries,classification,filters.asOf);
+  for(const hit of sources)for(const part of hit.parts)add(hit.entry.doc,{...part,heading:hit.article.number+'('+hit.article.title+')'},{match:'대상 정의·분류 일치',classificationFocus:hit.focus});
+  diagnostics={status:results.length?'classification':entries.length?'unresolved_subject':'no_documents',terms:[classification.subject],subject:classification.subject,grade:classification.grade,grades:classification.grades||[],alias:classification.alias};
  }else if(term){
   mode='definition';
   for(const entry of entries)for(const a of activeArticles(entry,filters.asOf).filter(a=>a.title==='정의')){
@@ -133,7 +139,7 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
   for(const entry of entries){const {doc,index}=entry;if(benefitQuestion||doc.type==='SOP'||requestedType&&doc.type!==requestedType)continue;for(const a of activeArticles(entry,filters.asOf))if(number?a.number===number:compact(a.title)===topic)for(const part of a.parts)add(doc,part,{match:'조문 일치'});}
   const knownTopic=!benefitQuestion&&filters.type!=='SOP'&&catalog.some(d=>(d.article_titles||[]).some(t=>compact(t)===topic));
   if(results.length||number||knownTopic)mode='article';else{
-   const found=retrieve(entries,query,filters.asOf,target);
+   const found=retrieve(entries,canonicalQuery,filters.asOf,target);
    if(found.hits.length){
     mode='ranked';
     for(const hit of found.hits)for(const part of hit.article.parts)add(hit.doc,part,{
@@ -198,5 +204,5 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
   for(const [doc,a,primary] of related)add(doc,a.part,{kind:a.kind,endPage:a.endPage,deleted:a.deleted,match:'조문 인용 별표·서식 연결',retrievalPrimary:primary});
  }
  const seen=new Set();results=results.filter(r=>{const k=r.documentId+':'+r.page+':'+compact(r.text);if(seen.has(k))return false;seen.add(k);return true;});
- return {mode,results,diagnostics:diagnostics||{status:results.length?'structured':'no_match',terms:[]},asOf:filters.asOf,message:diagnostics?.status==='no_documents'?'선택한 문서 종류·질병·기준일에 적용되는 등록 문서가 없습니다. 과거 버전의 미등록과 규정 부존재는 다릅니다.':results.length?(diagnostics?.status==='needs_detail'?'약품·제품과 희석 조건을 특정하지 못했습니다. 일반 소독 조문을 희석배율의 답으로 제시하지 않습니다. 관련 후보의 원문과 제품 기준을 확인하세요.':messages[mode]):term?`‘${term}’의 완결된 정의를 선택 조건에서 찾지 못했습니다. 다른 조문을 정의로 대신 제시하지 않습니다.`:diagnostics?.status==='no_terms'?'질문에서 등록 문서의 검색 용어를 연결하지 못했습니다. 대상이나 조치를 구체적으로 입력해주세요. 규정이 없다는 뜻은 아닙니다.':'선택 조건에서 근거를 찾지 못했습니다. 문서 종류·기준일을 확인하거나 질문 표현을 바꿔주세요. 검색 실패가 규정 부존재를 뜻하지는 않습니다.'};
+ return {mode,results,diagnostics:diagnostics||{status:results.length?'structured':'no_match',terms:[]},asOf:filters.asOf,message:diagnostics?.status==='unresolved_subject'?'질문의 분류 대상을 선택한 등록 원문에서 확인하지 못했습니다. 대상명·문서 종류·기준일을 확인해주세요. 다른 주제의 조문으로 대신 제시하지 않습니다.':diagnostics?.status==='no_documents'?'선택한 문서 종류·질병·기준일에 적용되는 등록 문서가 없습니다. 과거 버전의 미등록과 규정 부존재는 다릅니다.':results.length?(diagnostics?.status==='needs_detail'?'약품·제품과 희석 조건을 특정하지 못했습니다. 일반 소독 조문을 희석배율의 답으로 제시하지 않습니다. 관련 후보의 원문과 제품 기준을 확인하세요.':mode==='classification'&&diagnostics?.subject!=='가축전염병'?'질문한 대상의 분류·목록을 원문에서 확인했습니다. 포함 범위와 위임 사항은 전체 조문에서 함께 확인하세요.':messages[mode]):term?`‘${term}’의 완결된 정의를 선택 조건에서 찾지 못했습니다. 다른 조문을 정의로 대신 제시하지 않습니다.`:diagnostics?.status==='no_terms'?'질문에서 등록 문서의 검색 용어를 연결하지 못했습니다. 대상이나 조치를 구체적으로 입력해주세요. 규정이 없다는 뜻은 아닙니다.':'선택 조건에서 근거를 찾지 못했습니다. 문서 종류·기준일을 확인하거나 질문 표현을 바꿔주세요. 검색 실패가 규정 부존재를 뜻하지는 않습니다.'};
 }
