@@ -1,7 +1,8 @@
-import {annexExcerpt} from './annex-excerpts.js?v=20261024-15';
-import {annexReferences} from './annexes.js?v=20261024-15';
+import {normalizeQuestion} from './question.js?v=20261024-16';
+import {annexExcerpt} from './annex-excerpts.js?v=20261024-16';
+import {annexReferences} from './annexes.js?v=20261024-16';
 // Source-only presentation and internal legal references. No generated legal text.
-import {activeArticles} from './provisions.js?v=20261024-15';
+import {activeArticles} from './provisions.js?v=20261024-16';
 const squash=s=>s.replace(/\s+/gu,'');
 const clean=s=>s.replace(/[\sㆍ·]/gu,'');
 const circled='①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳';
@@ -162,6 +163,7 @@ function selectFocus(group,question,mode){
  return [];
 }
 export function presentResults(corpus,result,question){
+ const originalQuestion=question;question=normalizeQuestion(question);
  const groups=[];
  for(const row of result.results){
   const entry=corpus.find(e=>e.doc.id===row.documentId);if(!entry)continue;
@@ -201,7 +203,7 @@ export function presentResults(corpus,result,question){
  }
  if(!groups.some(g=>g.primary)&&!['related','ranked'].includes(result.mode))for(const g of groups)g.primary=true;
  groups.sort((a,b)=>({'법률':0,'시행령':1,'시행규칙':2,'고시':3,'SOP':4}[a.docType]??9)-({'법률':0,'시행령':1,'시행규칙':2,'고시':3,'SOP':4}[b.docType]??9));
- return {groups,question,scope:questionIntent(question)};
+ return {groups,question:originalQuestion,scope:questionIntent(question)};
 }
 export function articleDetail(corpus,target){
  const entry=corpus.find(e=>e.doc.id===target.documentId),article=entry&&articleIn(entry,target.articleNumber,target.asOf||entry.asOf||entry.doc.from);

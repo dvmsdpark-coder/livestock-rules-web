@@ -1,12 +1,12 @@
 // List intent resolves a named subject to its original definition, not any
 // paragraph containing a generic word such as 종류. Aliases stay explicit.
-import {activeArticles} from './provisions.js?v=20261024-15';
-import {legalUnits} from './evidence.js?v=20261024-15';
+import {activeArticles} from './provisions.js?v=20261024-16';
+import {legalUnits} from './evidence.js?v=20261024-16';
 const flat=s=>s.replace(/[\s“”"「」『』·ㆍ?？.]/gu,'');
 const escape=s=>s.replace(/[.*+?^${}()|[\]\\]/gu,'\\$&');
 export function classificationRequest(question){
  const q=flat(question);
- const intent=/종류|분류|목록|리스트|어떤질병|무슨질병|몇종/u.test(q);
+ const intent=/종류|분류|목록|리스트|어떤질병|무슨질병|어떤것|무엇이있|뭐가있|몇종/u.test(q);
  const animalDisease=/(?:법정(?:가축)?전염병|가축(?:법정)?전염병|(?:제)?\d+종(?:가축)?전염병)/u.test(q);
  if(animalDisease&&!/사람|인체|인간|식물/u.test(q)&&!/신고|보상|소독|살처분|처벌|과태료|수입|수출|조치|예방|검사|대응|역학|해제/u.test(q)&&
     (intent||/제?\d+종/u.test(q)||/정의|이란|무엇/u.test(q)||/^(?:법정(?:가축)?전염병|가축(?:법정)?전염병|제?[123]종(?:가축)?전염병)$/u.test(q))){

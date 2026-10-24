@@ -1,0 +1,2757 @@
+{
+  "schema": 1,
+  "asOf": "2026-10-24",
+  "documents": 11,
+  "total": 272,
+  "passed": 272,
+  "categories": [
+    {
+      "category": "source-recall",
+      "total": 144,
+      "passed": 144
+    },
+    {
+      "category": "sop-source",
+      "total": 60,
+      "passed": 60
+    },
+    {
+      "category": "sop-noise",
+      "total": 40,
+      "passed": 40
+    },
+    {
+      "category": "meaning-and-scope",
+      "total": 9,
+      "passed": 9
+    },
+    {
+      "category": "unsupported-or-conflicting",
+      "total": 19,
+      "passed": 19
+    }
+  ],
+  "cases": [
+    {
+      "id": "report-fmd-0",
+      "category": "source-recall",
+      "question": "구제역이 발생하면 신고를 어디에 해야하죠?",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제11조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "procedure"
+    },
+    {
+      "id": "report-fmd-1",
+      "category": "source-recall",
+      "question": "구제역이 발생하면 신고를 어디에 해야하죠?",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제11조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "procedure"
+    },
+    {
+      "id": "report-fmd-2",
+      "category": "source-recall",
+      "question": "  구제역이  발생하면  신고를  어디에  해야하죠?  ",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제11조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "procedure"
+    },
+    {
+      "id": "report-fmd-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 구제역이 발생하면 신고를 어디에 해야하죠? 알려주세요",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제11조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "procedure"
+    },
+    {
+      "id": "report-asf-0",
+      "category": "source-recall",
+      "question": "ASF 신고기관은 어디인가요?",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제11조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "procedure"
+    },
+    {
+      "id": "report-asf-1",
+      "category": "source-recall",
+      "question": "ASF 신고기관은 어디인가요?",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제11조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "procedure"
+    },
+    {
+      "id": "report-asf-2",
+      "category": "source-recall",
+      "question": "  ASF  신고기관은  어디인가요?  ",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제11조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "procedure"
+    },
+    {
+      "id": "report-asf-3",
+      "category": "source-recall",
+      "question": "안녕하세요. ASF 신고기관은 어디인가요? 알려주세요",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제11조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "procedure"
+    },
+    {
+      "id": "report-hpai-0",
+      "category": "source-recall",
+      "question": "HPAI 신고기관은 어디인가요?",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제11조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "procedure"
+    },
+    {
+      "id": "report-hpai-1",
+      "category": "source-recall",
+      "question": "HPAI 신고기관은 어디인가요?",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제11조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "procedure"
+    },
+    {
+      "id": "report-hpai-2",
+      "category": "source-recall",
+      "question": "  HPAI  신고기관은  어디인가요?  ",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제11조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "procedure"
+    },
+    {
+      "id": "report-hpai-3",
+      "category": "source-recall",
+      "question": "안녕하세요. HPAI 신고기관은 어디인가요? 알려주세요",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제11조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "procedure"
+    },
+    {
+      "id": "cull-0",
+      "category": "source-recall",
+      "question": "살처분",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제20조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "topic"
+    },
+    {
+      "id": "cull-1",
+      "category": "source-recall",
+      "question": "살처분",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제20조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "topic"
+    },
+    {
+      "id": "cull-2",
+      "category": "source-recall",
+      "question": "  살처분  ",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제20조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "topic"
+    },
+    {
+      "id": "cull-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 살처분 알려주세요",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제20조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "topic"
+    },
+    {
+      "id": "feed-0",
+      "category": "source-recall",
+      "question": "전염병 발생시 사료에 대한 조치",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제23조"
+      },
+      "pass": true,
+      "rank": 2,
+      "mode": "material"
+    },
+    {
+      "id": "feed-1",
+      "category": "source-recall",
+      "question": "전염병 발생시 사료에 대한 조치",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제23조"
+      },
+      "pass": true,
+      "rank": 2,
+      "mode": "material"
+    },
+    {
+      "id": "feed-2",
+      "category": "source-recall",
+      "question": "  전염병  발생시  사료에  대한  조치  ",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제23조"
+      },
+      "pass": true,
+      "rank": 2,
+      "mode": "material"
+    },
+    {
+      "id": "feed-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 전염병 발생시 사료에 대한 조치 알려주세요",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제23조"
+      },
+      "pass": true,
+      "rank": 2,
+      "mode": "material"
+    },
+    {
+      "id": "feed-fmd-0",
+      "category": "source-recall",
+      "question": "구제역 발생농장 사료 처리",
+      "expected": {
+        "type": "고시",
+        "disease": "구제역",
+        "article": "제27조"
+      },
+      "pass": true,
+      "rank": 5,
+      "mode": "material"
+    },
+    {
+      "id": "feed-fmd-1",
+      "category": "source-recall",
+      "question": "구제역 발생 농장 사료 처리",
+      "expected": {
+        "type": "고시",
+        "disease": "구제역",
+        "article": "제27조"
+      },
+      "pass": true,
+      "rank": 5,
+      "mode": "material"
+    },
+    {
+      "id": "feed-fmd-2",
+      "category": "source-recall",
+      "question": "  구제역  발생농장  사료  처리  ",
+      "expected": {
+        "type": "고시",
+        "disease": "구제역",
+        "article": "제27조"
+      },
+      "pass": true,
+      "rank": 5,
+      "mode": "material"
+    },
+    {
+      "id": "feed-fmd-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 구제역 발생농장 사료 처리 알려주세요",
+      "expected": {
+        "type": "고시",
+        "disease": "구제역",
+        "article": "제27조"
+      },
+      "pass": true,
+      "rank": 5,
+      "mode": "material"
+    },
+    {
+      "id": "feed-asf-0",
+      "category": "source-recall",
+      "question": "ASF 발생농장 사료 처리",
+      "expected": {
+        "type": "고시",
+        "disease": "ASF",
+        "article": "제20조"
+      },
+      "pass": true,
+      "rank": 4,
+      "mode": "material"
+    },
+    {
+      "id": "feed-asf-1",
+      "category": "source-recall",
+      "question": "ASF 발생 농장 사료 처리",
+      "expected": {
+        "type": "고시",
+        "disease": "ASF",
+        "article": "제20조"
+      },
+      "pass": true,
+      "rank": 4,
+      "mode": "material"
+    },
+    {
+      "id": "feed-asf-2",
+      "category": "source-recall",
+      "question": "  ASF  발생농장  사료  처리  ",
+      "expected": {
+        "type": "고시",
+        "disease": "ASF",
+        "article": "제20조"
+      },
+      "pass": true,
+      "rank": 4,
+      "mode": "material"
+    },
+    {
+      "id": "feed-asf-3",
+      "category": "source-recall",
+      "question": "안녕하세요. ASF 발생농장 사료 처리 알려주세요",
+      "expected": {
+        "type": "고시",
+        "disease": "ASF",
+        "article": "제20조"
+      },
+      "pass": true,
+      "rank": 4,
+      "mode": "material"
+    },
+    {
+      "id": "feed-hpai-0",
+      "category": "source-recall",
+      "question": "HPAI 발생농장 사료 처리",
+      "expected": {
+        "type": "고시",
+        "disease": "고병원성AI",
+        "article": "제21조"
+      },
+      "pass": true,
+      "rank": 4,
+      "mode": "material"
+    },
+    {
+      "id": "feed-hpai-1",
+      "category": "source-recall",
+      "question": "HPAI 발생 농장 사료 처리",
+      "expected": {
+        "type": "고시",
+        "disease": "고병원성AI",
+        "article": "제21조"
+      },
+      "pass": true,
+      "rank": 4,
+      "mode": "material"
+    },
+    {
+      "id": "feed-hpai-2",
+      "category": "source-recall",
+      "question": "  HPAI  발생농장  사료  처리  ",
+      "expected": {
+        "type": "고시",
+        "disease": "고병원성AI",
+        "article": "제21조"
+      },
+      "pass": true,
+      "rank": 4,
+      "mode": "material"
+    },
+    {
+      "id": "feed-hpai-3",
+      "category": "source-recall",
+      "question": "안녕하세요. HPAI 발생농장 사료 처리 알려주세요",
+      "expected": {
+        "type": "고시",
+        "disease": "고병원성AI",
+        "article": "제21조"
+      },
+      "pass": true,
+      "rank": 4,
+      "mode": "material"
+    },
+    {
+      "id": "manure-fmd-0",
+      "category": "source-recall",
+      "question": "구제역 발생농장 분뇨 처리",
+      "expected": {
+        "type": "고시",
+        "disease": "구제역",
+        "article": "제27조"
+      },
+      "pass": true,
+      "rank": 2,
+      "mode": "ranked"
+    },
+    {
+      "id": "manure-fmd-1",
+      "category": "source-recall",
+      "question": "구제역 발생 농장 분뇨 처리",
+      "expected": {
+        "type": "고시",
+        "disease": "구제역",
+        "article": "제27조"
+      },
+      "pass": true,
+      "rank": 2,
+      "mode": "ranked"
+    },
+    {
+      "id": "manure-fmd-2",
+      "category": "source-recall",
+      "question": "  구제역  발생농장  분뇨  처리  ",
+      "expected": {
+        "type": "고시",
+        "disease": "구제역",
+        "article": "제27조"
+      },
+      "pass": true,
+      "rank": 2,
+      "mode": "ranked"
+    },
+    {
+      "id": "manure-fmd-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 구제역 발생농장 분뇨 처리 알려주세요",
+      "expected": {
+        "type": "고시",
+        "disease": "구제역",
+        "article": "제27조"
+      },
+      "pass": true,
+      "rank": 2,
+      "mode": "ranked"
+    },
+    {
+      "id": "manure-asf-0",
+      "category": "source-recall",
+      "question": "ASF 발생농장 분뇨 처리",
+      "expected": {
+        "type": "고시",
+        "disease": "ASF",
+        "article": "제20조"
+      },
+      "pass": true,
+      "rank": 6,
+      "mode": "ranked"
+    },
+    {
+      "id": "manure-asf-1",
+      "category": "source-recall",
+      "question": "ASF 발생 농장 분뇨 처리",
+      "expected": {
+        "type": "고시",
+        "disease": "ASF",
+        "article": "제20조"
+      },
+      "pass": true,
+      "rank": 6,
+      "mode": "ranked"
+    },
+    {
+      "id": "manure-asf-2",
+      "category": "source-recall",
+      "question": "  ASF  발생농장  분뇨  처리  ",
+      "expected": {
+        "type": "고시",
+        "disease": "ASF",
+        "article": "제20조"
+      },
+      "pass": true,
+      "rank": 6,
+      "mode": "ranked"
+    },
+    {
+      "id": "manure-asf-3",
+      "category": "source-recall",
+      "question": "안녕하세요. ASF 발생농장 분뇨 처리 알려주세요",
+      "expected": {
+        "type": "고시",
+        "disease": "ASF",
+        "article": "제20조"
+      },
+      "pass": true,
+      "rank": 6,
+      "mode": "ranked"
+    },
+    {
+      "id": "manure-hpai-0",
+      "category": "source-recall",
+      "question": "HPAI 발생농장 분뇨 처리",
+      "expected": {
+        "type": "고시",
+        "disease": "고병원성AI",
+        "article": "제21조"
+      },
+      "pass": true,
+      "rank": 2,
+      "mode": "ranked"
+    },
+    {
+      "id": "manure-hpai-1",
+      "category": "source-recall",
+      "question": "HPAI 발생 농장 분뇨 처리",
+      "expected": {
+        "type": "고시",
+        "disease": "고병원성AI",
+        "article": "제21조"
+      },
+      "pass": true,
+      "rank": 2,
+      "mode": "ranked"
+    },
+    {
+      "id": "manure-hpai-2",
+      "category": "source-recall",
+      "question": "  HPAI  발생농장  분뇨  처리  ",
+      "expected": {
+        "type": "고시",
+        "disease": "고병원성AI",
+        "article": "제21조"
+      },
+      "pass": true,
+      "rank": 2,
+      "mode": "ranked"
+    },
+    {
+      "id": "manure-hpai-3",
+      "category": "source-recall",
+      "question": "안녕하세요. HPAI 발생농장 분뇨 처리 알려주세요",
+      "expected": {
+        "type": "고시",
+        "disease": "고병원성AI",
+        "article": "제21조"
+      },
+      "pass": true,
+      "rank": 2,
+      "mode": "ranked"
+    },
+    {
+      "id": "restock-asf-0",
+      "category": "source-recall",
+      "question": "ASF 발생 후 돼지를 다시 키워도 되나요?",
+      "expected": {
+        "type": "고시",
+        "disease": "ASF",
+        "article": "제32조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "restock-asf-1",
+      "category": "source-recall",
+      "question": "ASF 발생 후 돼지를 다시 키워도 되나요?",
+      "expected": {
+        "type": "고시",
+        "disease": "ASF",
+        "article": "제32조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "restock-asf-2",
+      "category": "source-recall",
+      "question": "  ASF  발생  후  돼지를  다시  키워도  되나요?  ",
+      "expected": {
+        "type": "고시",
+        "disease": "ASF",
+        "article": "제32조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "restock-asf-3",
+      "category": "source-recall",
+      "question": "안녕하세요. ASF 발생 후 돼지를 다시 키워도 되나요? 알려주세요",
+      "expected": {
+        "type": "고시",
+        "disease": "ASF",
+        "article": "제32조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "restock-hpai-0",
+      "category": "source-recall",
+      "question": "HPAI 재입식 조건은 무엇인가요?",
+      "expected": {
+        "type": "고시",
+        "disease": "고병원성AI",
+        "article": "제33조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "restock-hpai-1",
+      "category": "source-recall",
+      "question": "HPAI 재입 식 조건은 무엇인가요?",
+      "expected": {
+        "type": "고시",
+        "disease": "고병원성AI",
+        "article": "제33조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "restock-hpai-2",
+      "category": "source-recall",
+      "question": "  HPAI  재입식  조건은  무엇인가요?  ",
+      "expected": {
+        "type": "고시",
+        "disease": "고병원성AI",
+        "article": "제33조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "restock-hpai-3",
+      "category": "source-recall",
+      "question": "안녕하세요. HPAI 재입식 조건은 무엇인가요? 알려주세요",
+      "expected": {
+        "type": "고시",
+        "disease": "고병원성AI",
+        "article": "제33조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "compensation-0",
+      "category": "source-recall",
+      "question": "살처분 보상금은 어떻게 받나요?",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제48조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "compensation-1",
+      "category": "source-recall",
+      "question": "살처분 보상금은 어떻게 받나요?",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제48조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "compensation-2",
+      "category": "source-recall",
+      "question": "  살처분  보상금은  어떻게  받나요?  ",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제48조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "compensation-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 살처분 보상금은 어떻게 받나요? 알려주세요",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제48조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "livelihood-0",
+      "category": "source-recall",
+      "question": "생계비 지원은 받을 수 있나요?",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제49조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "livelihood-1",
+      "category": "source-recall",
+      "question": "생계비 지원은 받을 수 있나요?",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제49조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "livelihood-2",
+      "category": "source-recall",
+      "question": "  생계비  지원은  받을  수  있나요?  ",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제49조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "livelihood-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 생계비 지원은 받을 수 있나요? 알려주세요",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제49조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "vehicle-0",
+      "category": "source-recall",
+      "question": "축산차량은 어디에 등록하나요?",
+      "expected": {
+        "type": "시행규칙",
+        "disease": "공통",
+        "article": "제20조의3"
+      },
+      "pass": true,
+      "rank": 3,
+      "mode": "ranked"
+    },
+    {
+      "id": "vehicle-1",
+      "category": "source-recall",
+      "question": "축산 차량은 어디에 등록하나요?",
+      "expected": {
+        "type": "시행규칙",
+        "disease": "공통",
+        "article": "제20조의3"
+      },
+      "pass": true,
+      "rank": 3,
+      "mode": "ranked"
+    },
+    {
+      "id": "vehicle-2",
+      "category": "source-recall",
+      "question": "  축산차량은  어디에  등록하나요?  ",
+      "expected": {
+        "type": "시행규칙",
+        "disease": "공통",
+        "article": "제20조의3"
+      },
+      "pass": true,
+      "rank": 3,
+      "mode": "ranked"
+    },
+    {
+      "id": "vehicle-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 축산차량은 어디에 등록하나요? 알려주세요",
+      "expected": {
+        "type": "시행규칙",
+        "disease": "공통",
+        "article": "제20조의3"
+      },
+      "pass": true,
+      "rank": 3,
+      "mode": "ranked"
+    },
+    {
+      "id": "training-0",
+      "category": "source-recall",
+      "question": "축산차량 운전자는 교육을 받아야 하나요?",
+      "expected": {
+        "type": "시행규칙",
+        "disease": "공통",
+        "article": "제20조의6"
+      },
+      "pass": true,
+      "rank": 2,
+      "mode": "ranked"
+    },
+    {
+      "id": "training-1",
+      "category": "source-recall",
+      "question": "축산 차량 운전자는 교육을 받아야 하나요?",
+      "expected": {
+        "type": "시행규칙",
+        "disease": "공통",
+        "article": "제20조의6"
+      },
+      "pass": true,
+      "rank": 2,
+      "mode": "ranked"
+    },
+    {
+      "id": "training-2",
+      "category": "source-recall",
+      "question": "  축산차량  운전자는  교육을  받아야  하나요?  ",
+      "expected": {
+        "type": "시행규칙",
+        "disease": "공통",
+        "article": "제20조의6"
+      },
+      "pass": true,
+      "rank": 2,
+      "mode": "ranked"
+    },
+    {
+      "id": "training-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 축산차량 운전자는 교육을 받아야 하나요? 알려주세요",
+      "expected": {
+        "type": "시행규칙",
+        "disease": "공통",
+        "article": "제20조의6"
+      },
+      "pass": true,
+      "rank": 2,
+      "mode": "ranked"
+    },
+    {
+      "id": "records-0",
+      "category": "source-recall",
+      "question": "방문기록 보관 기간",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제17조의2"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "records-1",
+      "category": "source-recall",
+      "question": "방문기록 보관 기간",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제17조의2"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "records-2",
+      "category": "source-recall",
+      "question": "  방문기록  보관  기간  ",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제17조의2"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "records-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 방문기록 보관 기간 알려주세요",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제17조의2"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "epidemiology-0",
+      "category": "source-recall",
+      "question": "역학조사는 누가 하나요?",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제13조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "epidemiology-1",
+      "category": "source-recall",
+      "question": "역학 조사는 누가 하나요?",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제13조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "epidemiology-2",
+      "category": "source-recall",
+      "question": "  역학조사는  누가  하나요?  ",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제13조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "epidemiology-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 역학조사는 누가 하나요? 알려주세요",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제13조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "carcass-0",
+      "category": "source-recall",
+      "question": "발생농장 사체는 어떻게 처리하나요?",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제22조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "carcass-1",
+      "category": "source-recall",
+      "question": "발생 농장 사체는 어떻게 처리하나요?",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제22조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "carcass-2",
+      "category": "source-recall",
+      "question": "  발생농장  사체는  어떻게  처리하나요?  ",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제22조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "carcass-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 발생농장 사체는 어떻게 처리하나요? 알려주세요",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제22조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "dig-0",
+      "category": "source-recall",
+      "question": "매몰한 땅을 파도 되나요?",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제24조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "dig-1",
+      "category": "source-recall",
+      "question": "매몰한 땅을 파도 되나요?",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제24조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "dig-2",
+      "category": "source-recall",
+      "question": "  매몰한  땅을  파도  되나요?  ",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제24조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "dig-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 매몰한 땅을 파도 되나요? 알려주세요",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제24조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "import-0",
+      "category": "source-recall",
+      "question": "가축 수입금지 대상은 무엇인가요?",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제32조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "import-1",
+      "category": "source-recall",
+      "question": "가축 수입금지 대상은 무엇인가요?",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제32조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "import-2",
+      "category": "source-recall",
+      "question": "  가축  수입금지  대상은  무엇인가요?  ",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제32조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "import-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 가축 수입금지 대상은 무엇인가요? 알려주세요",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제32조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "certificate-0",
+      "category": "source-recall",
+      "question": "검역증명서가 필요한가요?",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제34조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "certificate-1",
+      "category": "source-recall",
+      "question": "검역증명서가 필요한가요?",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제34조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "certificate-2",
+      "category": "source-recall",
+      "question": "  검역증명서가  필요한가요?  ",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제34조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "certificate-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 검역증명서가 필요한가요? 알려주세요",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제34조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "reduction-0",
+      "category": "source-recall",
+      "question": "보상금 지급을 거부할 수 있나요?",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제48조"
+      },
+      "pass": true,
+      "rank": 3,
+      "mode": "ranked"
+    },
+    {
+      "id": "reduction-1",
+      "category": "source-recall",
+      "question": "보상금 지급을 거부할 수 있나요?",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제48조"
+      },
+      "pass": true,
+      "rank": 3,
+      "mode": "ranked"
+    },
+    {
+      "id": "reduction-2",
+      "category": "source-recall",
+      "question": "  보상금  지급을  거부할  수  있나요?  ",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제48조"
+      },
+      "pass": true,
+      "rank": 3,
+      "mode": "ranked"
+    },
+    {
+      "id": "reduction-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 보상금 지급을 거부할 수 있나요? 알려주세요",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제48조"
+      },
+      "pass": true,
+      "rank": 3,
+      "mode": "ranked"
+    },
+    {
+      "id": "vaccination-0",
+      "category": "source-recall",
+      "question": "구제역 예방접종은 어떻게 하나요?",
+      "expected": {
+        "type": "고시",
+        "disease": "구제역",
+        "article": "제22조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "vaccination-1",
+      "category": "source-recall",
+      "question": "구제역 예방 접종은 어떻게 하나요?",
+      "expected": {
+        "type": "고시",
+        "disease": "구제역",
+        "article": "제22조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "vaccination-2",
+      "category": "source-recall",
+      "question": "  구제역  예방접종은  어떻게  하나요?  ",
+      "expected": {
+        "type": "고시",
+        "disease": "구제역",
+        "article": "제22조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "vaccination-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 구제역 예방접종은 어떻게 하나요? 알려주세요",
+      "expected": {
+        "type": "고시",
+        "disease": "구제역",
+        "article": "제22조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "scope-0",
+      "category": "source-recall",
+      "question": "가축의 범위를 알려주세요",
+      "expected": {
+        "type": "시행령",
+        "disease": "공통",
+        "article": "제2조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "article"
+    },
+    {
+      "id": "scope-1",
+      "category": "source-recall",
+      "question": "가축의 범위를 알려주세요",
+      "expected": {
+        "type": "시행령",
+        "disease": "공통",
+        "article": "제2조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "article"
+    },
+    {
+      "id": "scope-2",
+      "category": "source-recall",
+      "question": "  가축의  범위를  알려주세요  ",
+      "expected": {
+        "type": "시행령",
+        "disease": "공통",
+        "article": "제2조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "article"
+    },
+    {
+      "id": "scope-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 가축의 범위를 알려주세요 알려주세요",
+      "expected": {
+        "type": "시행령",
+        "disease": "공통",
+        "article": "제2조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "article"
+    },
+    {
+      "id": "definition-0",
+      "category": "source-recall",
+      "question": "가축의 정의",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제2조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "definition"
+    },
+    {
+      "id": "definition-1",
+      "category": "source-recall",
+      "question": "가축의 정의",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제2조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "definition"
+    },
+    {
+      "id": "definition-2",
+      "category": "source-recall",
+      "question": "  가축의  정의  ",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제2조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "definition"
+    },
+    {
+      "id": "definition-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 가축의 정의 알려주세요",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제2조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "definition"
+    },
+    {
+      "id": "clean-asf-0",
+      "category": "source-recall",
+      "question": "ASF 발생농장은 어떻게 소독하나요?",
+      "expected": {
+        "type": "고시",
+        "disease": "ASF",
+        "article": "제20조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "procedure"
+    },
+    {
+      "id": "clean-asf-1",
+      "category": "source-recall",
+      "question": "ASF 발생 농장은 어떻게 소독하나요?",
+      "expected": {
+        "type": "고시",
+        "disease": "ASF",
+        "article": "제20조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "procedure"
+    },
+    {
+      "id": "clean-asf-2",
+      "category": "source-recall",
+      "question": "  ASF  발생농장은  어떻게  소독하나요?  ",
+      "expected": {
+        "type": "고시",
+        "disease": "ASF",
+        "article": "제20조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "procedure"
+    },
+    {
+      "id": "clean-asf-3",
+      "category": "source-recall",
+      "question": "안녕하세요. ASF 발생농장은 어떻게 소독하나요? 알려주세요",
+      "expected": {
+        "type": "고시",
+        "disease": "ASF",
+        "article": "제20조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "procedure"
+    },
+    {
+      "id": "clean-fmd-0",
+      "category": "source-recall",
+      "question": "구제역 발생농장은 어떻게 소독하나요?",
+      "expected": {
+        "type": "고시",
+        "disease": "구제역",
+        "article": "제20조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "procedure"
+    },
+    {
+      "id": "clean-fmd-1",
+      "category": "source-recall",
+      "question": "구제역 발생 농장은 어떻게 소독하나요?",
+      "expected": {
+        "type": "고시",
+        "disease": "구제역",
+        "article": "제20조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "procedure"
+    },
+    {
+      "id": "clean-fmd-2",
+      "category": "source-recall",
+      "question": "  구제역  발생농장은  어떻게  소독하나요?  ",
+      "expected": {
+        "type": "고시",
+        "disease": "구제역",
+        "article": "제20조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "procedure"
+    },
+    {
+      "id": "clean-fmd-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 구제역 발생농장은 어떻게 소독하나요? 알려주세요",
+      "expected": {
+        "type": "고시",
+        "disease": "구제역",
+        "article": "제20조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "procedure"
+    },
+    {
+      "id": "zone-0",
+      "category": "source-recall",
+      "question": "구제역 방역대는 어떻게 설정되나요?",
+      "expected": {
+        "type": "고시",
+        "disease": "구제역",
+        "article": "제2조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "zone"
+    },
+    {
+      "id": "zone-1",
+      "category": "source-recall",
+      "question": "구제역 방역 대는 어떻게 설정되나요?",
+      "expected": {
+        "type": "고시",
+        "disease": "구제역",
+        "article": "제2조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "zone"
+    },
+    {
+      "id": "zone-2",
+      "category": "source-recall",
+      "question": "  구제역  방역대는  어떻게  설정되나요?  ",
+      "expected": {
+        "type": "고시",
+        "disease": "구제역",
+        "article": "제2조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "zone"
+    },
+    {
+      "id": "zone-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 구제역 방역대는 어떻게 설정되나요? 알려주세요",
+      "expected": {
+        "type": "고시",
+        "disease": "구제역",
+        "article": "제2조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "zone"
+    },
+    {
+      "id": "release-asf-0",
+      "category": "source-recall",
+      "question": "ASF 이동제한 해제 조건",
+      "expected": {
+        "type": "고시",
+        "disease": "ASF",
+        "article": "제23조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "procedure"
+    },
+    {
+      "id": "release-asf-1",
+      "category": "source-recall",
+      "question": "ASF 이동 제한 해제 조건",
+      "expected": {
+        "type": "고시",
+        "disease": "ASF",
+        "article": "제23조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "procedure"
+    },
+    {
+      "id": "release-asf-2",
+      "category": "source-recall",
+      "question": "  ASF  이동제한  해제  조건  ",
+      "expected": {
+        "type": "고시",
+        "disease": "ASF",
+        "article": "제23조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "procedure"
+    },
+    {
+      "id": "release-asf-3",
+      "category": "source-recall",
+      "question": "안녕하세요. ASF 이동제한 해제 조건 알려주세요",
+      "expected": {
+        "type": "고시",
+        "disease": "ASF",
+        "article": "제23조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "procedure"
+    },
+    {
+      "id": "income-stability-funding-0",
+      "category": "source-recall",
+      "question": "소득안정자금 지급 근거",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제49조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "income-stability-funding-1",
+      "category": "source-recall",
+      "question": "소득 안정자금 지급 근거",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제49조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "income-stability-funding-2",
+      "category": "source-recall",
+      "question": "  소득안정자금  지급  근거  ",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제49조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "income-stability-funding-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 소득안정자금 지급 근거 알려주세요",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제49조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "livelihood-funding-0",
+      "category": "source-recall",
+      "question": "생계안정자금 지급 근거",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제49조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "livelihood-funding-1",
+      "category": "source-recall",
+      "question": "생계 안정자금 지급 근거",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제49조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "livelihood-funding-2",
+      "category": "source-recall",
+      "question": "  생계안정자금  지급  근거  ",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제49조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "livelihood-funding-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 생계안정자금 지급 근거 알려주세요",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제49조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "ranked"
+    },
+    {
+      "id": "disease-classification-0",
+      "category": "source-recall",
+      "question": "법정전염병의 종류",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제2조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "classification"
+    },
+    {
+      "id": "disease-classification-1",
+      "category": "source-recall",
+      "question": "법정 전염병의 종류",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제2조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "classification"
+    },
+    {
+      "id": "disease-classification-2",
+      "category": "source-recall",
+      "question": "  법정전염병의  종류  ",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제2조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "classification"
+    },
+    {
+      "id": "disease-classification-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 법정전염병의 종류 알려주세요",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제2조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "classification"
+    },
+    {
+      "id": "disease-grades-0",
+      "category": "source-recall",
+      "question": "가축전염병의 분류",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제2조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "classification"
+    },
+    {
+      "id": "disease-grades-1",
+      "category": "source-recall",
+      "question": "가축 전염병의 분류",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제2조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "classification"
+    },
+    {
+      "id": "disease-grades-2",
+      "category": "source-recall",
+      "question": "  가축전염병의  분류  ",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제2조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "classification"
+    },
+    {
+      "id": "disease-grades-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 가축전염병의 분류 알려주세요",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제2조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "classification"
+    },
+    {
+      "id": "disease-grade-three-0",
+      "category": "source-recall",
+      "question": "제3종 가축전염병 종류",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제2조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "classification"
+    },
+    {
+      "id": "disease-grade-three-1",
+      "category": "source-recall",
+      "question": "제3종 가축 전염병 종류",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제2조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "classification"
+    },
+    {
+      "id": "disease-grade-three-2",
+      "category": "source-recall",
+      "question": "  제3종  가축전염병  종류  ",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제2조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "classification"
+    },
+    {
+      "id": "disease-grade-three-3",
+      "category": "source-recall",
+      "question": "안녕하세요. 제3종 가축전염병 종류 알려주세요",
+      "expected": {
+        "type": "법률",
+        "disease": "공통",
+        "article": "제2조"
+      },
+      "pass": true,
+      "rank": 1,
+      "mode": "classification"
+    },
+    {
+      "id": "sop-wild-confirmed-0",
+      "category": "sop-source",
+      "question": "야생조류에서 고병원성AI 검출시 어떤 방역조치?",
+      "pass": true
+    },
+    {
+      "id": "sop-wild-confirmed-1",
+      "category": "sop-source",
+      "question": "야생 조류에서 고병원성AI 검출시 어떤 방역조치?",
+      "pass": true
+    },
+    {
+      "id": "sop-wild-confirmed-2",
+      "category": "sop-source",
+      "question": "  야생조류에서  고병원성AI  검출시  어떤  방역조치?  ",
+      "pass": true
+    },
+    {
+      "id": "sop-wild-confirmed-3",
+      "category": "sop-source",
+      "question": "안녕하세요. 야생조류에서 고병원성AI 검출시 어떤 방역조치? 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "sop-wild-antigen-0",
+      "category": "sop-source",
+      "question": "HPAI 야생조류 H5 H7 항원 확인 시 조치",
+      "pass": true
+    },
+    {
+      "id": "sop-wild-antigen-1",
+      "category": "sop-source",
+      "question": "HPAI 야생 조류 H5 H7 항원 확인 시 조치",
+      "pass": true
+    },
+    {
+      "id": "sop-wild-antigen-2",
+      "category": "sop-source",
+      "question": "  HPAI  야생조류  H5  H7  항원  확인  시  조치  ",
+      "pass": true
+    },
+    {
+      "id": "sop-wild-antigen-3",
+      "category": "sop-source",
+      "question": "안녕하세요. HPAI 야생조류 H5 H7 항원 확인 시 조치 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "sop-wild-location-0",
+      "category": "sop-source",
+      "question": "HPAI 검출지점에 대한 조치",
+      "pass": true
+    },
+    {
+      "id": "sop-wild-location-1",
+      "category": "sop-source",
+      "question": "HPAI 검출지점에 대한 조치",
+      "pass": true
+    },
+    {
+      "id": "sop-wild-location-2",
+      "category": "sop-source",
+      "question": "  HPAI  검출지점에  대한  조치  ",
+      "pass": true
+    },
+    {
+      "id": "sop-wild-location-3",
+      "category": "sop-source",
+      "question": "안녕하세요. HPAI 검출지점에 대한 조치 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "sop-wild-region-0",
+      "category": "sop-source",
+      "question": "HPAI 야생조류 방역지역 설정 운영",
+      "pass": true
+    },
+    {
+      "id": "sop-wild-region-1",
+      "category": "sop-source",
+      "question": "HPAI 야생 조류 방역지역 설정 운영",
+      "pass": true
+    },
+    {
+      "id": "sop-wild-region-2",
+      "category": "sop-source",
+      "question": "  HPAI  야생조류  방역지역  설정  운영  ",
+      "pass": true
+    },
+    {
+      "id": "sop-wild-region-3",
+      "category": "sop-source",
+      "question": "안녕하세요. HPAI 야생조류 방역지역 설정 운영 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "sop-wild-boar-0",
+      "category": "sop-source",
+      "question": "ASF 야생멧돼지 방역",
+      "pass": true
+    },
+    {
+      "id": "sop-wild-boar-1",
+      "category": "sop-source",
+      "question": "ASF 야생멧돼지 방역",
+      "pass": true
+    },
+    {
+      "id": "sop-wild-boar-2",
+      "category": "sop-source",
+      "question": "  ASF  야생멧돼지  방역  ",
+      "pass": true
+    },
+    {
+      "id": "sop-wild-boar-3",
+      "category": "sop-source",
+      "question": "안녕하세요. ASF 야생멧돼지 방역 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "sop-feed-asf-0",
+      "category": "sop-source",
+      "question": "ASF 사료 공급 요령",
+      "pass": true
+    },
+    {
+      "id": "sop-feed-asf-1",
+      "category": "sop-source",
+      "question": "ASF 사료 공급 요령",
+      "pass": true
+    },
+    {
+      "id": "sop-feed-asf-2",
+      "category": "sop-source",
+      "question": "  ASF  사료  공급  요령  ",
+      "pass": true
+    },
+    {
+      "id": "sop-feed-asf-3",
+      "category": "sop-source",
+      "question": "안녕하세요. ASF 사료 공급 요령 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "sop-manure-asf-0",
+      "category": "sop-source",
+      "question": "ASF 가축분뇨 처리",
+      "pass": true
+    },
+    {
+      "id": "sop-manure-asf-1",
+      "category": "sop-source",
+      "question": "ASF 가축분뇨 처리",
+      "pass": true
+    },
+    {
+      "id": "sop-manure-asf-2",
+      "category": "sop-source",
+      "question": "  ASF  가축분뇨  처리  ",
+      "pass": true
+    },
+    {
+      "id": "sop-manure-asf-3",
+      "category": "sop-source",
+      "question": "안녕하세요. ASF 가축분뇨 처리 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "sop-restock-asf-0",
+      "category": "sop-source",
+      "question": "ASF 살처분 농장 재입식 요령",
+      "pass": true
+    },
+    {
+      "id": "sop-restock-asf-1",
+      "category": "sop-source",
+      "question": "ASF 살처분 농장 재입 식 요령",
+      "pass": true
+    },
+    {
+      "id": "sop-restock-asf-2",
+      "category": "sop-source",
+      "question": "  ASF  살처분  농장  재입식  요령  ",
+      "pass": true
+    },
+    {
+      "id": "sop-restock-asf-3",
+      "category": "sop-source",
+      "question": "안녕하세요. ASF 살처분 농장 재입식 요령 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "sop-sample-fmd-0",
+      "category": "sop-source",
+      "question": "구제역 시료채취 송부",
+      "pass": true
+    },
+    {
+      "id": "sop-sample-fmd-1",
+      "category": "sop-source",
+      "question": "구제역 시료채취 송부",
+      "pass": true
+    },
+    {
+      "id": "sop-sample-fmd-2",
+      "category": "sop-source",
+      "question": "  구제역  시료채취  송부  ",
+      "pass": true
+    },
+    {
+      "id": "sop-sample-fmd-3",
+      "category": "sop-source",
+      "question": "안녕하세요. 구제역 시료채취 송부 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "sop-sample-fmd-unvaccinated-0",
+      "category": "sop-source",
+      "question": "구제역 시료채취 송부",
+      "pass": true
+    },
+    {
+      "id": "sop-sample-fmd-unvaccinated-1",
+      "category": "sop-source",
+      "question": "구제역 시료채취 송부",
+      "pass": true
+    },
+    {
+      "id": "sop-sample-fmd-unvaccinated-2",
+      "category": "sop-source",
+      "question": "  구제역  시료채취  송부  ",
+      "pass": true
+    },
+    {
+      "id": "sop-sample-fmd-unvaccinated-3",
+      "category": "sop-source",
+      "question": "안녕하세요. 구제역 시료채취 송부 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "sop-restock-fmd-0",
+      "category": "sop-source",
+      "question": "구제역 재입식 요령",
+      "pass": true
+    },
+    {
+      "id": "sop-restock-fmd-1",
+      "category": "sop-source",
+      "question": "구제역 재입 식 요령",
+      "pass": true
+    },
+    {
+      "id": "sop-restock-fmd-2",
+      "category": "sop-source",
+      "question": "  구제역  재입식  요령  ",
+      "pass": true
+    },
+    {
+      "id": "sop-restock-fmd-3",
+      "category": "sop-source",
+      "question": "안녕하세요. 구제역 재입식 요령 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "sop-restock-fmd-unvaccinated-0",
+      "category": "sop-source",
+      "question": "구제역 재입식 요령",
+      "pass": true
+    },
+    {
+      "id": "sop-restock-fmd-unvaccinated-1",
+      "category": "sop-source",
+      "question": "구제역 재입 식 요령",
+      "pass": true
+    },
+    {
+      "id": "sop-restock-fmd-unvaccinated-2",
+      "category": "sop-source",
+      "question": "  구제역  재입식  요령  ",
+      "pass": true
+    },
+    {
+      "id": "sop-restock-fmd-unvaccinated-3",
+      "category": "sop-source",
+      "question": "안녕하세요. 구제역 재입식 요령 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "sop-checkpoint-hpai-0",
+      "category": "sop-source",
+      "question": "HPAI 이동통제초소 운영",
+      "pass": true
+    },
+    {
+      "id": "sop-checkpoint-hpai-1",
+      "category": "sop-source",
+      "question": "HPAI 이동통제초소 운영",
+      "pass": true
+    },
+    {
+      "id": "sop-checkpoint-hpai-2",
+      "category": "sop-source",
+      "question": "  HPAI  이동통제초소  운영  ",
+      "pass": true
+    },
+    {
+      "id": "sop-checkpoint-hpai-3",
+      "category": "sop-source",
+      "question": "안녕하세요. HPAI 이동통제초소 운영 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "sop-worker-hpai-0",
+      "category": "sop-source",
+      "question": "HPAI 살처분 작업자 안전",
+      "pass": true
+    },
+    {
+      "id": "sop-worker-hpai-1",
+      "category": "sop-source",
+      "question": "HPAI 살처분 작업자 안전",
+      "pass": true
+    },
+    {
+      "id": "sop-worker-hpai-2",
+      "category": "sop-source",
+      "question": "  HPAI  살처분  작업자  안전  ",
+      "pass": true
+    },
+    {
+      "id": "sop-worker-hpai-3",
+      "category": "sop-source",
+      "question": "안녕하세요. HPAI 살처분 작업자 안전 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "sop-lowpath-hpai-0",
+      "category": "sop-source",
+      "question": "HPAI 저병원성 방역조치",
+      "pass": true
+    },
+    {
+      "id": "sop-lowpath-hpai-1",
+      "category": "sop-source",
+      "question": "HPAI 저병원성 방역조치",
+      "pass": true
+    },
+    {
+      "id": "sop-lowpath-hpai-2",
+      "category": "sop-source",
+      "question": "  HPAI  저병원성  방역조치  ",
+      "pass": true
+    },
+    {
+      "id": "sop-lowpath-hpai-3",
+      "category": "sop-source",
+      "question": "안녕하세요. HPAI 저병원성 방역조치 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "noise-confirmed-title-0",
+      "category": "sop-noise",
+      "question": "고병원성 확진 시 조치",
+      "pass": true
+    },
+    {
+      "id": "noise-confirmed-title-1",
+      "category": "sop-noise",
+      "question": "고병원성 확진 시 조치",
+      "pass": true
+    },
+    {
+      "id": "noise-confirmed-title-2",
+      "category": "sop-noise",
+      "question": "  고병원성  확진  시  조치  ",
+      "pass": true
+    },
+    {
+      "id": "noise-confirmed-title-3",
+      "category": "sop-noise",
+      "question": "안녕하세요. 고병원성 확진 시 조치 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "noise-confirmed-spacing-0",
+      "category": "sop-noise",
+      "question": "고병원성 확진시 조치",
+      "pass": true
+    },
+    {
+      "id": "noise-confirmed-spacing-1",
+      "category": "sop-noise",
+      "question": "고병원성 확진시 조치",
+      "pass": true
+    },
+    {
+      "id": "noise-confirmed-spacing-2",
+      "category": "sop-noise",
+      "question": "  고병원성  확진시  조치  ",
+      "pass": true
+    },
+    {
+      "id": "noise-confirmed-spacing-3",
+      "category": "sop-noise",
+      "question": "안녕하세요. 고병원성 확진시 조치 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "noise-confirmed-polite-0",
+      "category": "sop-noise",
+      "question": "고병원성 확진 시 조치를 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "noise-confirmed-polite-1",
+      "category": "sop-noise",
+      "question": "고병원성 확진 시 조치를 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "noise-confirmed-polite-2",
+      "category": "sop-noise",
+      "question": "  고병원성  확진  시  조치를  알려주세요  ",
+      "pass": true
+    },
+    {
+      "id": "noise-confirmed-polite-3",
+      "category": "sop-noise",
+      "question": "안녕하세요. 고병원성 확진 시 조치를 알려주세요 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "noise-confirmed-prefix-0",
+      "category": "sop-noise",
+      "question": "HPAI 고병원성 확진 시 조치",
+      "pass": true
+    },
+    {
+      "id": "noise-confirmed-prefix-1",
+      "category": "sop-noise",
+      "question": "HPAI 고병원성 확진 시 조치",
+      "pass": true
+    },
+    {
+      "id": "noise-confirmed-prefix-2",
+      "category": "sop-noise",
+      "question": "  HPAI  고병원성  확진  시  조치  ",
+      "pass": true
+    },
+    {
+      "id": "noise-confirmed-prefix-3",
+      "category": "sop-noise",
+      "question": "안녕하세요. HPAI 고병원성 확진 시 조치 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "noise-wild-natural-0",
+      "category": "sop-noise",
+      "question": "야생조류에서 고병원성AI 검출시 어떤 방역조치?",
+      "pass": true
+    },
+    {
+      "id": "noise-wild-natural-1",
+      "category": "sop-noise",
+      "question": "야생 조류에서 고병원성AI 검출시 어떤 방역조치?",
+      "pass": true
+    },
+    {
+      "id": "noise-wild-natural-2",
+      "category": "sop-noise",
+      "question": "  야생조류에서  고병원성AI  검출시  어떤  방역조치?  ",
+      "pass": true
+    },
+    {
+      "id": "noise-wild-natural-3",
+      "category": "sop-noise",
+      "question": "안녕하세요. 야생조류에서 고병원성AI 검출시 어떤 방역조치? 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "noise-feed-0",
+      "category": "sop-noise",
+      "question": "ASF 사료 공급 요령",
+      "pass": true
+    },
+    {
+      "id": "noise-feed-1",
+      "category": "sop-noise",
+      "question": "ASF 사료 공급 요령",
+      "pass": true
+    },
+    {
+      "id": "noise-feed-2",
+      "category": "sop-noise",
+      "question": "  ASF  사료  공급  요령  ",
+      "pass": true
+    },
+    {
+      "id": "noise-feed-3",
+      "category": "sop-noise",
+      "question": "안녕하세요. ASF 사료 공급 요령 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "noise-manure-0",
+      "category": "sop-noise",
+      "question": "ASF 가축분뇨 처리",
+      "pass": true
+    },
+    {
+      "id": "noise-manure-1",
+      "category": "sop-noise",
+      "question": "ASF 가축분뇨 처리",
+      "pass": true
+    },
+    {
+      "id": "noise-manure-2",
+      "category": "sop-noise",
+      "question": "  ASF  가축분뇨  처리  ",
+      "pass": true
+    },
+    {
+      "id": "noise-manure-3",
+      "category": "sop-noise",
+      "question": "안녕하세요. ASF 가축분뇨 처리 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "noise-checkpoint-0",
+      "category": "sop-noise",
+      "question": "HPAI 이동통제초소 운영",
+      "pass": true
+    },
+    {
+      "id": "noise-checkpoint-1",
+      "category": "sop-noise",
+      "question": "HPAI 이동통제초소 운영",
+      "pass": true
+    },
+    {
+      "id": "noise-checkpoint-2",
+      "category": "sop-noise",
+      "question": "  HPAI  이동통제초소  운영  ",
+      "pass": true
+    },
+    {
+      "id": "noise-checkpoint-3",
+      "category": "sop-noise",
+      "question": "안녕하세요. HPAI 이동통제초소 운영 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "noise-restock-0",
+      "category": "sop-noise",
+      "question": "구제역 재입식 요령",
+      "pass": true
+    },
+    {
+      "id": "noise-restock-1",
+      "category": "sop-noise",
+      "question": "구제역 재입 식 요령",
+      "pass": true
+    },
+    {
+      "id": "noise-restock-2",
+      "category": "sop-noise",
+      "question": "  구제역  재입식  요령  ",
+      "pass": true
+    },
+    {
+      "id": "noise-restock-3",
+      "category": "sop-noise",
+      "question": "안녕하세요. 구제역 재입식 요령 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "noise-antigen-0",
+      "category": "sop-noise",
+      "question": "HPAI 야생조류 H5 H7 항원 확인 시 조치",
+      "pass": true
+    },
+    {
+      "id": "noise-antigen-1",
+      "category": "sop-noise",
+      "question": "HPAI 야생 조류 H5 H7 항원 확인 시 조치",
+      "pass": true
+    },
+    {
+      "id": "noise-antigen-2",
+      "category": "sop-noise",
+      "question": "  HPAI  야생조류  H5  H7  항원  확인  시  조치  ",
+      "pass": true
+    },
+    {
+      "id": "noise-antigen-3",
+      "category": "sop-noise",
+      "question": "안녕하세요. HPAI 야생조류 H5 H7 항원 확인 시 조치 알려주세요",
+      "pass": true
+    },
+    {
+      "id": "meaning-244",
+      "category": "meaning-and-scope",
+      "question": "가축 방역관의 업무를 알려주세요",
+      "expected": {
+        "type": "법률",
+        "article": "제7조",
+        "paragraph": 3
+      },
+      "pass": true
+    },
+    {
+      "id": "meaning-245",
+      "category": "meaning-and-scope",
+      "question": "가축 방역사의 역할",
+      "expected": {
+        "type": "법률",
+        "article": "제8조",
+        "paragraph": 2
+      },
+      "pass": true
+    },
+    {
+      "id": "meaning-246",
+      "category": "meaning-and-scope",
+      "question": "법정 전염병에는 어떤 것들이 있나요?",
+      "expected": {
+        "type": "법률",
+        "article": "제2조",
+        "paragraph": null
+      },
+      "pass": true
+    },
+    {
+      "id": "meaning-247",
+      "category": "meaning-and-scope",
+      "question": "구제역 의심 소를 발견했어요 어디로 연락하나요?",
+      "expected": {
+        "type": "법률",
+        "article": "제11조",
+        "paragraph": 1
+      },
+      "pass": true
+    },
+    {
+      "id": "meaning-248",
+      "category": "meaning-and-scope",
+      "question": "농장에 남은 먹이는 어떻게 버리나요?",
+      "expected": {
+        "type": "법률",
+        "article": "제23조",
+        "paragraph": 1
+      },
+      "pass": true
+    },
+    {
+      "id": "meaning-249",
+      "category": "meaning-and-scope",
+      "question": "백신을 맞히지 않으면 보상금이 줄어드나요?",
+      "expected": {
+        "type": "법률",
+        "article": "제48조",
+        "paragraph": 3
+      },
+      "pass": true
+    },
+    {
+      "id": "meaning-250",
+      "category": "meaning-and-scope",
+      "question": "가축전염병 신고 안 하면 처벌받나요?",
+      "expected": {
+        "type": "법률",
+        "article": "제55조의2",
+        "paragraph": null
+      },
+      "pass": true
+    },
+    {
+      "id": "meaning-251",
+      "category": "meaning-and-scope",
+      "question": "소득 안정 자금 지원 대상이 누구인가요?",
+      "expected": {
+        "type": "법률",
+        "article": "제49조",
+        "paragraph": 2
+      },
+      "pass": true
+    },
+    {
+      "id": "meaning-252",
+      "category": "meaning-and-scope",
+      "question": "생계 안정 비용은 얼마나 받을 수 있나요?",
+      "expected": {
+        "type": "법률",
+        "article": "제49조",
+        "paragraph": 1
+      },
+      "pass": true
+    },
+    {
+      "id": "negative-253",
+      "category": "unsupported-or-conflicting",
+      "question": "우주전염병의 종류",
+      "filters": {},
+      "pass": true
+    },
+    {
+      "id": "negative-254",
+      "category": "unsupported-or-conflicting",
+      "question": "사람 법정전염병 종류",
+      "filters": {},
+      "pass": true
+    },
+    {
+      "id": "negative-255",
+      "category": "unsupported-or-conflicting",
+      "question": "식물 법정전염병 종류",
+      "filters": {},
+      "pass": true
+    },
+    {
+      "id": "negative-256",
+      "category": "unsupported-or-conflicting",
+      "question": "종류",
+      "filters": {},
+      "pass": true
+    },
+    {
+      "id": "negative-257",
+      "category": "unsupported-or-conflicting",
+      "question": "규정의 종류",
+      "filters": {},
+      "pass": true
+    },
+    {
+      "id": "negative-258",
+      "category": "unsupported-or-conflicting",
+      "question": "제4종 법정전염병 종류",
+      "filters": {},
+      "pass": true
+    },
+    {
+      "id": "negative-259",
+      "category": "unsupported-or-conflicting",
+      "question": "구제역 사료 처리 우주선",
+      "filters": {},
+      "pass": true
+    },
+    {
+      "id": "negative-260",
+      "category": "unsupported-or-conflicting",
+      "question": "ASF 보상금 피자",
+      "filters": {},
+      "pass": true
+    },
+    {
+      "id": "negative-261",
+      "category": "unsupported-or-conflicting",
+      "question": "HPAI 소독 우주선",
+      "filters": {},
+      "pass": true
+    },
+    {
+      "id": "negative-262",
+      "category": "unsupported-or-conflicting",
+      "question": "돼지를 다시 키우려면 어떤 조건이 필요한가요?",
+      "filters": {},
+      "pass": true
+    },
+    {
+      "id": "negative-263",
+      "category": "unsupported-or-conflicting",
+      "question": "방역대 설정",
+      "filters": {},
+      "pass": true
+    },
+    {
+      "id": "negative-264",
+      "category": "unsupported-or-conflicting",
+      "question": "이동제한 해제",
+      "filters": {},
+      "pass": true
+    },
+    {
+      "id": "negative-265",
+      "category": "unsupported-or-conflicting",
+      "question": "구제역 신고",
+      "filters": {
+        "disease": "ASF"
+      },
+      "pass": true
+    },
+    {
+      "id": "negative-266",
+      "category": "unsupported-or-conflicting",
+      "question": "ASF 사료 처리",
+      "filters": {
+        "disease": "고병원성AI"
+      },
+      "pass": true
+    },
+    {
+      "id": "negative-267",
+      "category": "unsupported-or-conflicting",
+      "question": "HPAI 방역대 설정",
+      "filters": {
+        "disease": "구제역"
+      },
+      "pass": true
+    },
+    {
+      "id": "negative-268",
+      "category": "unsupported-or-conflicting",
+      "question": "구제역 ASF 방역대 설정",
+      "filters": {},
+      "pass": true
+    },
+    {
+      "id": "negative-269",
+      "category": "unsupported-or-conflicting",
+      "question": "법정전염병의 종류",
+      "filters": {
+        "type": "SOP"
+      },
+      "pass": true
+    },
+    {
+      "id": "negative-270",
+      "category": "unsupported-or-conflicting",
+      "question": "가축방역관 역할",
+      "filters": {
+        "asOf": "2000-01-01"
+      },
+      "pass": true
+    },
+    {
+      "id": "negative-271",
+      "category": "unsupported-or-conflicting",
+      "question": "신고 절차",
+      "filters": {
+        "asOf": "2000-01-01"
+      },
+      "pass": true
+    }
+  ],
+  "limitations": [
+    "원문 도달성과 발췌 범위의 회귀 검사이며, 임의 질문의 정답률이나 법률 해석의 정합성을 보증하지 않습니다.",
+    "등록 원문에 없는 일부 명사를 탐지하지만, 문서에 존재하는 단어의 모든 의미·조건 조합이나 복합 질문을 이해하는 것은 아닙니다.",
+    "표현 변형 사례는 서로 독립적인 전문가 평가 문항이 아닙니다. 미검토 동의어·축종·예외 조건은 추가 검토가 필요합니다."
+  ]
+}

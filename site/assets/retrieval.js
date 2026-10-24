@@ -1,7 +1,7 @@
 // Corpus-derived clause retrieval; source excerpts, never a generated legal answer.
-import {activeArticles,searchableChunk} from './provisions.js?v=20261024-15';
-import {legalUnits,references} from './evidence.js?v=20261024-15';
-import {sopIndex} from './sop-index.js?v=20261024-15';
+import {activeArticles,searchableChunk} from './provisions.js?v=20261024-16';
+import {legalUnits,references} from './evidence.js?v=20261024-16';
+import {sopIndex} from './sop-index.js?v=20261024-16';
 const flat=s=>s.normalize('NFKC').replace(/[\sㆍ·“”"「」『』()（）,.:：]/gu,'').toLowerCase();
 const generic=new Set(['가축','전염병','가축전염병','방역','규정','관련','대한','대하여','위한','경우','사항','조치','방법','기준','요령','발생','발생시','대상','실시','관리','따른','따라','절차','등의','범위','의무','처리','구제역','아프리카돼지열병','조류인플루엔자','고병원성','농장','발생농장','가축의','지역','필요한','있는','없는','위하여','하여야','관한','어떤','검출시','고병원성ai','어떻게','어디에','어디','하나요','되나요','받나요','있나요','무엇','무엇인가요','조건','검출','확인','방역조치','언제','알려주세요','근거','비교','차이','차이점','종류','분류','목록','리스트','유형','구분','항목']);
 export const concepts=[
@@ -38,9 +38,10 @@ export const concepts=[
  ['검역',['검역']],
  ['처리',['처리','폐기','소각','매몰','소독','화학적처리']],
  ['보존기간',['보존기간','보관기간','보관','보존','기간','기한']],
+ ['처벌',['처벌','벌칙','벌금','과태료']],
  ['감액',['감액','삭감','거부','지급하지','지급안']]
 ].map(([name,aliases])=>({name,aliases:aliases.map(flat)}));
-const actionNames=new Set(['해제','검사','소독','폐기','매몰','반입','반출','소각','신고','처리','보존기간','감액','지원']);
+const actionNames=new Set(['해제','검사','소독','폐기','매몰','반입','반출','소각','신고','처리','보존기간','감액','지원','처벌']);
 const cache=new WeakMap();
 function indexFor(entry,asOf){
  let dates=cache.get(entry.index);if(!dates){dates=new Map();cache.set(entry.index,dates);}if(dates.has(asOf))return dates.get(asOf);
@@ -84,14 +85,20 @@ export function retrieve(entries,question,asOf,target){
  const actors=roleRequest?anchors.filter(a=>!concepts.some(c=>c.name===a.name)&&(indexes.some(i=>i.rows.some(r=>matches(r.heading,a)))||/관|사|본부|기관|위원회$/u.test(a.name))):[];
  const roleSearch=actors.length>0;
  const roleRoots=roleSearch?entries.filter(e=>e.doc.type==='법률').flatMap(e=>activeArticles(e,asOf).filter(a=>actors.some(actor=>actor.aliases.includes(flat(a.title)))).map(a=>({id:e.doc.id,number:a.number}))):[];
+ const penaltyRequest=anchors.some(a=>a.name==='처벌');
  const benefits=anchors.filter(a=>['생계안정','소득안정'].includes(a.name));
- const subjects=anchors.filter(a=>!actionNames.has(a.name)),required=subjects.length?subjects:anchors;
+ const subjects=anchors.filter(a=>!actionNames.has(a.name)&&(!penaltyRequest||a.name!=='가축전염병')),required=subjects.length?subjects:anchors.filter(a=>!penaltyRequest||a.name!=='가축전염병'&&a.name!=='처벌');
  if(!anchors.length)return {status:'no_terms',anchors:[],hits:[],sopHits:[],supplement:[]};
  const rows=indexes.flatMap((i,n)=>i.rows.map(row=>({...row,entry:entries[n]}))),total=rows.length||1;
  const weights=new Map(anchors.map(a=>[a.name,Math.log(1+total/(1+rows.filter(r=>matches(r.text+r.heading+r.context,a)).length))]));
- const scored=[],actions=anchors.filter(a=>actionNames.has(a.name));
+ const scored=[],actions=anchors.filter(a=>actionNames.has(a.name)&&a.name!=='처벌');
  const qualifiers=['발생농장','관리지역','보호지역','예찰지역'].filter(t=>flat(question).includes(t));
  for(const r of rows){
+  const penalty=penaltyRequest&&/^(?:벌칙|과태료)$/u.test(r.article.title);
+  if(penaltyRequest&&!penalty)continue;
+  const cited=penalty?references(r.unit.parts.map(p=>p.text).join(' '),r.entry.doc,entries).flatMap(ref=>{const e=entries.find(e=>e.doc.id===ref.documentId),a=e&&activeArticles(e,asOf).find(a=>a.number===ref.articleNumber);return a?[flat(a.title)]:[];}).join(' '):'';
+  const subjectText=r.text+r.heading+r.context+cited;
+  if(penaltyRequest&&anchors.some(a=>a.name==='가축전염병')&&anchors.some(a=>a.name==='신고')&&!cited.includes('죽거나병든가축의신고'))continue;
   if(roleSearch&&/벌칙|과태료|처벌/u.test(r.heading)&&!/벌칙|과태료|처벌/u.test(question))continue;
   if(benefits.length){
    if(r.unit.item||!benefits.some(a=>matches(r.text,a)))continue;
@@ -101,9 +108,9 @@ export function retrieve(entries,question,asOf,target){
   // Every identified subject must occur in the unit or its own article heading.
   // A parent introduction can supply conditions, but cannot alone make a sibling item relevant.
   if(r.entry.doc.disease!=='공통'&&qualifiers.length&&!qualifiers.every(t=>flat(r.article.parts.map(p=>p.text).join(' ')).includes(t)))continue;
-  if(!required.filter(a=>!benefits.includes(a)).every(a=>matches(r.text+r.heading+r.context,a))||!benefits.length&&!required.every(a=>matches(r.text+r.heading+r.context,a)))continue;
-  if(actions.length&&!actions.some(a=>matches(r.text+r.heading,a)))continue;
-  const direct=anchors.filter(a=>matches(r.text,a)),heading=anchors.filter(a=>matches(r.heading,a));
+  if(!required.filter(a=>!benefits.includes(a)).every(a=>matches(subjectText,a))||!benefits.length&&!required.every(a=>matches(subjectText,a)))continue;
+  if(actions.length&&!actions.some(a=>matches(r.text+r.heading+cited,a)))continue;
+  const direct=anchors.filter(a=>matches(r.text+cited,a)),heading=anchors.filter(a=>matches(r.heading,a));
   if(!direct.length)continue;
   const matched=anchors.filter(a=>direct.includes(a)||heading.includes(a));
   const actorHeading=roleSearch&&actors.some(a=>matches(r.heading,a));
@@ -148,7 +155,7 @@ export function retrieve(entries,question,asOf,target){
  const sopHits=[];
  const titleQuery=requestTitle(question),actionRequest=roleSearch||/조치|요령|어떻게|운영|운용|처리|소독|설정|해제|재입식|방역/u.test(question);
  const operational=/조치|요령|운영|운용|처리|소독|설정|해제|재입식|방역|채취|공급|교육|지원|제한|검사|진단|기본원칙/u;
- for(const entry of entries)if(entry.doc.type==='SOP')for(const section of sopIndex(entry).sections){
+ for(const entry of entries)if(!penaltyRequest&&entry.doc.type==='SOP')for(const section of sopIndex(entry).sections){
   const exactTitle=sectionTitle(section.heading)===titleQuery;
   if(actionRequest&&!exactTitle&&!operational.test(section.heading))continue;
   const context=flat(section.heading+' '+section.scenario);

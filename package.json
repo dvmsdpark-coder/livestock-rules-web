@@ -7,6 +7,7 @@
     "test": "node --test tests/*.test.mjs",
     "serve": "node tools/serve.mjs",
     "evaluate": "node tools/evaluate.mjs",
+    "audit:questions": "node tools/audit-questions.mjs",
     "audit:links": "node tools/audit-regulation-links.mjs"
   },
   "engines": {
