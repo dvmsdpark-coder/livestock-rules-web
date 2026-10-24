@@ -1894,6 +1894,32 @@
       "wrongDisease": false
     }
   ],
+  "annexQuestions": [
+    {
+      "question": "구제역 백신 미접종 시 보상금은 어떻게 되죠?",
+      "lawFirst": true,
+      "decree": true,
+      "annexUnits": [
+        "2:카"
+      ],
+      "common": [
+        "4",
+        "5"
+      ]
+    },
+    {
+      "question": "구제역 백신 안 맞으면 보상금",
+      "lawFirst": true,
+      "decree": true,
+      "annexUnits": [
+        "2:카"
+      ],
+      "common": [
+        "4",
+        "5"
+      ]
+    }
+  ],
   "benefits": [
     {
       "name": "생계안정",

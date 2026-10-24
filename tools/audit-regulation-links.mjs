@@ -34,6 +34,7 @@ export function auditLinks(){
   const ruleText=rule?.focus.flatMap(u=>u.parts).map(p=>p.text).join('')||'';
   reporting.push({disease,question:q,law:Boolean(law),rule:Boolean(rule),sop:sop.length>0,oralWrittenElectronic:ruleText.includes('구두ㆍ서면 또는 전자문서'),requiredFields:ruleText.includes('신고자의 성명 및 주소'),afterReceipt:ruleText.includes('검안 또는 진단'),sources:v.groups.map(g=>({type:g.docType,title:g.title,article:g.articleNumber,pages:[...new Set(g.parts.map(p=>p.page))]}))});
  }
+ const annexQuestions=['구제역 백신 미접종 시 보상금은 어떻게 되죠?','구제역 백신 안 맞으면 보상금'].map(question=>{const r=search(corpus,question,defaults),v=presentResults(corpus,r,question),g=v.groups.find(g=>g.kind==='table'&&g.docType==='시행령'&&g.annexExcerpt);return {question,lawFirst:v.groups[0]?.docType==='법률'&&v.groups[0]?.articleNumber==='제48조',decree:v.groups.some(g=>g.docType==='시행령'&&g.articleNumber==='제11조'),annexUnits:g?.annexExcerpt.selected.map(u=>u.key)||[],common:g?.annexExcerpt.common.map(u=>u.key)||[]};});
  const roles=[];
  for(const disease of ['구제역','ASF','고병원성AI']){
   const question='가축방역관의 역할',r=search(corpus,question,{...defaults,disease}),v=presentResults(corpus,r,question);
@@ -46,7 +47,7 @@ export function auditLinks(){
   const law=v.groups.find(g=>g.docType==='법률'&&g.articleNumber==='제49조'),decree=v.groups.find(g=>g.docType==='시행령'&&g.articleNumber===decreeArticle);
   benefits.push({name,lawParagraph,decreeArticle,law:Boolean(law?.focus.some(u=>u.paragraph===lawParagraph)),delegation:Boolean(law?.focus.some(u=>u.paragraph===3)),decree:Boolean(decree),wrongScheme:law?.focus.some(u=>u.paragraph===(lawParagraph===1?2:1))||false});
  }
- return {asOf:defaults.asOf,scope:'등록 문서의 인용 연결·신고 근거 누락·문서 버전 차이 점검. 법률 해석상 충돌 여부를 확정하는 감사가 아닙니다.',annexConnections,missingAttachments:corpus.filter(e=>e.doc.search_note?.includes('실제 첨부')).map(e=>({title:e.doc.title,note:e.doc.search_note})),resolvedReferences:links,invalidLinks:issues,documents:stats,reporting,roles,benefits,versionReview,limitations:['인용 해석기가 연결하지 못한 외부 법령·모호한 인용은 이 연결 검증 수에 포함되지 않습니다.','같은 조문 번호가 존재해도 개정 전후 내용이 같다는 뜻은 아닙니다.','SOP의 공식 시행일 미확인 사항과 표·그림의 의미는 별도 검토가 필요합니다.']};
+ return {asOf:defaults.asOf,scope:'등록 문서의 인용 연결·신고 근거 누락·문서 버전 차이 점검. 법률 해석상 충돌 여부를 확정하는 감사가 아닙니다.',annexConnections,missingAttachments:corpus.filter(e=>e.doc.search_note?.includes('실제 첨부')).map(e=>({title:e.doc.title,note:e.doc.search_note})),resolvedReferences:links,invalidLinks:issues,documents:stats,reporting,roles,annexQuestions,benefits,versionReview,limitations:['인용 해석기가 연결하지 못한 외부 법령·모호한 인용은 이 연결 검증 수에 포함되지 않습니다.','같은 조문 번호가 존재해도 개정 전후 내용이 같다는 뜻은 아닙니다.','SOP의 공식 시행일 미확인 사항과 표·그림의 의미는 별도 검토가 필요합니다.']};
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  const r=auditLinks(),root=new URL('../docs/',import.meta.url);fs.mkdirSync(root,{recursive:true});
@@ -69,6 +70,7 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
  '', '## 별표·별지 연결','',
  '- 본문에서 실제 첨부자료로 연결된 인용: '+r.annexConnections.length+'건. 목록 페이지는 대상으로 사용하지 않습니다.',
  '- 시행령 제11조제1항 → 별표 2: PDF 29~36쪽. 번호는 PDF 페이지 기준입니다.',
+ ...r.annexQuestions.map(x=>'- '+x.question+': 법률 우선 '+x.lawFirst+', 시행령 연결 '+x.decree+', 별표 항목 '+x.annexUnits.join('·')+', 공통 규정 '+x.common.join('·')),
  ...r.missingAttachments.map(x=>'- '+x.title+': '+x.note),
  '', '## 버전 대조가 필요한 자료','',
  ...r.versionReview.map(v=>'- '+v.sop+' ('+v.sopDate+') → '+v.notice+' ('+v.noticeDate+'): '+v.reason),

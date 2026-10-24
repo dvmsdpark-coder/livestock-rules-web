@@ -845,15 +845,15 @@
         "visibleHit": true,
         "top": [
           {
-            "type": "고시",
-            "disease": "ASF",
-            "article": "제20조",
-            "primary": true
+            "type": "법률",
+            "disease": "공통",
+            "article": "제17조",
+            "primary": false
           },
           {
             "type": "법률",
             "disease": "공통",
-            "article": "제17조",
+            "article": "제60조",
             "primary": false
           },
           {
@@ -875,10 +875,10 @@
             "primary": false
           },
           {
-            "type": "법률",
-            "disease": "공통",
-            "article": "제60조",
-            "primary": false
+            "type": "고시",
+            "disease": "ASF",
+            "article": "제20조",
+            "primary": true
           }
         ]
       },
@@ -898,6 +898,12 @@
         "hitInSix": true,
         "visibleHit": true,
         "top": [
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제17조",
+            "primary": false
+          },
           {
             "type": "고시",
             "disease": "고병원성AI",
@@ -926,12 +932,6 @@
             "type": "고시",
             "disease": "고병원성AI",
             "article": "제33조",
-            "primary": false
-          },
-          {
-            "type": "법률",
-            "disease": "공통",
-            "article": "제17조",
             "primary": false
           }
         ]
@@ -1000,15 +1000,15 @@
         "visibleHit": true,
         "top": [
           {
-            "type": "시행령",
-            "disease": "공통",
-            "article": "제11조",
-            "primary": true
-          },
-          {
             "type": "법률",
             "disease": "공통",
             "article": "제48조",
+            "primary": true
+          },
+          {
+            "type": "시행령",
+            "disease": "공통",
+            "article": "제11조",
             "primary": true
           },
           {
@@ -1114,6 +1114,12 @@
             "primary": true
           },
           {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제17조의5",
+            "primary": false
+          },
+          {
             "type": "시행규칙",
             "disease": "공통",
             "article": "제20조의3",
@@ -1129,12 +1135,6 @@
             "type": "시행규칙",
             "disease": "공통",
             "article": "제20조의8",
-            "primary": false
-          },
-          {
-            "type": "법률",
-            "disease": "공통",
-            "article": "제17조의5",
             "primary": false
           },
           {
@@ -1164,15 +1164,15 @@
         "visibleHit": true,
         "top": [
           {
-            "type": "시행규칙",
-            "disease": "공통",
-            "article": "제20조의6",
-            "primary": true
-          },
-          {
             "type": "법률",
             "disease": "공통",
             "article": "제17조의3",
+            "primary": true
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제20조의6",
             "primary": true
           }
         ]
@@ -1206,12 +1206,6 @@
             "primary": true
           },
           {
-            "type": "시행규칙",
-            "disease": "공통",
-            "article": "제20조의2",
-            "primary": true
-          },
-          {
             "type": "법률",
             "disease": "공통",
             "article": "제17조의4",
@@ -1228,6 +1222,12 @@
             "disease": "공통",
             "article": "제15조의2",
             "primary": false
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제20조의2",
+            "primary": true
           }
         ]
       },
@@ -1301,22 +1301,16 @@
         "visibleHit": true,
         "top": [
           {
-            "type": "시행규칙",
-            "disease": "공통",
-            "article": "제25조",
-            "primary": true
-          },
-          {
             "type": "법률",
             "disease": "공통",
             "article": "제22조",
             "primary": true
           },
           {
-            "type": "시행규칙",
+            "type": "법률",
             "disease": "공통",
-            "article": "제28조",
-            "primary": true
+            "article": "제24조",
+            "primary": false
           },
           {
             "type": "시행령",
@@ -1331,10 +1325,16 @@
             "primary": false
           },
           {
-            "type": "법률",
+            "type": "시행규칙",
             "disease": "공통",
-            "article": "제24조",
-            "primary": false
+            "article": "제25조",
+            "primary": true
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제28조",
+            "primary": true
           }
         ]
       },
@@ -1361,6 +1361,12 @@
             "primary": true
           },
           {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제22조",
+            "primary": false
+          },
+          {
             "type": "시행규칙",
             "disease": "공통",
             "article": "제27조",
@@ -1371,12 +1377,6 @@
             "disease": "공통",
             "article": "제1조",
             "primary": true
-          },
-          {
-            "type": "법률",
-            "disease": "공통",
-            "article": "제22조",
-            "primary": false
           },
           {
             "type": "고시",
@@ -1463,15 +1463,21 @@
             "primary": true
           },
           {
-            "type": "시행규칙",
+            "type": "법률",
             "disease": "공통",
-            "article": "제35조",
+            "article": "제40조",
             "primary": true
           },
           {
             "type": "법률",
             "disease": "공통",
-            "article": "제40조",
+            "article": "제41조",
+            "primary": false
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제35조",
             "primary": true
           },
           {
@@ -1484,12 +1490,6 @@
             "type": "시행규칙",
             "disease": "공통",
             "article": "제37조",
-            "primary": false
-          },
-          {
-            "type": "법률",
-            "disease": "공통",
-            "article": "제41조",
             "primary": false
           }
         ]
@@ -1512,18 +1512,6 @@
         "visibleHit": true,
         "top": [
           {
-            "type": "시행령",
-            "disease": "공통",
-            "article": "제11조",
-            "primary": true
-          },
-          {
-            "type": "법률",
-            "disease": "공통",
-            "article": "제48조",
-            "primary": true
-          },
-          {
             "type": "법률",
             "disease": "공통",
             "article": "제48조의3",
@@ -1533,6 +1521,18 @@
             "type": "법률",
             "disease": "공통",
             "article": "제52조",
+            "primary": true
+          },
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제48조",
+            "primary": true
+          },
+          {
+            "type": "시행령",
+            "disease": "공통",
+            "article": "제11조",
             "primary": true
           },
           {

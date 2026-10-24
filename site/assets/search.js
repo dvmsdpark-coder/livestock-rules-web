@@ -1,8 +1,8 @@
 // Browser and Node share this deterministic, model-free search implementation.
-import {activeArticles,searchableChunk} from './provisions.js?v=20261024-13';
-import {legalUnits} from './evidence.js?v=20261024-13';
-import {actualAnnexes,annexReferences} from './annexes.js?v=20261024-13';
-import {retrieve} from './retrieval.js?v=20261024-13';
+import {activeArticles,searchableChunk} from './provisions.js?v=20261024-14';
+import {legalUnits} from './evidence.js?v=20261024-14';
+import {actualAnnexes,annexReferences} from './annexes.js?v=20261024-14';
+import {retrieve} from './retrieval.js?v=20261024-14';
 const compact=s=>s.replace(/[\s“”"「」『』·ㆍ]/gu,'').replace(/[?？.]+$/u,'');
 const normalize=s=>s.replace(/\s+/gu,' ').trim();
 const stop=new Set(['구제역','FMD','ASF','HPAI','가축','경우','발생','규정','관련','대한','대하여','어떻게','무엇','언제','어디','해야','하나요','되나요','알려','주세요','합니까','인가요','방법']);
@@ -164,12 +164,20 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
  // Financial compensation is anchored in decree 11(1), which explicitly
  // delegates payment/reduction criteria to annex 2. Delayed-order reductions
  // in 14-2 do not replace that primary source.
- if(!annexKind&&!term&&/보상/u.test(q)&&/감액|지급|기준|살처분/u.test(q)){
+ if(!annexKind&&!term&&!directRequest&&/보상/u.test(q)&&(results.length||!diagnostics?.terms?.some(t=>!['보상','감액','지원','예방접종','살처분','명령','위반'].includes(t)))){
   const decree=entries.find(e=>e.doc.type==='시행령');
   const article=decree&&activeArticles(decree,filters.asOf).find(a=>a.number==='제11조');
-  if(article){
-   mode='ranked';results=results.filter(r=>r.docType!=='SOP'&&!(r.documentId===decree.doc.id&&r.heading?.startsWith('제11조(')));
-   const parts=legalUnits(article).units.find(u=>u.paragraph===1&&!u.item)?.parts||[];
+  const law=entries.find(e=>e.doc.type==='법률'),basis=law&&activeArticles(law,filters.asOf).find(a=>a.number==='제48조');
+  if(article||basis){
+   mode='ranked';if(diagnostics){diagnostics.financialBasis=true;if(diagnostics.status==='no_match')diagnostics.status='linked_basis';}results=results.filter(r=>!(article&&r.documentId===decree.doc.id&&r.heading?.startsWith('제11조(')));
+   for(const row of results)if(row.docType==='SOP')row.retrievalPrimary=false;
+   if(basis){
+    results=results.filter(r=>!(r.documentId===law.doc.id&&r.heading?.startsWith('제48조(')));
+    const reduction=/감액|삭감|미접종|접종하지|접종안|안맞|위반|불이행|거부/u.test(q);
+    const scopes=reduction?[{paragraph:3,item:/백신|예방접종|미접종/u.test(q)?2:null},{paragraph:4,item:null}]:[{paragraph:1,item:q.includes('살처분')?3:null}];
+    for(const part of basis.parts)add(law.doc,part,{match:'보상금 법률 근거 연결',retrievalPrimary:true,retrievalScopes:scopes});
+   }
+   const parts=article?legalUnits(article).units.find(u=>u.paragraph===1&&!u.item)?.parts||[]:[];
    for(const p of parts)add(decree.doc,{...p,heading:'제11조('+article.title+')'},{match:'보상금 지급·감액 기준 연결',retrievalPrimary:true,retrievalScopes:[{paragraph:1,item:null}]});
    results.sort((a,b)=>Number(b.match==='보상금 지급·감액 기준 연결')-Number(a.match==='보상금 지급·감액 기준 연결'));
   }

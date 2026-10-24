@@ -1,4 +1,4 @@
-import {eligible} from './search.js?v=20261024-13';
+import {eligible} from './search.js?v=20261024-14';
 const $=id=>document.getElementById(id);
 const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
 const labels={definition:'용어 정의',ranked:'조문·용어 검색',material:'사료 관련 조치',topic:'살처분 근거',article:'조문 검색',procedure:'절차 검색',zone:'방역지역',annex:'서식·별표',related:'관련 후보'};
@@ -29,6 +29,28 @@ function library(){
  }if(!docs.length)root.append(el('p','meta','선택 조건에 해당하는 게시 자료가 없습니다.'));
 }
 const diseaseLabel=d=>({'구제역':'구제역(FMD)','고병원성AI':'고병원성 AI(HPAI)','ASF':'아프리카돼지열병(ASF)','공통':'공통'}[d]||d);
+function annexPassage(unit,g,container){
+ const section=el('section','annex-unit');section.append(el('h4','unit-label',g.annexExcerpt.label+' '+unit.label));
+ passages(unit.parts,g.doc,section,true);
+ if(unit.images?.length){
+  const original=el('details','annex-original-images');original.append(el('summary','','원문 배치로 비교 · 이미지'));
+  for(const source of unit.images){const box=el('div','annex-image-scroll'),a=link('',pdfLink(g.doc,source.page)),img=el('img','annex-crop');img.src=new URL(source.path,document.baseURI).href;img.alt=g.annexExcerpt.label+' '+unit.label+' 원문 · PDF '+source.page+'쪽';img.loading='lazy';a.append(img);box.append(a);original.append(el('p','page-label','원문 발췌 · PDF '+source.page+'쪽'),box);}
+  section.append(original);
+ }
+ container.append(section);
+}
+function annexPreview(g,node){
+ const excerpt=g.annexExcerpt,body=el('div','annex-preview-body');
+ if(excerpt.choices?.length){const label=el('label','','별표 항목 직접 선택'),select=el('select','annex-selector');label.append(select);select.append(new Option('항목을 선택하세요',''));for(const u of excerpt.choices)select.append(new Option(u.label+' · '+u.parts.map(p=>p.display).join(' ').slice(0,65),u.key));select.value=excerpt.selected[0]?.key||'';select.onchange=()=>{excerpt.selected=excerpt.choices.filter(u=>u.key===select.value);g.locator=excerpt.label+' · '+(excerpt.selected.map(u=>u.label).join(' · ')||'항목 선택');const location=node.querySelector('.location-label');if(location)location.textContent=g.locator;body.replaceChildren();annexPreviewBody(g,body);};node.append(label);}
+ node.append(body);annexPreviewBody(g,body);
+}
+function annexPreviewBody(g,node){
+ const excerpt=g.annexExcerpt;if(!excerpt.selected.length){node.append(el('p','layout-notice','질문만으로 별표의 항목을 좁히지 못했습니다. 위 목록에서 항목을 선택하거나 전체 PDF를 확인하세요.'));return;}node.append(el('p','layout-notice','질문과 관련된 별표 항목을 발췌했습니다. 공통 적용 규정과 경감 규정도 함께 확인하세요. 지급액을 계산하거나 확정한 결과는 아닙니다.'));
+ const intro=excerpt.selected[0]?.intro||[];if(intro.length){const box=el('div','annex-intro');box.append(el('h4','unit-label','해당 호의 적용 범위'));passages(intro,g.doc,box,true);node.append(box);}
+ for(const unit of excerpt.selected)annexPassage(unit,g,node);
+ if(excerpt.common.length){const box=el('div','annex-common');box.append(el('h4','unit-label','함께 적용되는 공통 규정'));for(const unit of excerpt.common)annexPassage(unit,g,box);node.append(box);}
+ if(excerpt.selected.some(u=>u.root===2)&&excerpt.adjustment.length){const extra=el('details','annex-adjustment');extra.append(el('summary','','별표의 경감 규정 함께 보기'));for(const unit of excerpt.adjustment)annexPassage(unit,g,extra);node.append(extra);}
+}
 function card(g){
  const node=el('article','evidence'+(g.primary?' is-primary':'')),head=el('div','evidence-top');
  head.append(el('span','type-chip',g.docType),el('span','disease-chip',diseaseLabel(g.disease)),el('span','source-name',g.title));node.append(head);
@@ -37,7 +59,8 @@ function card(g){
  if(topic&&topic!==g.locator)node.append(el('p','article-topic',topic));
  if(g.doc.search_note)node.append(el('p','scope-notice',g.doc.search_note));
  if(g.scenario)node.append(el('p','scenario',g.scenario));
- if(['form','table','figure'].includes(g.kind)){
+ if(g.annexExcerpt){annexPreview(g,node);
+ }else if(['form','table','figure'].includes(g.kind)){
   node.append(el('p','layout-notice',(g.kind==='form'?'서식':g.kind==='table'?'별표':'그림·사진')+'의 배치와 작성란은 PDF 원문에서 확인하세요.'));
  }else if(g.focus.length){
   const focused=el('div','focused-source');
@@ -52,7 +75,7 @@ function card(g){
  footer.append(link('PDF '+(g.endPage&&g.endPage!==pages[0]?pages[0]+'–'+g.endPage:pages.join('·'))+'쪽 ↗',pdfLink(g.doc,pages[0])));
  if(g.target)footer.append(articleLink('조문·연결 규정',g.target,'text-action'));
  const copy=el('button','text-action','발췌 복사');copy.type='button';copy.onclick=async()=>{
-  const parts=g.focus.length?g.focus.flatMap(u=>u.parts):g.parts;
+  const parts=g.annexExcerpt?[...g.annexExcerpt.selected.flatMap(u=>[...u.intro,...u.parts]),...g.annexExcerpt.common.flatMap(u=>u.parts)]:g.focus.length?g.focus.flatMap(u=>u.parts):g.parts;
   try{await navigator.clipboard.writeText(`${g.title} / ${g.locator} / ${g.version}\n${parts.map(p=>`[PDF ${p.page}쪽]\n${p.text}`).join('\n')}\n${pdfLink(g.doc,parts[0].page)}`);copy.textContent='복사했습니다';}catch{copy.textContent='복사 권한을 확인하세요';}
  };footer.append(copy);node.append(footer);
  const meta=el('details','source-info');meta.append(el('summary','',g.version+' · 문서 정보'),el('p','meta',`적용 기준일 ${searchedFilters?.asOf||asOf.value} · 문서 기준일 ${g.from}`));if(g.dateNote)meta.append(el('p','date-note',g.dateNote));node.append(meta);
@@ -66,8 +89,8 @@ function sourceOverview(groups,result){
  if(extra)extra.append(el('summary','','추가 연결 근거'));
  for(const g of groups){
   const key=g.documentId+'|'+(g.articleNumber||g.scenario||g.heading);if(seen.has(key))continue;seen.add(key);
-  const row=el('div','source-overview-row'),label=diseaseLabel(g.disease)+' · '+g.docType+' · '+(g.articleNumber||g.heading||'현장 절차');
-  row.append(g.target?articleLink(label,g.target,'source-overview-link'):link(label,pdfLink(g.doc,g.page)));
+  const row=el('div','source-overview-row'),label=diseaseLabel(g.disease)+' · '+g.docType+' · '+(g.articleNumber||(g.annexExcerpt?g.locator:g.heading)||'현장 절차');
+  row.append(g.target?articleLink(label,g.target,'source-overview-link'):link(label,pdfLink(g.doc,g.annexExcerpt?.selected[0]?.parts[0]?.page||g.page)));
   const scenario=g.docType==='SOP'&&g.scenario?(g.scenario.includes('미접종')?'백신미접종 유형':g.scenario.includes('백신접종')?'백신접종 유형':g.scenario):'';
   row.append(el('span','meta',g.title+' · '+(roles[g.docType]||'관련 원문')+(scenario?' · '+scenario:'')));if(extra&&!g.primary){extra.append(row);extraCount++;}else box.append(row);
  }
@@ -82,7 +105,10 @@ function render(result){
  if(!groups.length){$('message').textContent=result.message;root.append(el('p','scope-notice','질병·문서 종류·적용 기준일을 확인해주세요.'));return;}
  $('message').textContent=(['topic','material','ranked'].includes(result.mode)||result.diagnostics?.status==='needs_detail')?result.message:result.mode==='related'?'질문에 일치하는 항·호를 특정하지 못했습니다. 관련 원문 후보를 펼쳐 확인하거나 질문을 구체적으로 입력해주세요.':'질문과 연결한 원문 항목을 먼저 표시합니다. 밑줄 친 조문을 누르면 같은 기준일의 연결 규정을 볼 수 있습니다.';
  root.append(sourceOverview(groups,result));
- const primary=groups.filter(g=>g.primary),support=groups.filter(g=>!g.primary);
+ const legalCandidates=result.mode!=='related'&&result.diagnostics?.status!=='needs_detail'?groups.filter(g=>['법률','시행령','시행규칙'].includes(g.docType)&&g.focus.length):[];
+ const markedLegal=legalCandidates.filter(g=>g.primary),legal=markedLegal.length?markedLegal:legalCandidates.slice(0,2);
+ const primary=groups.filter(g=>g.primary&&!legal.includes(g)),support=groups.filter(g=>!g.primary&&!legal.includes(g));
+ if(legal.length){root.append(el('h3','result-section-label','법률·시행령·시행규칙 근거'));for(const g of legal)root.append(card({...g,primary:true}));}
  if(result.diagnostics?.roleSearch)root.append(el('p','scope-notice','담당 주체의 역할·업무 질문으로 검색했습니다. 법령의 권한·업무와 질병별 고시·SOP의 현장 조치를 구분해 확인하세요. 문서별 상세도 차이만으로 규정 충돌을 뜻하지는 않습니다.'));
  if(result.diagnostics?.benefits?.length)root.append(el('p','scope-notice','안정자금·지원금이라는 표현을 원문의 안정비용 관련 용어로 연결했습니다. 생계안정과 소득안정은 구분해 표시하며, 지원 여부와 조건은 각 항의 원문을 확인하세요.'));
  if(result.diagnostics?.terms?.length)root.append(el('p','scope-notice','연결한 검색어: '+result.diagnostics.terms.join(' · ')));
@@ -130,8 +156,8 @@ for(const button of document.querySelectorAll('[data-question]'))button.onclick=
 for(const id of ['disease','docType','asOf'])$(id).addEventListener('change',()=>{requestId++;if(dialog.open)dialog.close();$('submit').disabled=!manifest;document.querySelector('.results-panel').setAttribute('aria-busy','false');library();updateExamples();$('message').textContent='검색 조건이 바뀌었습니다. 다시 검색해주세요.';$('results').replaceChildren();});
 function updateExamples(){const name={ASF:'아프리카돼지열병',고병원성AI:'고병원성 조류인플루엔자'}[$('disease').value]||'구제역';for(const b of document.querySelectorAll('[data-question]')){b.dataset.baseQuestion??=b.dataset.question;b.dataset.question=b.dataset.baseQuestion.replace(/^구제역/u,name);}}
 try{
- const response=await fetch(new URL('../data/manifest.json?v=20261024-13',import.meta.url));if(!response.ok)throw Error();manifest=await response.json();if(manifest.schema!==1)throw Error();
- worker=new Worker(new URL('./worker.js?v=20261024-13',import.meta.url),{type:'module'});
+ const response=await fetch(new URL('../data/manifest.json?v=20261024-14',import.meta.url));if(!response.ok)throw Error();manifest=await response.json();if(manifest.schema!==1)throw Error();
+ worker=new Worker(new URL('./worker.js?v=20261024-14',import.meta.url),{type:'module'});
  worker.onmessage=({data})=>{
   if(data.action==='article'){if(data.id!==navId||!dialog.open)return;renderArticle(data.error?{error:data.error}:data.detail);return;}
   if(data.id!==requestId)return;$('submit').disabled=false;document.querySelector('.results-panel').setAttribute('aria-busy','false');if(data.error){$('message').textContent=data.error;return;}render(data.result);

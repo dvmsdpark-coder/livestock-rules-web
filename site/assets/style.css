@@ -10,3 +10,9 @@ main,.masthead,footer{max-width:1320px}.hero{padding:34px 0 28px}.hero h1{font-s
 .disease-chip{display:inline-block;padding:.2rem .5rem;border-radius:6px;background:#e4f2f2;color:#086d75;font-size:.78rem;font-weight:700;white-space:nowrap}.evidence-top{flex-wrap:wrap}
 
 .role-source-details{margin-top:12px}.role-source-details>summary{font-size:13px;font-weight:650;color:#086d75;cursor:pointer;padding:5px 0}.role-source-details[open]>summary{margin-bottom:8px}
+
+.annex-crop{display:block;width:100%;height:auto;border:1px solid #dce5e8;border-radius:5px;margin:6px 0 12px;background:white}.annex-unit{margin:16px 0}.annex-intro,.annex-common{border-left:3px solid #168c91;padding-left:12px;margin:16px 0}.annex-text>summary,.annex-adjustment>summary{cursor:pointer;color:#086d75;font-size:12px}.annex-adjustment{border-top:1px solid #dce5e8;padding-top:12px;margin-top:15px}
+
+.annex-image-scroll{max-width:100%;overflow-x:auto}.annex-image-scroll .annex-crop{min-width:600px}.annex-original-images>summary{cursor:pointer;color:#086d75;font-size:12px}
+
+.annex-unit .excerpt{white-space:pre-line}

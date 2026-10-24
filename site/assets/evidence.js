@@ -1,6 +1,7 @@
-import {annexReferences} from './annexes.js?v=20261024-13';
+import {annexExcerpt} from './annex-excerpts.js?v=20261024-14';
+import {annexReferences} from './annexes.js?v=20261024-14';
 // Source-only presentation and internal legal references. No generated legal text.
-import {activeArticles} from './provisions.js?v=20261024-13';
+import {activeArticles} from './provisions.js?v=20261024-14';
 const squash=s=>s.replace(/\s+/gu,'');
 const clean=s=>s.replace(/[\sㆍ·]/gu,'');
 const circled='①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳';
@@ -182,9 +183,12 @@ export function presentResults(corpus,result,question){
   if(g.docType!=='SOP'&&!g.article)g.locator=['form','table','figure'].includes(g.kind)?g.heading:'PDF '+g.page+'쪽 · 관련 후보';
   g.articleNumber=g.article?.number||null;g.articleTitle=g.article?.title||g.heading;
   g.target=g.article?{documentId:g.documentId,articleNumber:g.article.number,paragraph:location?.paragraph||null,item:location?.item||null}:null;
+  if(g.kind==='table'){const entry=corpus.find(e=>e.doc.id===g.documentId),a=entry.index.annexes.find(a=>a.part.page===g.page&&a.heading===g.heading);if(a)g.annexExcerpt=annexExcerpt(entry,a,question);}
+  if(g.annexExcerpt){g.locator=g.annexExcerpt.label+' · '+(g.annexExcerpt.selected.map(u=>u.label).join(' · ')||'항목 선택');g.articleTitle=g.heading.split(' · ').at(-1).replace(/^\[[^\]]+\]\s*/u,'');}
   g.focus=selectFocus(g,question,result.mode).map(u=>({label:u.label,note:u.note,paragraph:u.paragraph,item:u.item,parts:addRefs(u.parts,g.doc,corpus,g.target?{...g.target,paragraph:u.paragraph??g.target.paragraph,item:u.item??g.target.item}:null)}));
   if(g.focus.length===1){g.locator=g.focus[0].label;if(g.target&&g.focus[0].paragraph!==undefined)g.target={...g.target,paragraph:g.focus[0].paragraph,item:g.focus[0].item};}
   g.needsContext=g.docType==='SOP'&&g.focus.some(u=>/(?:아래|다음)[^.]{0,45}(?:검사|절차)/u.test(u.parts.map(p=>p.text).join(' ').replace(/\s+/gu,' ')));
+  if(g.annexExcerpt){const entry=corpus.find(e=>e.doc.id===g.documentId);g.fullParts=entry.index.pages.filter(p=>p.page>=g.page&&p.page<=(g.endPage||g.page)).map(p=>({...p,display:readable(p.text)}));}
   g.fullParts=addRefs(g.fullParts,g.doc,corpus);
   g.primary=result.mode==='procedure'?g.docType==='SOP':result.mode==='zone'?g.match==='방역지역 정의 연결':true;
   if(result.mode==='topic')g.primary=g.topicPrimary;
@@ -195,6 +199,7 @@ export function presentResults(corpus,result,question){
   delete g.article;
  }
  if(!groups.some(g=>g.primary)&&!['related','ranked'].includes(result.mode))for(const g of groups)g.primary=true;
+ groups.sort((a,b)=>({'법률':0,'시행령':1,'시행규칙':2,'고시':3,'SOP':4}[a.docType]??9)-({'법률':0,'시행령':1,'시행규칙':2,'고시':3,'SOP':4}[b.docType]??9));
  return {groups,question,scope:questionIntent(question)};
 }
 export function articleDetail(corpus,target){
