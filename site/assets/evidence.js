@@ -1,6 +1,6 @@
-import {annexReferences} from './annexes.js?v=20261024-12';
+import {annexReferences} from './annexes.js?v=20261024-13';
 // Source-only presentation and internal legal references. No generated legal text.
-import {activeArticles} from './provisions.js?v=20261024-12';
+import {activeArticles} from './provisions.js?v=20261024-13';
 const squash=s=>s.replace(/\s+/gu,'');
 const clean=s=>s.replace(/[\sㆍ·]/gu,'');
 const circled='①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳';
@@ -200,7 +200,7 @@ export function presentResults(corpus,result,question){
 export function articleDetail(corpus,target){
  const entry=corpus.find(e=>e.doc.id===target.documentId),article=entry&&articleIn(entry,target.articleNumber,target.asOf||entry.asOf||entry.doc.from);
  if(!article)return {error:'이 기준일에 게시된 해당 조문을 찾지 못했습니다.'};
- const {units}=legalUnits(article),selected=units.filter(u=>(!target.paragraph||u.paragraph===Number(target.paragraph))&&(!target.item||u.item===Number(target.item)));
+ const {units}=legalUnits(article),selected=units.filter(u=>(!target.paragraph||u.paragraph===Number(target.paragraph))&&(target.item?u.item===Number(target.item):!target.paragraph||!u.item));
  const scope=selected.length===1?selected[0]:null;
  const citations=[];
  for(const e of corpus){

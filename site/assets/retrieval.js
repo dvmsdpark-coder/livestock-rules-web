@@ -1,7 +1,7 @@
 // Corpus-derived clause retrieval; source excerpts, never a generated legal answer.
-import {activeArticles,searchableChunk} from './provisions.js?v=20261024-12';
-import {legalUnits} from './evidence.js?v=20261024-12';
-import {sopIndex} from './sop-index.js?v=20261024-12';
+import {activeArticles,searchableChunk} from './provisions.js?v=20261024-13';
+import {legalUnits,references} from './evidence.js?v=20261024-13';
+import {sopIndex} from './sop-index.js?v=20261024-13';
 const flat=s=>s.normalize('NFKC').replace(/[\sㆍ·“”"「」『』()（）,.:：]/gu,'').toLowerCase();
 const generic=new Set(['가축','전염병','가축전염병','방역','규정','관련','대한','대하여','위한','경우','사항','조치','방법','기준','요령','발생','발생시','대상','실시','관리','따른','따라','절차','등의','범위','의무','처리','구제역','아프리카돼지열병','조류인플루엔자','고병원성','농장','발생농장','가축의','지역','필요한','있는','없는','위하여','하여야','관한','어떤','검출시','고병원성ai','어떻게','어디에','어디','하나요','되나요','받나요','있나요','무엇','무엇인가요','조건','검출','확인','방역조치','언제','알려주세요','근거','비교','차이','차이점']);
 export const concepts=[
@@ -76,7 +76,13 @@ const sectionTitle=s=>flat(s).replace(/^\d+(?:\.\d+)*[.]?/u,'').replace(/[?？]/
 const requestTitle=s=>sectionTitle(s).replace(/^(?:hpai|ai|asf|fmd|구제역|아프리카돼지열병|조류인플루엔자)/u,'').replace(/(?:을|를|은|는)?(?:알려주세요|설명해주세요|알려줘)$/u,'').replace(/[을를은는]$/u,'');
 const matches=(text,a)=>a.aliases.some(alias=>(a.name==='처리'?text.replace(/처리업|처리시설|처리장/gu,''):text).includes(alias));
 export function retrieve(entries,question,asOf,target){
- const indexes=entries.map(e=>indexFor(e,asOf)),anchors=anchorsFor(question,indexes);
+ const indexes=entries.map(e=>indexFor(e,asOf));
+ const roleRequest=/역할|직무|권한|책무|업무(?!량)|하는\s*일|해야\s*할\s*일|무슨\s*일|어떤\s*일/u.test(question);
+ const roleWords=new Set(['역할','업무','직무','권한','책무','하는일','해야할일','내용','무슨','정리','설명']);
+ const anchors=anchorsFor(question,indexes).filter(a=>!roleRequest||!roleWords.has(a.name));
+ const actors=roleRequest?anchors.filter(a=>!concepts.some(c=>c.name===a.name)&&(indexes.some(i=>i.rows.some(r=>matches(r.heading,a)))||/관|사|본부|기관|위원회$/u.test(a.name))):[];
+ const roleSearch=actors.length>0;
+ const roleRoots=roleSearch?entries.filter(e=>e.doc.type==='법률').flatMap(e=>activeArticles(e,asOf).filter(a=>actors.some(actor=>actor.aliases.includes(flat(a.title)))).map(a=>({id:e.doc.id,number:a.number}))):[];
  const benefits=anchors.filter(a=>['생계안정','소득안정'].includes(a.name));
  const subjects=anchors.filter(a=>!actionNames.has(a.name)),required=subjects.length?subjects:anchors;
  if(!anchors.length)return {status:'no_terms',anchors:[],hits:[],sopHits:[],supplement:[]};
@@ -85,8 +91,11 @@ export function retrieve(entries,question,asOf,target){
  const scored=[],actions=anchors.filter(a=>actionNames.has(a.name));
  const qualifiers=['발생농장','관리지역','보호지역','예찰지역'].filter(t=>flat(question).includes(t));
  for(const r of rows){
+  if(roleSearch&&/벌칙|과태료|처벌/u.test(r.heading)&&!/벌칙|과태료|처벌/u.test(question))continue;
   if(benefits.length){
    if(r.unit.item||!benefits.some(a=>matches(r.text,a)))continue;
+  }else if(roleSearch){
+   if(r.unit.item)continue;
   }else if(r.wholeParagraph)continue;
   // Every identified subject must occur in the unit or its own article heading.
   // A parent introduction can supply conditions, but cannot alone make a sibling item relevant.
@@ -96,17 +105,26 @@ export function retrieve(entries,question,asOf,target){
   const direct=anchors.filter(a=>matches(r.text,a)),heading=anchors.filter(a=>matches(r.heading,a));
   if(!direct.length)continue;
   const matched=anchors.filter(a=>direct.includes(a)||heading.includes(a));
-  const score=matched.reduce((n,a)=>n+weights.get(a.name),0)+heading.reduce((n,a)=>n+weights.get(a.name)*3,0)+matched.length/anchors.length*2;
-  scored.push({...r,score,matched:matched.map(a=>a.name)});
+  const actorHeading=roleSearch&&actors.some(a=>matches(r.heading,a));
+  const roleOwn=flat(r.unit.parts.map(p=>p.text).join(' ').replace(/^\s*제\s*\d+\s*조(?:\s*의\s*\d+)?\([^)]*\)/u,'').replace(/^\s*[①-⑳]\s*/u,''));
+  const actorSubject=roleSearch&&actors.some(a=>a.aliases.some(alias=>new RegExp('^'+alias+'(?:은|는|이(?!란)|가|ㆍ|ᆞ|또는|및)').test(roleOwn)));
+  const operational=roleSearch&&/업무|담당|수행|할수있|하여야|검사|질문|채취|지도|감독|예찰|조사/u.test(r.text);
+  if(roleSearch&&actorHeading&&!operational&&!/교육|증표/u.test(r.heading))continue;
+  const roleDelegated=roleSearch&&references(r.unit.parts.map(p=>p.text).join(' '),r.entry.doc,entries).some(ref=>roleRoots.some(root=>root.id===ref.documentId&&root.number===ref.articleNumber));
+  const actorRoot=roleSearch&&actors.some(a=>a.aliases.includes(r.heading));
+  const roleScore=roleSearch?(actorHeading?25:0)+(actorRoot?50:0)+(actorSubject?15:0)+(actorSubject&&operational?20:0)+(roleDelegated?20:0)-(!actorHeading&&/소유자|종사자/u.test(r.heading)?25:0)-(/자격|임명|위촉/u.test(r.text)&&!/담당|업무범위/u.test(r.text)?20:0):0;
+  const score=roleScore+matched.reduce((n,a)=>n+weights.get(a.name),0)+heading.reduce((n,a)=>n+weights.get(a.name)*3,0)+matched.length/anchors.length*2;
+  scored.push({...r,score,actorHeading,actorRoot,roleDelegated,matched:matched.map(a=>a.name)});
  }
  scored.sort((a,b)=>b.score-a.score||a.article.number.localeCompare(b.article.number,'ko'));
  const groups=[];
  for(const row of scored){
   const key=row.entry.doc.id+':'+row.article.number;let group=groups.find(g=>g.key===key);
-  if(!group){group={key,doc:row.entry.doc,article:row.article,score:row.score,scopes:[],matched:row.matched};groups.push(group);}
+  if(!group){group={key,doc:row.entry.doc,article:row.article,score:row.score,actorHeading:row.actorHeading,actorRoot:row.actorRoot,roleDelegated:row.roleDelegated,scopes:[],matched:row.matched};groups.push(group);}
   if(group.scopes.length<(benefits.length?3:2))group.scopes.push({paragraph:row.unit.paragraph,item:row.unit.item});
  }
- if(target)groups.sort((a,b)=>Number(b.doc.disease===target)-Number(a.doc.disease===target)||b.score-a.score);
+ if(roleSearch)groups.sort((a,b)=>Number(b.actorRoot)-Number(a.actorRoot)||Number(b.roleDelegated)-Number(a.roleDelegated)||({'법률':0,'시행령':1,'시행규칙':2,'고시':3}[a.doc.type]??9)-({'법률':0,'시행령':1,'시행규칙':2,'고시':3}[b.doc.type]??9)||b.score-a.score);
+ if(target&&!roleSearch)groups.sort((a,b)=>Number(b.doc.disease===target)-Number(a.doc.disease===target)||b.score-a.score);
  if(benefits.length||anchors.some(a=>a.name==='보상'))groups.sort((a,b)=>({'법률':0,'시행령':1}[a.doc.type]??9)-({'법률':0,'시행령':1}[b.doc.type]??9)||b.score-a.score);
  for(const g of groups)if(benefits.length){
   // Include a separately numbered exception explicitly tied to a selected paragraph.
@@ -116,10 +134,18 @@ export function retrieve(entries,question,asOf,target){
   }
   g.scopes.sort((a,b)=>(a.paragraph||0)-(b.paragraph||0));
  }
- const hits=groups.slice(0,6);
+ // Role questions retain the strongest source from each legal layer before
+ // filling additional slots; mentions in one layer cannot displace all others.
+ let ordered=groups;
+ if(roleSearch){
+  const representatives=['법률','시행령','시행규칙'].map(type=>groups.find(g=>g.doc.type===type)).filter(Boolean);
+  for(const disease of [...new Set(entries.filter(e=>e.doc.type==='고시'&&e.doc.disease!=='공통').map(e=>e.doc.disease))]){const g=groups.find(g=>g.doc.type==='고시'&&g.doc.disease===disease);if(g)representatives.push(g);}
+  ordered=[...representatives,...groups.filter(g=>!representatives.includes(g))];
+ }
+ const hits=ordered.slice(0,roleSearch?8:6);
  // Rank complete numbered SOP units, including page continuations, rather than page hits.
  const sopHits=[];
- const titleQuery=requestTitle(question),actionRequest=/조치|요령|어떻게|운영|운용|처리|소독|설정|해제|재입식|방역/u.test(question);
+ const titleQuery=requestTitle(question),actionRequest=roleSearch||/조치|요령|어떻게|운영|운용|처리|소독|설정|해제|재입식|방역/u.test(question);
  const operational=/조치|요령|운영|운용|처리|소독|설정|해제|재입식|방역|채취|공급|교육|지원|제한|검사|진단|기본원칙/u;
  for(const entry of entries)if(entry.doc.type==='SOP')for(const section of sopIndex(entry).sections){
   const exactTitle=sectionTitle(section.heading)===titleQuery;
@@ -133,7 +159,7 @@ export function retrieve(entries,question,asOf,target){
    const headingHits=anchors.filter(a=>matches(context,a));
    const exactHeading=exactTitle?40:0;
    const stageBoost=/고병원성|확진/u.test(question)&&/고병원성.*확진|확진.*조치/u.test(section.heading)?8:0;
-   sopHits.push({doc:entry.doc,section,unit,exactTitle,stageBoost,affinity:subjects.filter(a=>matches(flat(section.heading),a)).length,score:direct.length*2+headingHits.length*4+direct.length/anchors.length+stageBoost+exactHeading-(section.layout==='table'?20:0)});
+   sopHits.push({doc:entry.doc,section,unit,exactTitle,stageBoost,affinity:subjects.filter(a=>matches(flat(section.heading),a)).length,score:(roleSearch?5:0)+direct.length*2+headingHits.length*4+direct.length/anchors.length+stageBoost+exactHeading-(section.layout==='table'?20:0)});
   }
  }
  sopHits.sort((a,b)=>b.score-a.score||a.section.parts[0].page-b.section.parts[0].page);
@@ -143,9 +169,10 @@ export function retrieve(entries,question,asOf,target){
   if(g.units.length<2)g.units.push(hit.unit);
  }
  const exactGroups=sopGroups.filter(g=>g.exactTitle);
- const selectedSop=exactGroups.length?exactGroups:sopGroups.filter(g=>g.score>=Math.max(5,(sopGroups[0]?.score||0)*0.65));
- for(const [i,g] of selectedSop.entries())g.primary=i===0||g.exactTitle||g.stageBoost>0||g.affinity>0&&g.score>=selectedSop[0].score*0.85;
+ let selectedSop=exactGroups.length?exactGroups:sopGroups.filter(g=>g.score>=Math.max(5,(sopGroups[0]?.score||0)*0.65));
+ if(roleSearch){const first=[...new Set(selectedSop.map(g=>g.doc.disease))].map(d=>selectedSop.find(g=>g.doc.disease===d));selectedSop=[...first,...selectedSop.filter(g=>!first.includes(g))];}
+ for(const [i,g] of selectedSop.entries())g.primary=roleSearch?hits.length===0:i===0||g.exactTitle||g.stageBoost>0||g.affinity>0&&g.score>=selectedSop[0].score*0.85;
  const supplement=[];
  const needsDetail=/희석|몇\s*배|농도|용량/u.test(question);
- return {benefits:benefits.map(a=>a.name),needsDetail,status:needsDetail?'needs_detail':hits.length||selectedSop.length?'matched':'no_match',anchors:anchors.map(a=>a.name),hits,sopHits:selectedSop.slice(0,4),supplement};
+ return {roleSearch,actors:actors.map(a=>a.name),benefits:benefits.map(a=>a.name),needsDetail,status:needsDetail?'needs_detail':hits.length||selectedSop.length?'matched':'no_match',anchors:anchors.map(a=>a.name),hits,sopHits:selectedSop.slice(0,4),supplement};
 }

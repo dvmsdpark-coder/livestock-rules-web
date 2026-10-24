@@ -1862,6 +1862,38 @@
       ]
     }
   ],
+  "roles": [
+    {
+      "disease": "구제역",
+      "question": "가축방역관의 역할",
+      "law": true,
+      "decree": true,
+      "rule": true,
+      "notice": true,
+      "sop": true,
+      "wrongDisease": false
+    },
+    {
+      "disease": "ASF",
+      "question": "가축방역관의 역할",
+      "law": true,
+      "decree": true,
+      "rule": true,
+      "notice": true,
+      "sop": true,
+      "wrongDisease": false
+    },
+    {
+      "disease": "고병원성AI",
+      "question": "가축방역관의 역할",
+      "law": true,
+      "decree": true,
+      "rule": true,
+      "notice": true,
+      "sop": true,
+      "wrongDisease": false
+    }
+  ],
   "benefits": [
     {
       "name": "생계안정",

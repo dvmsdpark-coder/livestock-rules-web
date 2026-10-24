@@ -6,3 +6,7 @@ main,.masthead,footer{max-width:1320px}.hero{padding:34px 0 28px}.hero h1{font-s
 @media(max-width:480px){.hero h1{font-size:26px}.hero h1 br{display:block}.workspace{gap:18px}.results-panel{padding:18px}.search-panel .filters{grid-template-columns:1fr 1fr}.search-panel .filters>div:last-child{grid-column:1/-1}.evidence{padding:17px}.evidence .evidence-title{font-size:19px}.excerpt{font-size:14px;line-height:1.85}.focused-source{padding-left:12px}.source-name{font-size:11px}.evidence-footer{gap:13px}.evidence-footer a,.text-action{font-size:11px}#articleDialog{padding:18px;width:96vw;max-height:92vh;border-radius:12px}#articleHeading{font-size:20px}.selected-clause{padding:15px}.dialog-source{font-size:11px}}
 
 .source-overview{padding:16px;margin:16px 0 22px;border:1px solid #d7e4e8;border-radius:12px;background:#f8fbfc}.source-overview h3{font-size:15px;margin:0 0 12px}.source-overview-row{display:flex;flex-wrap:wrap;gap:6px 16px;padding:8px 0;border-bottom:1px solid #e4edef}.source-overview-row a{font-size:14px;font-weight:650}.source-overview-row .meta{font-size:12px}.source-overview .context-note{margin-bottom:0}
+
+.disease-chip{display:inline-block;padding:.2rem .5rem;border-radius:6px;background:#e4f2f2;color:#086d75;font-size:.78rem;font-weight:700;white-space:nowrap}.evidence-top{flex-wrap:wrap}
+
+.role-source-details{margin-top:12px}.role-source-details>summary{font-size:13px;font-weight:650;color:#086d75;cursor:pointer;padding:5px 0}.role-source-details[open]>summary{margin-bottom:8px}

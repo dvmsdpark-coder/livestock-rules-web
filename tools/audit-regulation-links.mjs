@@ -34,13 +34,19 @@ export function auditLinks(){
   const ruleText=rule?.focus.flatMap(u=>u.parts).map(p=>p.text).join('')||'';
   reporting.push({disease,question:q,law:Boolean(law),rule:Boolean(rule),sop:sop.length>0,oralWrittenElectronic:ruleText.includes('구두ㆍ서면 또는 전자문서'),requiredFields:ruleText.includes('신고자의 성명 및 주소'),afterReceipt:ruleText.includes('검안 또는 진단'),sources:v.groups.map(g=>({type:g.docType,title:g.title,article:g.articleNumber,pages:[...new Set(g.parts.map(p=>p.page))]}))});
  }
+ const roles=[];
+ for(const disease of ['구제역','ASF','고병원성AI']){
+  const question='가축방역관의 역할',r=search(corpus,question,{...defaults,disease}),v=presentResults(corpus,r,question);
+  const has=(type,article,paragraph)=>v.groups.some(g=>g.docType===type&&g.articleNumber===article&&g.primary&&g.focus.some(u=>u.paragraph===paragraph));
+  roles.push({disease,question,law:has('법률','제7조',3),decree:has('시행령','제3조',3),rule:has('시행규칙','제49조',null),notice:v.groups.some(g=>g.docType==='고시'&&g.disease===disease),sop:v.groups.some(g=>g.docType==='SOP'&&g.disease===disease),wrongDisease:v.groups.some(g=>!['공통',disease].includes(g.disease))});
+ }
  const benefits=[];
  for(const [name,lawParagraph,decreeArticle] of [['생계안정',1,'제12조'],['소득안정',2,'제12조의2']]){
   const q=name+'자금 지급 근거',r=search(corpus,q,defaults),v=presentResults(corpus,r,q);
   const law=v.groups.find(g=>g.docType==='법률'&&g.articleNumber==='제49조'),decree=v.groups.find(g=>g.docType==='시행령'&&g.articleNumber===decreeArticle);
   benefits.push({name,lawParagraph,decreeArticle,law:Boolean(law?.focus.some(u=>u.paragraph===lawParagraph)),delegation:Boolean(law?.focus.some(u=>u.paragraph===3)),decree:Boolean(decree),wrongScheme:law?.focus.some(u=>u.paragraph===(lawParagraph===1?2:1))||false});
  }
- return {asOf:defaults.asOf,scope:'등록 문서의 인용 연결·신고 근거 누락·문서 버전 차이 점검. 법률 해석상 충돌 여부를 확정하는 감사가 아닙니다.',annexConnections,missingAttachments:corpus.filter(e=>e.doc.search_note?.includes('실제 첨부')).map(e=>({title:e.doc.title,note:e.doc.search_note})),resolvedReferences:links,invalidLinks:issues,documents:stats,reporting,benefits,versionReview,limitations:['인용 해석기가 연결하지 못한 외부 법령·모호한 인용은 이 연결 검증 수에 포함되지 않습니다.','같은 조문 번호가 존재해도 개정 전후 내용이 같다는 뜻은 아닙니다.','SOP의 공식 시행일 미확인 사항과 표·그림의 의미는 별도 검토가 필요합니다.']};
+ return {asOf:defaults.asOf,scope:'등록 문서의 인용 연결·신고 근거 누락·문서 버전 차이 점검. 법률 해석상 충돌 여부를 확정하는 감사가 아닙니다.',annexConnections,missingAttachments:corpus.filter(e=>e.doc.search_note?.includes('실제 첨부')).map(e=>({title:e.doc.title,note:e.doc.search_note})),resolvedReferences:links,invalidLinks:issues,documents:stats,reporting,roles,benefits,versionReview,limitations:['인용 해석기가 연결하지 못한 외부 법령·모호한 인용은 이 연결 검증 수에 포함되지 않습니다.','같은 조문 번호가 존재해도 개정 전후 내용이 같다는 뜻은 아닙니다.','SOP의 공식 시행일 미확인 사항과 표·그림의 의미는 별도 검토가 필요합니다.']};
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  const r=auditLinks(),root=new URL('../docs/',import.meta.url);fs.mkdirSync(root,{recursive:true});
@@ -52,6 +58,10 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
  '| 질병 | 법 제11조 | 규칙 제13조 | SOP | 신고방법·필수사항·접수후조치 |','| --- | --- | --- | --- | --- |',
  ...r.reporting.map(x=>'| '+x.disease+' | '+(x.law?'확인':'누락')+' | '+(x.rule?'확인':'누락')+' | '+(x.sop?'확인':'누락')+' | '+(x.oralWrittenElectronic&&x.requiredFields&&x.afterReceipt?'검색 발췌에 포함':'확인 필요')+' |'),
  '', '신고 기관·의무는 법, 신고방법과 포함 사항 및 접수 후 조치는 시행규칙, 현장 대응은 고시·SOP에서 구분해 확인합니다. 서로 다른 설명의 상세도가 곧 충돌을 뜻하지 않습니다.',
+ '', '## 가축방역관 역할 근거 대조','',
+ '| 질병 | 법 제7조제3항 | 시행령 제3조제3항 | 규칙 제49조 | 고시 | SOP | 다른 질병 혼입 |','| --- | --- | --- | --- | --- | --- | --- |',
+ ...r.roles.map(x=>'| '+x.disease+' | '+(x.law?'확인':'누락')+' | '+(x.decree?'확인':'누락')+' | '+(x.rule?'확인':'누락')+' | '+(x.notice?'확인':'누락')+' | '+(x.sop?'확인':'누락')+' | '+(x.wrongDisease?'확인 필요':'없음')+' |'),
+ '', '역할·업무·권한 표현을 법령과 현장 지침의 검색 의도로 연결한 표본 점검입니다. 역할의 상세도·위임 범위 및 개정 전후의 의미상 충돌을 확정하지 않습니다.',
  '', '## 안정비용 지원 근거 대조','',
  '| 구분 | 법 제49조의 근거 항 | 시행령 | 위임 조항 포함 | 다른 지원 항 혼입 |','| --- | --- | --- | --- | --- |',
  ...r.benefits.map(x=>'| '+x.name+' | 제'+x.lawParagraph+'항 | '+x.decreeArticle+' | '+(x.delegation?'제3항 확인':'확인 필요')+' | '+(x.wrongScheme?'확인 필요':'없음')+' |'),
