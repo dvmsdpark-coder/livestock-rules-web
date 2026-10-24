@@ -1,7 +1,7 @@
-import {eligible} from './search.js?v=20261024-5';
+import {eligible} from './search.js?v=20261024-6';
 const $=id=>document.getElementById(id);
 const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
-const labels={definition:'용어 정의',material:'사료 관련 조치',topic:'살처분 근거',article:'조문 검색',procedure:'절차 검색',zone:'방역지역',annex:'서식·별표',related:'관련 후보'};
+const labels={definition:'용어 정의',ranked:'조문·용어 검색',material:'사료 관련 조치',topic:'살처분 근거',article:'조문 검색',procedure:'절차 검색',zone:'방역지역',annex:'서식·별표',related:'관련 후보'};
 let manifest,worker,requestId=0,navId=0,navStack=[],navDate=null,searchedFilters=null;
 const asOf=$('asOf');
 const koreaDate=value=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(value));
@@ -60,10 +60,11 @@ function render(result){
  $('mode').textContent=labels[result.mode];const root=$('results');root.replaceChildren();
  const groups=result.view?.groups||[];
  if(!groups.length){$('message').textContent=result.message;root.append(el('p','scope-notice','질병·문서 종류·적용 기준일을 확인해주세요.'));return;}
- $('message').textContent=['topic','material'].includes(result.mode)?result.message:result.mode==='related'?'질문에 일치하는 항·호를 특정하지 못했습니다. 관련 원문 후보를 펼쳐 확인하거나 질문을 구체적으로 입력해주세요.':'질문과 연결한 원문 항목을 먼저 표시합니다. 밑줄 친 조문을 누르면 같은 기준일의 연결 규정을 볼 수 있습니다.';
+ $('message').textContent=(['topic','material','ranked'].includes(result.mode)||result.diagnostics?.status==='needs_detail')?result.message:result.mode==='related'?'질문에 일치하는 항·호를 특정하지 못했습니다. 관련 원문 후보를 펼쳐 확인하거나 질문을 구체적으로 입력해주세요.':'질문과 연결한 원문 항목을 먼저 표시합니다. 밑줄 친 조문을 누르면 같은 기준일의 연결 규정을 볼 수 있습니다.';
  const primary=groups.filter(g=>g.primary),support=groups.filter(g=>!g.primary);
+ if(result.diagnostics?.terms?.length)root.append(el('p','scope-notice','연결한 검색어: '+result.diagnostics.terms.join(' · ')));
  if(primary.length){const label=el('div','result-section-label');label.append(el('h3','','질문에 연결한 근거'),el('span','',primary.length+'건'));root.append(label);for(const g of primary)root.append(card(g));}
- if(support.length){const related=el('details','supporting-results');related.append(el('summary','',`${result.mode==='related'?'관련 원문 후보':'관련 법령·추가 근거'} ${support.length}건 보기`));for(const g of support)related.append(card(g));root.append(related);}
+ if(support.length){const related=el('details','supporting-results');if(!primary.length)related.open=true;related.append(el('summary','',`${result.mode==='related'?'관련 원문 후보':'관련 법령·추가 근거'} ${support.length}건 보기`));for(const g of support)related.append(card(g));root.append(related);}
 }
 function parseTarget(){
  const p=new URLSearchParams(location.hash.slice(1)),id=p.get('article'),number=p.get('number');
@@ -105,8 +106,8 @@ for(const button of document.querySelectorAll('[data-question]'))button.onclick=
 for(const id of ['disease','docType','asOf'])$(id).addEventListener('change',()=>{requestId++;if(dialog.open)dialog.close();$('submit').disabled=!manifest;document.querySelector('.results-panel').setAttribute('aria-busy','false');library();updateExamples();$('message').textContent='검색 조건이 바뀌었습니다. 다시 검색해주세요.';$('results').replaceChildren();});
 function updateExamples(){const name={ASF:'아프리카돼지열병',고병원성AI:'고병원성 조류인플루엔자'}[$('disease').value]||'구제역';for(const b of document.querySelectorAll('[data-question]')){b.dataset.baseQuestion??=b.dataset.question;b.dataset.question=b.dataset.baseQuestion.replace(/^구제역/u,name);}}
 try{
- const response=await fetch(new URL('../data/manifest.json?v=20261024-5',import.meta.url));if(!response.ok)throw Error();manifest=await response.json();if(manifest.schema!==1)throw Error();
- worker=new Worker(new URL('./worker.js?v=20261024-5',import.meta.url),{type:'module'});
+ const response=await fetch(new URL('../data/manifest.json?v=20261024-6',import.meta.url));if(!response.ok)throw Error();manifest=await response.json();if(manifest.schema!==1)throw Error();
+ worker=new Worker(new URL('./worker.js?v=20261024-6',import.meta.url),{type:'module'});
  worker.onmessage=({data})=>{
   if(data.action==='article'){if(data.id!==navId||!dialog.open)return;renderArticle(data.error?{error:data.error}:data.detail);return;}
   if(data.id!==requestId)return;$('submit').disabled=false;document.querySelector('.results-panel').setAttribute('aria-busy','false');if(data.error){$('message').textContent=data.error;return;}render(data.result);

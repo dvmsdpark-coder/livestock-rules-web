@@ -1,6 +1,7 @@
 // Browser and Node share this deterministic, model-free search implementation.
-import {activeArticles,searchableChunk} from './provisions.js?v=20261024-5';
-import {legalUnits} from './evidence.js?v=20261024-5';
+import {activeArticles,searchableChunk} from './provisions.js?v=20261024-6';
+import {legalUnits} from './evidence.js?v=20261024-6';
+import {retrieve} from './retrieval.js?v=20261024-6';
 const compact=s=>s.replace(/[\s“”"「」『』·ㆍ]/gu,'').replace(/[?？.]+$/u,'');
 const normalize=s=>s.replace(/\s+/gu,' ').trim();
 const stop=new Set(['구제역','FMD','ASF','HPAI','가축','경우','발생','규정','관련','대한','대하여','어떻게','무엇','언제','어디','해야','하나요','되나요','알려','주세요','합니까','인가요','방법']);
@@ -37,6 +38,7 @@ function procedureIntent(question,disease){
  return null;
 }
 const messages={definition:'질문한 용어의 정의 항목을 찾았습니다. 위임 규정과 적용 범위는 원문에서 함께 확인하세요.',
+ ranked:'질문 속 용어와 연결된 조문을 검색했습니다. 법적 판단이나 답변 확정이 아니며, 발췌한 항·호의 적용 조건과 전체 원문을 확인하세요.',
  material:'사료의 오염물건 처리와 이동·공급 관련 근거입니다. 질병을 선택하면 해당 고시를 먼저 표시합니다. 발생농장·방역지역 및 예외 조건을 구분해 확인하세요. 등록된 법령·고시에서 찾은 결과이며 SOP 전체 절차를 대신하지 않습니다.',
  topic:'살처분 명령과 대상에 관한 조문입니다. 질병을 선택하면 해당 질병의 세부 기준을 함께 표시합니다. 예외와 적용 조건은 전체 조문에서 확인하세요.',
  article:'제목 또는 번호가 일치하는 조문입니다. 여러 쪽에 걸친 조문은 이어 표시합니다.',
@@ -52,7 +54,7 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
  if(named.length&&!['전체','공통',target].includes(filters.disease))return {mode:'related',results:[],message:'질문과 선택한 질병이 다릅니다. 검색 범위를 확인하세요.'};
  const entries=corpus.filter(({doc})=>eligible(doc,filters)&&(!target||doc.disease==='공통'||doc.disease===target)).sort((a,b)=>(priorities[a.doc.type]??9)-(priorities[b.doc.type]??9));
  if(!target&&/방역지역|방역구역|방역대(?!책|본부)|이동제한.*(?:해제|풀리)/u.test(q))return {mode:'related',results:[],message:'질병별 적용 기준이 다릅니다. 질문에 질병명을 넣거나 질병을 선택해주세요.'};
- let results=[],mode='related';
+ let results=[],mode='related',diagnostics;
  const add=(doc,part,extra={})=>results.push({documentId:doc.id,title:doc.title,docType:doc.type,disease:doc.disease,version:doc.version,
   from:doc.from,pdf:doc.pdf,dateNote:doc.date_note||'',...part,kind:part.kind||'body',...extra});
  const articles=(titles)=>{
@@ -124,15 +126,27 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
   for(const entry of entries){const {doc,index}=entry;if(doc.type==='SOP'||requestedType&&doc.type!==requestedType)continue;for(const a of activeArticles(entry,filters.asOf))if(number?a.number===number:compact(a.title)===topic)for(const part of a.parts)add(doc,part,{match:'조문 일치'});}
   const knownTopic=catalog.some(d=>(d.article_titles||[]).some(t=>compact(t)===topic));
   if(results.length||number||knownTopic)mode='article';else{
-   const terms=words(query.replace(/방역대(?!책|본부)|방역구역/gu,'방역지역'));
-   for(const entry of entries)for(const part of entry.index.chunks){const {doc,index}=entry;if(!searchableChunk(entry,part,filters.asOf))continue;
-    const hits=terms.filter(t=>part.text.includes(t));if(!hits.length)continue;
-    const score=hits.length*3+hits.filter(t=>part.heading.includes(t)).length*2-(part.kind==='form'?6:part.kind==='table'?1:0);
-    add(doc,part,{match:'관련 단어 일치',score});
+   const found=retrieve(entries,query,filters.asOf,target);
+   if(found.hits.length){
+    mode='ranked';
+    for(const hit of found.hits)for(const part of hit.article.parts)add(hit.doc,part,{
+     match:'질문어·조문 연결',retrievalScopes:hit.scopes,retrievalScore:hit.score,matchedTerms:hit.matched,
+     retrievalPrimary:!found.needsDetail&&found.hits.indexOf(hit)<3&&(!target||hit.doc.disease===target||!found.hits.some(h=>h.doc.disease===target))});
    }
-   results.sort((a,b)=>b.score-a.score);results=results.slice(0,6);
+   for(const hit of found.supplement)add(hit.doc,hit.part,{match:'SOP 관련 후보',retrievalPrimary:false,matchedTerms:found.anchors});
+   if(!results.length&&!found.anchors.length){
+    const terms=words(query).filter(t=>!['조치','발생시','발생하면','전염병','처리','기준'].includes(t));
+    for(const entry of entries)for(const part of entry.index.chunks){
+     if(!terms.length||!searchableChunk(entry,part,filters.asOf)||!terms.every(t=>compact(part.text).includes(compact(t))))continue;
+     add(entry.doc,part,{match:'관련 단어 일치',score:terms.length});
+    }
+    results=results.slice(0,6);
+   }
+   // Keep diagnostics separate from the existence of a rule.
+   diagnostics={status:entries.length?found.status:'no_documents',terms:found.anchors,articleCandidates:found.hits.length,sopCandidates:found.supplement.length};
+
   }
  }
  const seen=new Set();results=results.filter(r=>{const k=r.documentId+':'+r.page+':'+compact(r.text);if(seen.has(k))return false;seen.add(k);return true;});
- return {mode,results,asOf:filters.asOf,message:results.length?messages[mode]:term?`‘${term}’의 완결된 정의를 선택 조건에서 찾지 못했습니다. 다른 조문을 정의로 대신 제시하지 않습니다.`:'선택 조건에서 근거를 찾지 못했습니다. 문서 종류·기준일을 확인하거나 질문 표현을 바꿔주세요. 검색 실패가 규정 부존재를 뜻하지는 않습니다.'};
+ return {mode,results,diagnostics:diagnostics||{status:results.length?'structured':'no_match',terms:[]},asOf:filters.asOf,message:diagnostics?.status==='no_documents'?'선택한 문서 종류·질병·기준일에 적용되는 등록 문서가 없습니다. 과거 버전의 미등록과 규정 부존재는 다릅니다.':results.length?(diagnostics?.status==='needs_detail'?'약품·제품과 희석 조건을 특정하지 못했습니다. 일반 소독 조문을 희석배율의 답으로 제시하지 않습니다. 관련 후보의 원문과 제품 기준을 확인하세요.':messages[mode]):term?`‘${term}’의 완결된 정의를 선택 조건에서 찾지 못했습니다. 다른 조문을 정의로 대신 제시하지 않습니다.`:diagnostics?.status==='no_terms'?'질문에서 등록 문서의 검색 용어를 연결하지 못했습니다. 대상이나 조치를 구체적으로 입력해주세요. 규정이 없다는 뜻은 아닙니다.':'선택 조건에서 근거를 찾지 못했습니다. 문서 종류·기준일을 확인하거나 질문 표현을 바꿔주세요. 검색 실패가 규정 부존재를 뜻하지는 않습니다.'};
 }

@@ -1,0 +1,1332 @@
+{
+  "schema": 1,
+  "asOf": "2026-10-24",
+  "sourceDocuments": 9,
+  "sourceSnapshot": [
+    {
+      "id": "284b2b92-ae1b-4c2b-a943-225fca48578e",
+      "sha256": "a7eec762ed408bfd2fe0f3fae4b030c6541fa6db603989a5bf95d71e0a07c8d9",
+      "dataSha256": "15f2f95e71009dc0605b57672d7315bb328e2d851c5ecf88631c8c5920d6d50c",
+      "activeArticles": 91,
+      "chunks": 143
+    },
+    {
+      "id": "e8eee283-2857-40c5-8e0e-0d87750e4c1a",
+      "sha256": "728b40d149eb8ea1402518923138e1a83853598ecf333182c65ba5a1bd7097a5",
+      "dataSha256": "be2e2ae5246af4450242bc1f172378a3eea7c8efb92f5b96f7b6c76be8044897",
+      "activeArticles": 30,
+      "chunks": 80
+    },
+    {
+      "id": "1265dc44-6eb2-4934-a5a8-85b1f2f3638f",
+      "sha256": "25ef0494687bf942ebabde909478e218baf7a4d2ec2efe269198d478cd0a6d11",
+      "dataSha256": "9f3085e13500166b3ad9f414f60aa989993b513e1db56f3221ef7ff298b0f541",
+      "activeArticles": 95,
+      "chunks": 362
+    },
+    {
+      "id": "37899984-3bca-5e02-a322-9d29397f15a5",
+      "sha256": "0a0c00fe1712746c6ab57cfea30b5780a3ab5ce2e2be00f6983d34f5c719e2f0",
+      "dataSha256": "561c07342f8354ddd42d33d1e9fb311c8e20b7ff69f14b509ec6b1f7c48b7eb0",
+      "activeArticles": 33,
+      "chunks": 65
+    },
+    {
+      "id": "e6d52b81-681d-5e59-aa4c-63e78798e41e",
+      "sha256": "c67e963d2c1730f017672c3a2e24b08628afac430ef2d2fa3814ff483418a744",
+      "dataSha256": "e745758cefed41f247b4fb7daccd7e6e28436d34335eb9c79762e18a8c380307",
+      "activeArticles": 37,
+      "chunks": 84
+    },
+    {
+      "id": "56e4867e-a534-4ed4-a8ba-d46aadd3ed0a",
+      "sha256": "544f35dfbb842a39a752fe2cacd510207c3a24c167f0d2e374bd4610bc152ee9",
+      "dataSha256": "50fa306815be7d50782c92926af77ba2183d357865175ff28936d205f4ac8dfd",
+      "activeArticles": 42,
+      "chunks": 61
+    },
+    {
+      "id": "7b763e5d-e1f8-5711-aedc-19ec89ab044f",
+      "sha256": "8ca92a9774fa4ca4af353140f4fed9741297780d189aeadd5ac72e26153fec4a",
+      "dataSha256": "e0ff1f25f6b6c4172cba9937061d0340db8c65908d536fee440addba89de00e7",
+      "activeArticles": 0,
+      "chunks": 232
+    },
+    {
+      "id": "3d9ae693-1bb3-5f8c-af9e-0e3512252566",
+      "sha256": "a2b814c1053b54f9e772628e60f5dee7abe2e841b3ae69efedc026a6d5a9995d",
+      "dataSha256": "00092fa209e19d167cc263715242b7726520a72e14ad569bb5111a82fd3e7b7c",
+      "activeArticles": 0,
+      "chunks": 445
+    },
+    {
+      "id": "de2a0c26-cb9d-4f83-b3f9-4d31f29fbbef",
+      "sha256": "f317fe10748e2a09e84db8098071ee71a0d9609490a35428479e6caccb8f3e60",
+      "dataSha256": "89d16239a48d2e43108aed4cf3c23dc12d6366e583158450c40a43a83949b88e",
+      "activeArticles": 0,
+      "chunks": 474
+    }
+  ],
+  "natural": {
+    "total": 31,
+    "hitInSix": 31,
+    "visibleHit": 25,
+    "cases": [
+      {
+        "id": "report-fmd",
+        "question": "구제역이 발생하면 신고를 어디에 해야하죠?",
+        "expected": {
+          "type": "법률",
+          "disease": "공통",
+          "article": "제11조"
+        },
+        "mode": "procedure",
+        "terms": [],
+        "hitInSix": true,
+        "visibleHit": false,
+        "top": [
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제11조",
+            "primary": false
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제13조",
+            "primary": false
+          }
+        ]
+      },
+      {
+        "id": "report-asf",
+        "question": "ASF 신고기관은 어디인가요?",
+        "expected": {
+          "type": "법률",
+          "disease": "공통",
+          "article": "제11조"
+        },
+        "mode": "procedure",
+        "terms": [],
+        "hitInSix": true,
+        "visibleHit": false,
+        "top": [
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제11조",
+            "primary": false
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제13조",
+            "primary": false
+          }
+        ]
+      },
+      {
+        "id": "report-hpai",
+        "question": "HPAI 신고기관은 어디인가요?",
+        "expected": {
+          "type": "법률",
+          "disease": "공통",
+          "article": "제11조"
+        },
+        "mode": "procedure",
+        "terms": [],
+        "hitInSix": true,
+        "visibleHit": false,
+        "top": [
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제11조",
+            "primary": false
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제13조",
+            "primary": false
+          }
+        ]
+      },
+      {
+        "id": "cull",
+        "question": "살처분",
+        "expected": {
+          "type": "법률",
+          "disease": "공통",
+          "article": "제20조"
+        },
+        "mode": "topic",
+        "terms": [],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제20조",
+            "primary": true
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제23조",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "ASF",
+            "article": "제18조",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "고병원성AI",
+            "article": "제19조",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제18조",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제25조",
+            "primary": false
+          }
+        ]
+      },
+      {
+        "id": "feed",
+        "question": "전염병 발생시 사료에 대한 조치",
+        "expected": {
+          "type": "법률",
+          "disease": "공통",
+          "article": "제23조"
+        },
+        "mode": "material",
+        "terms": [],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제19조",
+            "primary": false
+          },
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제23조",
+            "primary": true
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제22조의3",
+            "primary": true
+          },
+          {
+            "type": "고시",
+            "disease": "ASF",
+            "article": "제20조",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "ASF",
+            "article": "제21조",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "ASF",
+            "article": "제22조",
+            "primary": false
+          }
+        ]
+      },
+      {
+        "id": "feed-fmd",
+        "question": "구제역 발생농장 사료 처리",
+        "expected": {
+          "type": "고시",
+          "disease": "구제역",
+          "article": "제27조"
+        },
+        "mode": "material",
+        "terms": [],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제19조",
+            "primary": false
+          },
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제23조",
+            "primary": false
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제22조의3",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제20조",
+            "primary": true
+          },
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제27조",
+            "primary": true
+          }
+        ]
+      },
+      {
+        "id": "feed-asf",
+        "question": "ASF 발생농장 사료 처리",
+        "expected": {
+          "type": "고시",
+          "disease": "ASF",
+          "article": "제20조"
+        },
+        "mode": "material",
+        "terms": [],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제19조",
+            "primary": false
+          },
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제23조",
+            "primary": false
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제22조의3",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "ASF",
+            "article": "제20조",
+            "primary": true
+          }
+        ]
+      },
+      {
+        "id": "feed-hpai",
+        "question": "HPAI 발생농장 사료 처리",
+        "expected": {
+          "type": "고시",
+          "disease": "고병원성AI",
+          "article": "제21조"
+        },
+        "mode": "material",
+        "terms": [],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제19조",
+            "primary": false
+          },
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제23조",
+            "primary": false
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제22조의3",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "고병원성AI",
+            "article": "제21조",
+            "primary": true
+          }
+        ]
+      },
+      {
+        "id": "manure-fmd",
+        "question": "구제역 발생농장 분뇨 처리",
+        "expected": {
+          "type": "고시",
+          "disease": "구제역",
+          "article": "제27조"
+        },
+        "mode": "ranked",
+        "terms": [
+          "분뇨",
+          "처리"
+        ],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제20조",
+            "primary": true
+          },
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제27조",
+            "primary": true
+          },
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제20조의2",
+            "primary": true
+          },
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제20조의3",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제21조",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제28조",
+            "primary": false
+          }
+        ]
+      },
+      {
+        "id": "manure-asf",
+        "question": "ASF 발생농장 분뇨 처리",
+        "expected": {
+          "type": "고시",
+          "disease": "ASF",
+          "article": "제20조"
+        },
+        "mode": "ranked",
+        "terms": [
+          "분뇨",
+          "처리"
+        ],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "고시",
+            "disease": "ASF",
+            "article": "제20조",
+            "primary": true
+          },
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제17조",
+            "primary": false
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제20조",
+            "primary": false
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제43조",
+            "primary": false
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제50조",
+            "primary": false
+          },
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제60조",
+            "primary": false
+          }
+        ]
+      },
+      {
+        "id": "manure-hpai",
+        "question": "HPAI 발생농장 분뇨 처리",
+        "expected": {
+          "type": "고시",
+          "disease": "고병원성AI",
+          "article": "제21조"
+        },
+        "mode": "ranked",
+        "terms": [
+          "분뇨",
+          "처리"
+        ],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "고시",
+            "disease": "고병원성AI",
+            "article": "제21조",
+            "primary": true
+          },
+          {
+            "type": "고시",
+            "disease": "고병원성AI",
+            "article": "제19조",
+            "primary": true
+          },
+          {
+            "type": "고시",
+            "disease": "고병원성AI",
+            "article": "제22조",
+            "primary": true
+          },
+          {
+            "type": "고시",
+            "disease": "고병원성AI",
+            "article": "제23조",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "고병원성AI",
+            "article": "제33조",
+            "primary": false
+          },
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제17조",
+            "primary": false
+          }
+        ]
+      },
+      {
+        "id": "restock-asf",
+        "question": "ASF 발생 후 돼지를 다시 키워도 되나요?",
+        "expected": {
+          "type": "고시",
+          "disease": "ASF",
+          "article": "제32조"
+        },
+        "mode": "ranked",
+        "terms": [
+          "재입식"
+        ],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "고시",
+            "disease": "ASF",
+            "article": "제32조",
+            "primary": true
+          }
+        ]
+      },
+      {
+        "id": "restock-hpai",
+        "question": "HPAI 재입식 조건은 무엇인가요?",
+        "expected": {
+          "type": "고시",
+          "disease": "고병원성AI",
+          "article": "제33조"
+        },
+        "mode": "ranked",
+        "terms": [
+          "재입식"
+        ],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "고시",
+            "disease": "고병원성AI",
+            "article": "제33조",
+            "primary": true
+          }
+        ]
+      },
+      {
+        "id": "compensation",
+        "question": "살처분 보상금은 어떻게 받나요?",
+        "expected": {
+          "type": "법률",
+          "disease": "공통",
+          "article": "제48조"
+        },
+        "mode": "ranked",
+        "terms": [
+          "보상",
+          "살처분"
+        ],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "시행령",
+            "disease": "공통",
+            "article": "제11조의5",
+            "primary": true
+          },
+          {
+            "type": "시행령",
+            "disease": "공통",
+            "article": "제14조의2",
+            "primary": true
+          },
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제48조",
+            "primary": true
+          },
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제18조",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "ASF",
+            "article": "제10조",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제10조",
+            "primary": false
+          }
+        ]
+      },
+      {
+        "id": "livelihood",
+        "question": "생계비 지원은 받을 수 있나요?",
+        "expected": {
+          "type": "법률",
+          "disease": "공통",
+          "article": "제49조"
+        },
+        "mode": "ranked",
+        "terms": [
+          "생계안정",
+          "지원"
+        ],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제49조",
+            "primary": true
+          },
+          {
+            "type": "시행령",
+            "disease": "공통",
+            "article": "제12조",
+            "primary": true
+          }
+        ]
+      },
+      {
+        "id": "vehicle",
+        "question": "축산차량은 어디에 등록하나요?",
+        "expected": {
+          "type": "시행규칙",
+          "disease": "공통",
+          "article": "제20조의3"
+        },
+        "mode": "ranked",
+        "terms": [
+          "축산차량",
+          "등록"
+        ],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제17조의3",
+            "primary": true
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제20조의3",
+            "primary": true
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제20조의4",
+            "primary": true
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제20조의8",
+            "primary": false
+          },
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제17조의5",
+            "primary": false
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제20조의6",
+            "primary": false
+          }
+        ]
+      },
+      {
+        "id": "training",
+        "question": "축산차량 운전자는 교육을 받아야 하나요?",
+        "expected": {
+          "type": "시행규칙",
+          "disease": "공통",
+          "article": "제20조의6"
+        },
+        "mode": "ranked",
+        "terms": [
+          "축산차량",
+          "교육"
+        ],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제20조의6",
+            "primary": true
+          },
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제17조의3",
+            "primary": true
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제20조의3",
+            "primary": true
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제50조",
+            "primary": false
+          },
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제60조",
+            "primary": false
+          }
+        ]
+      },
+      {
+        "id": "records",
+        "question": "방문기록 보관 기간",
+        "expected": {
+          "type": "법률",
+          "disease": "공통",
+          "article": "제17조의2"
+        },
+        "mode": "ranked",
+        "terms": [
+          "출입기록",
+          "보존기간"
+        ],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제17조의2",
+            "primary": true
+          },
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제17조의3",
+            "primary": true
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제20조의2",
+            "primary": true
+          },
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제17조의4",
+            "primary": false
+          },
+          {
+            "type": "시행령",
+            "disease": "공통",
+            "article": "제15조",
+            "primary": false
+          },
+          {
+            "type": "시행령",
+            "disease": "공통",
+            "article": "제15조의2",
+            "primary": false
+          }
+        ]
+      },
+      {
+        "id": "epidemiology",
+        "question": "역학조사는 누가 하나요?",
+        "expected": {
+          "type": "법률",
+          "disease": "공통",
+          "article": "제13조"
+        },
+        "mode": "ranked",
+        "terms": [
+          "역학조사"
+        ],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제13조",
+            "primary": true
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제15조",
+            "primary": true
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제16조",
+            "primary": true
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제16조의2",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "ASF",
+            "article": "제19조",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제19조",
+            "primary": false
+          }
+        ]
+      },
+      {
+        "id": "carcass",
+        "question": "발생농장 사체는 어떻게 처리하나요?",
+        "expected": {
+          "type": "법률",
+          "disease": "공통",
+          "article": "제22조"
+        },
+        "mode": "ranked",
+        "terms": [
+          "사체",
+          "처리"
+        ],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제25조",
+            "primary": true
+          },
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제22조",
+            "primary": true
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제28조",
+            "primary": true
+          },
+          {
+            "type": "시행령",
+            "disease": "공통",
+            "article": "제8조",
+            "primary": false
+          },
+          {
+            "type": "시행령",
+            "disease": "공통",
+            "article": "제8조의2",
+            "primary": false
+          },
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제24조",
+            "primary": false
+          }
+        ]
+      },
+      {
+        "id": "dig",
+        "question": "매몰한 땅을 파도 되나요?",
+        "expected": {
+          "type": "법률",
+          "disease": "공통",
+          "article": "제24조"
+        },
+        "mode": "ranked",
+        "terms": [
+          "매몰",
+          "매몰한"
+        ],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제24조",
+            "primary": true
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제27조",
+            "primary": true
+          },
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제22조",
+            "primary": true
+          }
+        ]
+      },
+      {
+        "id": "import",
+        "question": "가축 수입금지 대상은 무엇인가요?",
+        "expected": {
+          "type": "법률",
+          "disease": "공통",
+          "article": "제32조"
+        },
+        "mode": "ranked",
+        "terms": [
+          "수입",
+          "수입금지"
+        ],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제32조",
+            "primary": true
+          },
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제33조",
+            "primary": true
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제33조",
+            "primary": true
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제34조",
+            "primary": false
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제35조",
+            "primary": false
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제40조",
+            "primary": false
+          }
+        ]
+      },
+      {
+        "id": "certificate",
+        "question": "검역증명서가 필요한가요?",
+        "expected": {
+          "type": "법률",
+          "disease": "공통",
+          "article": "제34조"
+        },
+        "mode": "ranked",
+        "terms": [
+          "검역",
+          "검역증명서"
+        ],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제34조",
+            "primary": true
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제35조",
+            "primary": true
+          },
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제40조",
+            "primary": true
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제41조",
+            "primary": false
+          },
+          {
+            "type": "시행규칙",
+            "disease": "공통",
+            "article": "제37조",
+            "primary": false
+          },
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제41조",
+            "primary": false
+          }
+        ]
+      },
+      {
+        "id": "reduction",
+        "question": "보상금 지급을 거부할 수 있나요?",
+        "expected": {
+          "type": "법률",
+          "disease": "공통",
+          "article": "제48조"
+        },
+        "mode": "ranked",
+        "terms": [
+          "보상",
+          "감액",
+          "지급"
+        ],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "시행령",
+            "disease": "공통",
+            "article": "제11조",
+            "primary": true
+          },
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제48조",
+            "primary": true
+          }
+        ]
+      },
+      {
+        "id": "vaccination",
+        "question": "구제역 예방접종은 어떻게 하나요?",
+        "expected": {
+          "type": "고시",
+          "disease": "구제역",
+          "article": "제22조"
+        },
+        "mode": "ranked",
+        "terms": [
+          "예방접종"
+        ],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제22조",
+            "primary": true
+          },
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제13조",
+            "primary": true
+          },
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제14조",
+            "primary": true
+          },
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제16조",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제17조",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제20조의2",
+            "primary": false
+          }
+        ]
+      },
+      {
+        "id": "scope",
+        "question": "가축의 범위를 알려주세요",
+        "expected": {
+          "type": "시행령",
+          "disease": "공통",
+          "article": "제2조"
+        },
+        "mode": "article",
+        "terms": [],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "시행령",
+            "disease": "공통",
+            "article": "제2조",
+            "primary": true
+          }
+        ]
+      },
+      {
+        "id": "definition",
+        "question": "가축의 정의",
+        "expected": {
+          "type": "법률",
+          "disease": "공통",
+          "article": "제2조"
+        },
+        "mode": "definition",
+        "terms": [],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제2조",
+            "primary": true
+          }
+        ]
+      },
+      {
+        "id": "clean-asf",
+        "question": "ASF 발생농장은 어떻게 소독하나요?",
+        "expected": {
+          "type": "고시",
+          "disease": "ASF",
+          "article": "제20조"
+        },
+        "mode": "procedure",
+        "terms": [],
+        "hitInSix": true,
+        "visibleHit": false,
+        "top": [
+          {
+            "type": "고시",
+            "disease": "ASF",
+            "article": "제20조",
+            "primary": false
+          }
+        ]
+      },
+      {
+        "id": "clean-fmd",
+        "question": "구제역 발생농장은 어떻게 소독하나요?",
+        "expected": {
+          "type": "고시",
+          "disease": "구제역",
+          "article": "제20조"
+        },
+        "mode": "procedure",
+        "terms": [],
+        "hitInSix": true,
+        "visibleHit": false,
+        "top": [
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제20조",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제27조",
+            "primary": false
+          }
+        ]
+      },
+      {
+        "id": "zone",
+        "question": "구제역 방역대는 어떻게 설정되나요?",
+        "expected": {
+          "type": "고시",
+          "disease": "구제역",
+          "article": "제2조"
+        },
+        "mode": "zone",
+        "terms": [],
+        "hitInSix": true,
+        "visibleHit": true,
+        "top": [
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제2조",
+            "primary": true
+          },
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제2조",
+            "primary": true
+          },
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제2조",
+            "primary": true
+          },
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제2조",
+            "primary": true
+          },
+          {
+            "type": "고시",
+            "disease": "구제역",
+            "article": "제11조",
+            "primary": false
+          }
+        ]
+      },
+      {
+        "id": "release-asf",
+        "question": "ASF 이동제한 해제 조건",
+        "expected": {
+          "type": "고시",
+          "disease": "ASF",
+          "article": "제23조"
+        },
+        "mode": "procedure",
+        "terms": [],
+        "hitInSix": true,
+        "visibleHit": false,
+        "top": [
+          {
+            "type": "고시",
+            "disease": "ASF",
+            "article": "제23조",
+            "primary": false
+          }
+        ]
+      }
+    ]
+  },
+  "structural": {
+    "total": 656,
+    "passed": 656,
+    "failed": []
+  },
+  "limitations": [
+    "조문 번호·제목 자동 점검은 자연어 이해 정확도를 뜻하지 않습니다.",
+    "예시 질문의 기대 조문 도달 여부만 평가하며 법률 해석·완전성을 보증하지 않습니다.",
+    "SOP의 미검토 표·그림과 전체 절차의 의미 정확도는 별도 검토가 필요합니다."
+  ]
+}

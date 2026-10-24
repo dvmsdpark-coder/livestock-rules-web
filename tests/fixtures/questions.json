@@ -1,0 +1,281 @@
+[
+  {
+    "id": "report-fmd",
+    "question": "구제역이 발생하면 신고를 어디에 해야하죠?",
+    "expected": {
+      "type": "법률",
+      "disease": "공통",
+      "article": "제11조"
+    }
+  },
+  {
+    "id": "report-asf",
+    "question": "ASF 신고기관은 어디인가요?",
+    "expected": {
+      "type": "법률",
+      "disease": "공통",
+      "article": "제11조"
+    }
+  },
+  {
+    "id": "report-hpai",
+    "question": "HPAI 신고기관은 어디인가요?",
+    "expected": {
+      "type": "법률",
+      "disease": "공통",
+      "article": "제11조"
+    }
+  },
+  {
+    "id": "cull",
+    "question": "살처분",
+    "expected": {
+      "type": "법률",
+      "disease": "공통",
+      "article": "제20조"
+    }
+  },
+  {
+    "id": "feed",
+    "question": "전염병 발생시 사료에 대한 조치",
+    "expected": {
+      "type": "법률",
+      "disease": "공통",
+      "article": "제23조"
+    }
+  },
+  {
+    "id": "feed-fmd",
+    "question": "구제역 발생농장 사료 처리",
+    "expected": {
+      "type": "고시",
+      "disease": "구제역",
+      "article": "제27조"
+    }
+  },
+  {
+    "id": "feed-asf",
+    "question": "ASF 발생농장 사료 처리",
+    "expected": {
+      "type": "고시",
+      "disease": "ASF",
+      "article": "제20조"
+    }
+  },
+  {
+    "id": "feed-hpai",
+    "question": "HPAI 발생농장 사료 처리",
+    "expected": {
+      "type": "고시",
+      "disease": "고병원성AI",
+      "article": "제21조"
+    }
+  },
+  {
+    "id": "manure-fmd",
+    "question": "구제역 발생농장 분뇨 처리",
+    "expected": {
+      "type": "고시",
+      "disease": "구제역",
+      "article": "제27조"
+    }
+  },
+  {
+    "id": "manure-asf",
+    "question": "ASF 발생농장 분뇨 처리",
+    "expected": {
+      "type": "고시",
+      "disease": "ASF",
+      "article": "제20조"
+    }
+  },
+  {
+    "id": "manure-hpai",
+    "question": "HPAI 발생농장 분뇨 처리",
+    "expected": {
+      "type": "고시",
+      "disease": "고병원성AI",
+      "article": "제21조"
+    }
+  },
+  {
+    "id": "restock-asf",
+    "question": "ASF 발생 후 돼지를 다시 키워도 되나요?",
+    "expected": {
+      "type": "고시",
+      "disease": "ASF",
+      "article": "제32조"
+    }
+  },
+  {
+    "id": "restock-hpai",
+    "question": "HPAI 재입식 조건은 무엇인가요?",
+    "expected": {
+      "type": "고시",
+      "disease": "고병원성AI",
+      "article": "제33조"
+    }
+  },
+  {
+    "id": "compensation",
+    "question": "살처분 보상금은 어떻게 받나요?",
+    "expected": {
+      "type": "법률",
+      "disease": "공통",
+      "article": "제48조"
+    }
+  },
+  {
+    "id": "livelihood",
+    "question": "생계비 지원은 받을 수 있나요?",
+    "expected": {
+      "type": "법률",
+      "disease": "공통",
+      "article": "제49조"
+    }
+  },
+  {
+    "id": "vehicle",
+    "question": "축산차량은 어디에 등록하나요?",
+    "expected": {
+      "type": "시행규칙",
+      "disease": "공통",
+      "article": "제20조의3"
+    }
+  },
+  {
+    "id": "training",
+    "question": "축산차량 운전자는 교육을 받아야 하나요?",
+    "expected": {
+      "type": "시행규칙",
+      "disease": "공통",
+      "article": "제20조의6"
+    }
+  },
+  {
+    "id": "records",
+    "question": "방문기록 보관 기간",
+    "expected": {
+      "type": "법률",
+      "disease": "공통",
+      "article": "제17조의2"
+    }
+  },
+  {
+    "id": "epidemiology",
+    "question": "역학조사는 누가 하나요?",
+    "expected": {
+      "type": "법률",
+      "disease": "공통",
+      "article": "제13조"
+    }
+  },
+  {
+    "id": "carcass",
+    "question": "발생농장 사체는 어떻게 처리하나요?",
+    "expected": {
+      "type": "법률",
+      "disease": "공통",
+      "article": "제22조"
+    }
+  },
+  {
+    "id": "dig",
+    "question": "매몰한 땅을 파도 되나요?",
+    "expected": {
+      "type": "법률",
+      "disease": "공통",
+      "article": "제24조"
+    }
+  },
+  {
+    "id": "import",
+    "question": "가축 수입금지 대상은 무엇인가요?",
+    "expected": {
+      "type": "법률",
+      "disease": "공통",
+      "article": "제32조"
+    }
+  },
+  {
+    "id": "certificate",
+    "question": "검역증명서가 필요한가요?",
+    "expected": {
+      "type": "법률",
+      "disease": "공통",
+      "article": "제34조"
+    }
+  },
+  {
+    "id": "reduction",
+    "question": "보상금 지급을 거부할 수 있나요?",
+    "expected": {
+      "type": "법률",
+      "disease": "공통",
+      "article": "제48조"
+    }
+  },
+  {
+    "id": "vaccination",
+    "question": "구제역 예방접종은 어떻게 하나요?",
+    "expected": {
+      "type": "고시",
+      "disease": "구제역",
+      "article": "제22조"
+    }
+  },
+  {
+    "id": "scope",
+    "question": "가축의 범위를 알려주세요",
+    "expected": {
+      "type": "시행령",
+      "disease": "공통",
+      "article": "제2조"
+    }
+  },
+  {
+    "id": "definition",
+    "question": "가축의 정의",
+    "expected": {
+      "type": "법률",
+      "disease": "공통",
+      "article": "제2조"
+    }
+  },
+  {
+    "id": "clean-asf",
+    "question": "ASF 발생농장은 어떻게 소독하나요?",
+    "expected": {
+      "type": "고시",
+      "disease": "ASF",
+      "article": "제20조"
+    }
+  },
+  {
+    "id": "clean-fmd",
+    "question": "구제역 발생농장은 어떻게 소독하나요?",
+    "expected": {
+      "type": "고시",
+      "disease": "구제역",
+      "article": "제20조"
+    }
+  },
+  {
+    "id": "zone",
+    "question": "구제역 방역대는 어떻게 설정되나요?",
+    "expected": {
+      "type": "고시",
+      "disease": "구제역",
+      "article": "제2조"
+    }
+  },
+  {
+    "id": "release-asf",
+    "question": "ASF 이동제한 해제 조건",
+    "expected": {
+      "type": "고시",
+      "disease": "ASF",
+      "article": "제23조"
+    }
+  }
+]

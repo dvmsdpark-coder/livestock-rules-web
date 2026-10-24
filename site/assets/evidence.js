@@ -1,5 +1,5 @@
 // Source-only presentation and internal legal references. No generated legal text.
-import {activeArticles} from './provisions.js?v=20261024-5';
+import {activeArticles} from './provisions.js?v=20261024-6';
 const squash=s=>s.replace(/\s+/gu,'');
 const clean=s=>s.replace(/[\sㆍ·]/gu,'');
 const circled='①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳';
@@ -139,13 +139,13 @@ function selectFocus(group,question,mode){
   const matched=parsed.units.filter(u=>(!explicit[1]||u.paragraph===Number(explicit[1]))&&(!explicit[2]||u.item===Number(explicit[2])));
   return matched.length===1?matched:[];
  }
- if(mode==='material'){
-  return (group.materialScopes||[]).flatMap(scope=>{
+ if(mode==='material'||mode==='ranked'){
+  return (group.materialScopes||group.retrievalScopes||[]).flatMap(scope=>{
    const u=parsed.units.find(u=>u.paragraph===scope.paragraph&&u.item===scope.item);if(!u)return [];
    const parent=parsed.units.find(p=>!p.item&&p.paragraph===u.paragraph);
    const first=parsed.units.find(p=>p.item&&p.paragraph===u.paragraph);
    const context=u.item&&first?slices(parsed.src,parent.start,first.start):[];
-   return [{...u,parts:[...context,...u.parts],note:u.item?'해당 항의 적용 조건과 사료 관련 호를 함께 발췌했습니다. 다른 호와 전체 맥락은 전체 조문에서 확인하세요.':null}];
+   return [{...u,parts:[...context,...u.parts],note:u.item?'해당 항의 적용 조건과 관련 호를 함께 발췌했습니다. 다른 호와 전체 맥락은 전체 조문에서 확인하세요.':null}];
   });
  }
  const parents=parsed.units.filter(u=>!u.item);
@@ -186,10 +186,12 @@ export function presentResults(corpus,result,question){
   g.primary=result.mode==='procedure'?g.docType==='SOP':result.mode==='zone'?g.match==='방역지역 정의 연결':true;
   if(result.mode==='topic')g.primary=g.topicPrimary;
   if(result.mode==='material')g.primary=g.materialPrimary;
+  if(result.mode==='ranked')g.primary=g.retrievalPrimary;
+  if(g.match==='SOP 관련 후보')g.primary=false;
   if(result.mode==='related')g.primary=false;
   delete g.article;
  }
- if(!groups.some(g=>g.primary)&&result.mode!=='related')for(const g of groups)g.primary=true;
+ if(!groups.some(g=>g.primary)&&!['related','ranked'].includes(result.mode))for(const g of groups)g.primary=true;
  return {groups,question,scope:questionIntent(question)};
 }
 export function articleDetail(corpus,target){

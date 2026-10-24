@@ -19,6 +19,14 @@ jobs:
           node-version: '22'
       - name: Verify source hashes, search behavior and public data
         run: npm test
+      - name: Evaluate natural-language fixtures and every legal article
+        run: npm run evaluate
+      - name: Save search evaluation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: search-evaluation
+          path: docs/search-evaluation.json
   deploy:
     if: github.event_name != 'pull_request'
     needs: test
