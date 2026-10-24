@@ -1,3 +1,4 @@
+import {annexReferences} from '../site/assets/annexes.js';
 import fs from 'node:fs';import {fileURLToPath} from 'node:url';
 import {corpus,defaults} from './evaluate.mjs';
 import {activeArticles} from '../site/assets/provisions.js';
@@ -17,6 +18,11 @@ export function auditLinks(){
   }
   stats.push({document:e.doc.id,title:e.doc.title,type:e.doc.type,sourceDate:e.doc.from,dateNote:e.doc.date_note||'',checkedParts:parts.length,resolvedReferences:linked});
  }
+ const annexConnections=[];
+ for(const e of corpus)for(const a of activeArticles(e,defaults.asOf))for(const p of a.parts)for(const r of annexReferences(p.text,e.doc,corpus)){
+  const key=e.doc.id+':'+a.number+':'+r.documentId+':'+r.page;
+  if(!annexConnections.some(x=>x.key===key))annexConnections.push({key,source:e.doc.title,article:a.number,target:corpus.find(t=>t.doc.id===r.documentId).doc.title,label:r.label,page:r.page,endPage:r.endPage});
+ }
  const versionReview=[];
  for(const e of corpus.filter(e=>e.doc.type==='SOP'))for(const n of corpus.filter(n=>n.doc.type==='고시'&&n.doc.disease===e.doc.disease&&n.doc.from>e.doc.from)){
   versionReview.push({sop:e.doc.title,sopDate:e.doc.from,sopDateNote:e.doc.date_note,notice:n.doc.title,noticeDate:n.doc.from,reason:'SOP 검색 기준일 이후 고시가 개정되었습니다. 변경 내용과 SOP 적용 문구의 대조 검토가 필요합니다. 이 날짜 차이만으로 충돌을 판정하지 않습니다.'});
@@ -34,7 +40,7 @@ export function auditLinks(){
   const law=v.groups.find(g=>g.docType==='법률'&&g.articleNumber==='제49조'),decree=v.groups.find(g=>g.docType==='시행령'&&g.articleNumber===decreeArticle);
   benefits.push({name,lawParagraph,decreeArticle,law:Boolean(law?.focus.some(u=>u.paragraph===lawParagraph)),delegation:Boolean(law?.focus.some(u=>u.paragraph===3)),decree:Boolean(decree),wrongScheme:law?.focus.some(u=>u.paragraph===(lawParagraph===1?2:1))||false});
  }
- return {asOf:defaults.asOf,scope:'등록 문서의 인용 연결·신고 근거 누락·문서 버전 차이 점검. 법률 해석상 충돌 여부를 확정하는 감사가 아닙니다.',resolvedReferences:links,invalidLinks:issues,documents:stats,reporting,benefits,versionReview,limitations:['인용 해석기가 연결하지 못한 외부 법령·모호한 인용은 이 연결 검증 수에 포함되지 않습니다.','같은 조문 번호가 존재해도 개정 전후 내용이 같다는 뜻은 아닙니다.','SOP의 공식 시행일 미확인 사항과 표·그림의 의미는 별도 검토가 필요합니다.']};
+ return {asOf:defaults.asOf,scope:'등록 문서의 인용 연결·신고 근거 누락·문서 버전 차이 점검. 법률 해석상 충돌 여부를 확정하는 감사가 아닙니다.',annexConnections,missingAttachments:corpus.filter(e=>e.doc.search_note?.includes('실제 첨부')).map(e=>({title:e.doc.title,note:e.doc.search_note})),resolvedReferences:links,invalidLinks:issues,documents:stats,reporting,benefits,versionReview,limitations:['인용 해석기가 연결하지 못한 외부 법령·모호한 인용은 이 연결 검증 수에 포함되지 않습니다.','같은 조문 번호가 존재해도 개정 전후 내용이 같다는 뜻은 아닙니다.','SOP의 공식 시행일 미확인 사항과 표·그림의 의미는 별도 검토가 필요합니다.']};
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  const r=auditLinks(),root=new URL('../docs/',import.meta.url);fs.mkdirSync(root,{recursive:true});
@@ -50,6 +56,10 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
  '| 구분 | 법 제49조의 근거 항 | 시행령 | 위임 조항 포함 | 다른 지원 항 혼입 |','| --- | --- | --- | --- | --- |',
  ...r.benefits.map(x=>'| '+x.name+' | 제'+x.lawParagraph+'항 | '+x.decreeArticle+' | '+(x.delegation?'제3항 확인':'확인 필요')+' | '+(x.wrongScheme?'확인 필요':'없음')+' |'),
  '', '이 표는 검색 발췌의 근거 연결을 점검합니다. 지원 여부나 금액을 확정하는 표가 아닙니다.',
+ '', '## 별표·별지 연결','',
+ '- 본문에서 실제 첨부자료로 연결된 인용: '+r.annexConnections.length+'건. 목록 페이지는 대상으로 사용하지 않습니다.',
+ '- 시행령 제11조제1항 → 별표 2: PDF 29~36쪽. 번호는 PDF 페이지 기준입니다.',
+ ...r.missingAttachments.map(x=>'- '+x.title+': '+x.note),
  '', '## 버전 대조가 필요한 자료','',
  ...r.versionReview.map(v=>'- '+v.sop+' ('+v.sopDate+') → '+v.notice+' ('+v.noticeDate+'): '+v.reason),
  '', '## 한계','',...r.limitations.map(x=>'- '+x),''

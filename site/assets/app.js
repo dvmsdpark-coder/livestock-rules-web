@@ -1,4 +1,4 @@
-import {eligible} from './search.js?v=20261024-10';
+import {eligible} from './search.js?v=20261024-11';
 const $=id=>document.getElementById(id);
 const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
 const labels={definition:'용어 정의',ranked:'조문·용어 검색',material:'사료 관련 조치',topic:'살처분 근거',article:'조문 검색',procedure:'절차 검색',zone:'방역지역',annex:'서식·별표',related:'관련 후보'};
@@ -16,7 +16,7 @@ function articleLink(text,target,cls='citation-link'){
 }
 function linkedText(part){
  const p=el('p','excerpt'),text=part.display||part.text;let cursor=0;
- for(const r of part.references||[]){if(r.start<cursor||r.end>text.length)continue;p.append(document.createTextNode(text.slice(cursor,r.start)),articleLink(text.slice(r.start,r.end),r));cursor=r.end;}
+ for(const r of part.references||[]){if(r.start<cursor||r.end>text.length)continue;p.append(document.createTextNode(text.slice(cursor,r.start)),r.kind==='annex'?link(text.slice(r.start,r.end),pdfLink(manifest.documents.find(d=>d.id===r.documentId),r.page)):articleLink(text.slice(r.start,r.end),r));cursor=r.end;}
  p.append(document.createTextNode(text.slice(cursor)));return p;
 }
 function passages(parts,doc,container,showPages=false){
@@ -34,6 +34,7 @@ function card(g){
  const title=el('h3','evidence-title');title.append(g.target?articleLink(g.locator,g.target,'location-link'):el('span','location-label',g.locator));node.append(title);
  const topic=g.heading?.startsWith('정의 · ')?g.heading.replace('정의 · ','')+'의 정의':g.articleTitle;
  if(topic&&topic!==g.locator)node.append(el('p','article-topic',topic));
+ if(g.doc.search_note)node.append(el('p','scope-notice',g.doc.search_note));
  if(g.scenario)node.append(el('p','scenario',g.scenario));
  if(['form','table','figure'].includes(g.kind)){
   node.append(el('p','layout-notice',(g.kind==='form'?'서식':g.kind==='table'?'별표':'그림·사진')+'의 배치와 작성란은 PDF 원문에서 확인하세요.'));
@@ -47,7 +48,7 @@ function card(g){
  passages(g.fullParts,g.doc,full,true);
  const original=el('details','original');original.append(el('summary','','추출 원문 · 줄바꿈 비교'));for(const p of g.fullParts)original.append(el('pre','',`PDF ${p.page}쪽\n${p.text}`));full.append(original);node.append(full);
  const footer=el('div','evidence-footer'),pages=[...new Set(g.parts.map(p=>p.page))];
- footer.append(link('PDF '+pages.join('·')+'쪽 ↗',pdfLink(g.doc,pages[0])));
+ footer.append(link('PDF '+(g.endPage&&g.endPage!==pages[0]?pages[0]+'–'+g.endPage:pages.join('·'))+'쪽 ↗',pdfLink(g.doc,pages[0])));
  if(g.target)footer.append(articleLink('조문·연결 규정',g.target,'text-action'));
  const copy=el('button','text-action','발췌 복사');copy.type='button';copy.onclick=async()=>{
   const parts=g.focus.length?g.focus.flatMap(u=>u.parts):g.parts;
@@ -124,8 +125,8 @@ for(const button of document.querySelectorAll('[data-question]'))button.onclick=
 for(const id of ['disease','docType','asOf'])$(id).addEventListener('change',()=>{requestId++;if(dialog.open)dialog.close();$('submit').disabled=!manifest;document.querySelector('.results-panel').setAttribute('aria-busy','false');library();updateExamples();$('message').textContent='검색 조건이 바뀌었습니다. 다시 검색해주세요.';$('results').replaceChildren();});
 function updateExamples(){const name={ASF:'아프리카돼지열병',고병원성AI:'고병원성 조류인플루엔자'}[$('disease').value]||'구제역';for(const b of document.querySelectorAll('[data-question]')){b.dataset.baseQuestion??=b.dataset.question;b.dataset.question=b.dataset.baseQuestion.replace(/^구제역/u,name);}}
 try{
- const response=await fetch(new URL('../data/manifest.json?v=20261024-10',import.meta.url));if(!response.ok)throw Error();manifest=await response.json();if(manifest.schema!==1)throw Error();
- worker=new Worker(new URL('./worker.js?v=20261024-10',import.meta.url),{type:'module'});
+ const response=await fetch(new URL('../data/manifest.json?v=20261024-11',import.meta.url));if(!response.ok)throw Error();manifest=await response.json();if(manifest.schema!==1)throw Error();
+ worker=new Worker(new URL('./worker.js?v=20261024-11',import.meta.url),{type:'module'});
  worker.onmessage=({data})=>{
   if(data.action==='article'){if(data.id!==navId||!dialog.open)return;renderArticle(data.error?{error:data.error}:data.detail);return;}
   if(data.id!==requestId)return;$('submit').disabled=false;document.querySelector('.results-panel').setAttribute('aria-busy','false');if(data.error){$('message').textContent=data.error;return;}render(data.result);

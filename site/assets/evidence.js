@@ -1,5 +1,6 @@
+import {annexReferences} from './annexes.js?v=20261024-11';
 // Source-only presentation and internal legal references. No generated legal text.
-import {activeArticles} from './provisions.js?v=20261024-10';
+import {activeArticles} from './provisions.js?v=20261024-11';
 const squash=s=>s.replace(/\s+/gu,'');
 const clean=s=>s.replace(/[\sㆍ·]/gu,'');
 const circled='①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳';
@@ -87,7 +88,7 @@ export function delegationReferences(text,doc,target,corpus){
  }
  return result;
 }
-function addRefs(parts,doc,corpus,target=null){return parts.map(p=>{const text=p.display||p.text;return {...p,references:[...references(text,doc,corpus),...delegationReferences(text,doc,target,corpus)].sort((a,b)=>a.start-b.start)};});}
+function addRefs(parts,doc,corpus,target=null){return parts.map(p=>{const text=p.display||p.text;return {...p,references:[...references(text,doc,corpus),...annexReferences(text,doc,corpus),...delegationReferences(text,doc,target,corpus)].sort((a,b)=>a.start-b.start)};});}
 function sopUnits(parts){
  const src=source(parts),markers=[...src.text.matchAll(/(?:^|\n)[ \t]*(\d+(?:\.\d+)+)\.?[ \t]*(?=[가-힣「(<-])/gu)];
  return markers.map((m,i)=>{
@@ -164,7 +165,7 @@ export function presentResults(corpus,result,question){
   const entry=corpus.find(e=>e.doc.id===row.documentId);if(!entry)continue;
   let article=null;
   const number=row.heading?.match(/제\s*\d+\s*조(?:의\s*\d+)?/u)?.[0];
-  if(number)article=articleIn(entry,clean(number),result.asOf);
+  if(number&&!(['form','table'].includes(row.kind)))article=articleIn(entry,clean(number),result.asOf);
   if(!article&&row.match==='정의 항목 일치'||!article&&row.match==='방역지역 정의 연결'){
    article=activeArticles(entry,result.asOf).find(a=>a.title==='정의'&&a.parts.some(p=>p.page===row.page&&p.text.includes(row.text)))||null;
    if(article)article=articleIn(entry,article.number,result.asOf);

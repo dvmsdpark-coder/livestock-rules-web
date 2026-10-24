@@ -1,7 +1,8 @@
 // Browser and Node share this deterministic, model-free search implementation.
-import {activeArticles,searchableChunk} from './provisions.js?v=20261024-10';
-import {legalUnits} from './evidence.js?v=20261024-10';
-import {retrieve} from './retrieval.js?v=20261024-10';
+import {activeArticles,searchableChunk} from './provisions.js?v=20261024-11';
+import {legalUnits} from './evidence.js?v=20261024-11';
+import {actualAnnexes,annexReferences} from './annexes.js?v=20261024-11';
+import {retrieve} from './retrieval.js?v=20261024-11';
 const compact=s=>s.replace(/[\s“”"「」『』·ㆍ]/gu,'').replace(/[?？.]+$/u,'');
 const normalize=s=>s.replace(/\s+/gu,' ').trim();
 const stop=new Set(['구제역','FMD','ASF','HPAI','가축','경우','발생','규정','관련','대한','대하여','어떻게','무엇','언제','어디','해야','하나요','되나요','알려','주세요','합니까','인가요','방법']);
@@ -69,7 +70,8 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
  if(annexKind){
   mode='annex';const number=query.match(/(?:별지|별표|제)\s*(?:제\s*)?(\d+)\s*호?(?:\s*의\s*(\d+))?/u);
   const terms=words(query.replace(/별지|별표|서식|제\d+호(?:의\d+)?|알려주세요|찾아주세요|보여주세요/gu,' '));
-  for(const {doc,index} of entries)for(const a of index.annexes){
+  for(const {doc,index} of entries)for(const a of actualAnnexes(index)){
+   if(/시행령/u.test(query)&&doc.type!=='시행령'||/시행규칙/u.test(query)&&doc.type!=='시행규칙')continue;
    if(a.kind!==annexKind||number&&(a.number[0]!==number[1]||(a.number[1]||null)!==(number[2]||null)))continue;
    if(!number&&terms.length&&!terms.some(t=>a.heading.includes(t)))continue;
    add(doc,a.part,{kind:a.kind,endPage:a.endPage,deleted:a.deleted,match:'자료 번호·제목 일치'});
@@ -126,8 +128,9 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
   const requested=q.match(/제\d+조(?:의\d+)?(?:제\d+항)?(?:제\d+호)?/u);
   const number=requested?.[0].match(/^제\d+조(?:의\d+)?/u)?.[0]||null;
   const requestedType=/시행규칙/u.test(q)?'시행규칙':/시행령/u.test(q)?'시행령':/예방법|^법제/u.test(q)?'법률':null;
-  for(const entry of entries){const {doc,index}=entry;if(doc.type==='SOP'||requestedType&&doc.type!==requestedType)continue;for(const a of activeArticles(entry,filters.asOf))if(number?a.number===number:compact(a.title)===topic)for(const part of a.parts)add(doc,part,{match:'조문 일치'});}
-  const knownTopic=filters.type!=='SOP'&&catalog.some(d=>(d.article_titles||[]).some(t=>compact(t)===topic));
+  const benefitQuestion=!number&&/생계안정|소득안정/u.test(q);
+  for(const entry of entries){const {doc,index}=entry;if(benefitQuestion||doc.type==='SOP'||requestedType&&doc.type!==requestedType)continue;for(const a of activeArticles(entry,filters.asOf))if(number?a.number===number:compact(a.title)===topic)for(const part of a.parts)add(doc,part,{match:'조문 일치'});}
+  const knownTopic=!benefitQuestion&&filters.type!=='SOP'&&catalog.some(d=>(d.article_titles||[]).some(t=>compact(t)===topic));
   if(results.length||number||knownTopic)mode='article';else{
    const found=retrieve(entries,query,filters.asOf,target);
    if(found.hits.length){
@@ -156,6 +159,34 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
    diagnostics={status:entries.length?found.status:'no_documents',terms:found.anchors,benefits:found.benefits||[],articleCandidates:found.hits.length,sopCandidates:found.sopHits.length};
 
   }
+ }
+ // Financial compensation is anchored in decree 11(1), which explicitly
+ // delegates payment/reduction criteria to annex 2. Delayed-order reductions
+ // in 14-2 do not replace that primary source.
+ if(!annexKind&&!term&&/보상/u.test(q)&&/감액|지급|기준|살처분/u.test(q)){
+  const decree=entries.find(e=>e.doc.type==='시행령');
+  const article=decree&&activeArticles(decree,filters.asOf).find(a=>a.number==='제11조');
+  if(article){
+   mode='ranked';results=results.filter(r=>r.docType!=='SOP'&&!(r.documentId===decree.doc.id&&r.heading?.startsWith('제11조(')));
+   const parts=legalUnits(article).units.find(u=>u.paragraph===1&&!u.item)?.parts||[];
+   for(const p of parts)add(decree.doc,{...p,heading:'제11조('+article.title+')'},{match:'보상금 지급·감액 기준 연결',retrievalPrimary:true,retrievalScopes:[{paragraph:1,item:null}]});
+   results.sort((a,b)=>Number(b.match==='보상금 지급·감액 기준 연결')-Number(a.match==='보상금 지급·감액 기준 연결'));
+  }
+ }
+ // Follow explicit annex citations in the retrieved source, never a guessed
+ // table number or an appendix-list page. Keep document/date filters binding.
+ if(mode==='ranked'&&/보상|생계안정|소득안정/u.test(q)){
+  const related=[];
+  for(const row of results){
+   if(row.docType==='SOP'||['table','form'].includes(row.kind))continue;
+   const source=entries.find(e=>e.doc.id===row.documentId);
+   for(const ref of annexReferences(row.text,source.doc,entries)){
+    const e=entries.find(e=>e.doc.id===ref.documentId),a=actualAnnexes(e.index).find(a=>a.kind===ref.annexKind&&a.number.join(':')===ref.number.join(':'));
+    if(a)related.push([e.doc,a,row.retrievalPrimary!==false]);
+   }
+  }
+  related.sort((a,b)=>Number(b[2])-Number(a[2]));
+  for(const [doc,a,primary] of related)add(doc,a.part,{kind:a.kind,endPage:a.endPage,deleted:a.deleted,match:'조문 인용 별표·서식 연결',retrievalPrimary:primary});
  }
  const seen=new Set();results=results.filter(r=>{const k=r.documentId+':'+r.page+':'+compact(r.text);if(seen.has(k))return false;seen.add(k);return true;});
  return {mode,results,diagnostics:diagnostics||{status:results.length?'structured':'no_match',terms:[]},asOf:filters.asOf,message:diagnostics?.status==='no_documents'?'선택한 문서 종류·질병·기준일에 적용되는 등록 문서가 없습니다. 과거 버전의 미등록과 규정 부존재는 다릅니다.':results.length?(diagnostics?.status==='needs_detail'?'약품·제품과 희석 조건을 특정하지 못했습니다. 일반 소독 조문을 희석배율의 답으로 제시하지 않습니다. 관련 후보의 원문과 제품 기준을 확인하세요.':messages[mode]):term?`‘${term}’의 완결된 정의를 선택 조건에서 찾지 못했습니다. 다른 조문을 정의로 대신 제시하지 않습니다.`:diagnostics?.status==='no_terms'?'질문에서 등록 문서의 검색 용어를 연결하지 못했습니다. 대상이나 조치를 구체적으로 입력해주세요. 규정이 없다는 뜻은 아닙니다.':'선택 조건에서 근거를 찾지 못했습니다. 문서 종류·기준일을 확인하거나 질문 표현을 바꿔주세요. 검색 실패가 규정 부존재를 뜻하지는 않습니다.'};

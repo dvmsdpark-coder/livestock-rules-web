@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "asOf": "2026-10-24",
-  "sourceDocuments": 9,
+  "sourceDocuments": 11,
   "sourceSnapshot": [
     {
       "id": "284b2b92-ae1b-4c2b-a943-225fca48578e",
@@ -65,6 +65,20 @@
       "dataSha256": "89d16239a48d2e43108aed4cf3c23dc12d6366e583158450c40a43a83949b88e",
       "activeArticles": 0,
       "chunks": 474
+    },
+    {
+      "id": "57324e54-f079-518c-9f25-0df28b1c60e1",
+      "sha256": "374c98701b9916920b0fea74b66b743b0d3c774e41890622c4d9ccdd98e62171",
+      "dataSha256": "40781b631978406539e6b9d70d5b85b1158994b18a11d872946421ed6ff7c644",
+      "activeArticles": 17,
+      "chunks": 0
+    },
+    {
+      "id": "1dce0635-63a4-5b58-b3a0-63cd313ed189",
+      "sha256": "d50cfc573930e29631c9d924fbdd2cdf11b90a79a4306e9fd4d3fd238e2606a3",
+      "dataSha256": "d930f7da937f68234013e7aeef43e7d1e6ab64b0dc0d6ae3d6c1cb7a4ee53188",
+      "activeArticles": 8,
+      "chunks": 0
     }
   ],
   "precision": {
@@ -988,6 +1002,18 @@
           {
             "type": "시행령",
             "disease": "공통",
+            "article": "제11조",
+            "primary": true
+          },
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제48조",
+            "primary": true
+          },
+          {
+            "type": "시행령",
+            "disease": "공통",
             "article": "제11조의5",
             "primary": true
           },
@@ -998,27 +1024,15 @@
             "primary": true
           },
           {
-            "type": "법률",
+            "type": "고시",
             "disease": "공통",
-            "article": "제48조",
-            "primary": true
-          },
-          {
-            "type": "고시",
-            "disease": "구제역",
-            "article": "제18조",
+            "article": "제15조",
             "primary": false
           },
           {
             "type": "고시",
-            "disease": "ASF",
-            "article": "제10조",
-            "primary": false
-          },
-          {
-            "type": "고시",
-            "disease": "구제역",
-            "article": "제10조",
+            "disease": "공통",
+            "article": "제16조",
             "primary": false
           }
         ]
@@ -1050,6 +1064,30 @@
             "disease": "공통",
             "article": "제12조",
             "primary": true
+          },
+          {
+            "type": "고시",
+            "disease": "공통",
+            "article": "제12조",
+            "primary": true
+          },
+          {
+            "type": "고시",
+            "disease": "공통",
+            "article": "제13조",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "공통",
+            "article": "제14조",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "공통",
+            "article": "제1조",
+            "primary": false
           }
         ]
       },
@@ -1329,10 +1367,22 @@
             "primary": true
           },
           {
+            "type": "고시",
+            "disease": "공통",
+            "article": "제1조",
+            "primary": true
+          },
+          {
             "type": "법률",
             "disease": "공통",
             "article": "제22조",
-            "primary": true
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "공통",
+            "article": "제3조",
+            "primary": false
           }
         ]
       },
@@ -1464,12 +1514,6 @@
           {
             "type": "시행령",
             "disease": "공통",
-            "article": "제11조의5",
-            "primary": true
-          },
-          {
-            "type": "시행령",
-            "disease": "공통",
             "article": "제11조",
             "primary": true
           },
@@ -1483,18 +1527,24 @@
             "type": "법률",
             "disease": "공통",
             "article": "제48조의3",
+            "primary": true
+          },
+          {
+            "type": "법률",
+            "disease": "공통",
+            "article": "제52조",
+            "primary": true
+          },
+          {
+            "type": "시행령",
+            "disease": "공통",
+            "article": "제11조의5",
             "primary": false
           },
           {
             "type": "시행령",
             "disease": "공통",
             "article": "제11조의2",
-            "primary": false
-          },
-          {
-            "type": "법률",
-            "disease": "공통",
-            "article": "제52조",
             "primary": false
           }
         ]
@@ -1735,6 +1785,30 @@
             "disease": "공통",
             "article": "제12조의2",
             "primary": true
+          },
+          {
+            "type": "고시",
+            "disease": "공통",
+            "article": "제2조",
+            "primary": true
+          },
+          {
+            "type": "고시",
+            "disease": "공통",
+            "article": "제3조",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "공통",
+            "article": "제4조",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "공통",
+            "article": "제5조",
+            "primary": false
           }
         ]
       },
@@ -1765,14 +1839,38 @@
             "disease": "공통",
             "article": "제12조",
             "primary": true
+          },
+          {
+            "type": "고시",
+            "disease": "공통",
+            "article": "제12조",
+            "primary": true
+          },
+          {
+            "type": "고시",
+            "disease": "공통",
+            "article": "제13조",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "공통",
+            "article": "제14조",
+            "primary": false
+          },
+          {
+            "type": "고시",
+            "disease": "공통",
+            "article": "제1조",
+            "primary": false
           }
         ]
       }
     ]
   },
   "structural": {
-    "total": 656,
-    "passed": 656,
+    "total": 706,
+    "passed": 706,
     "failed": []
   },
   "limitations": [

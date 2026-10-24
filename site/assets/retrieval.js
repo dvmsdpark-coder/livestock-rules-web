@@ -1,7 +1,7 @@
 // Corpus-derived clause retrieval; source excerpts, never a generated legal answer.
-import {activeArticles,searchableChunk} from './provisions.js?v=20261024-10';
-import {legalUnits} from './evidence.js?v=20261024-10';
-import {sopIndex} from './sop-index.js?v=20261024-10';
+import {activeArticles,searchableChunk} from './provisions.js?v=20261024-11';
+import {legalUnits} from './evidence.js?v=20261024-11';
+import {sopIndex} from './sop-index.js?v=20261024-11';
 const flat=s=>s.normalize('NFKC').replace(/[\sㆍ·“”"「」『』()（）,.:：]/gu,'').toLowerCase();
 const generic=new Set(['가축','전염병','가축전염병','방역','규정','관련','대한','대하여','위한','경우','사항','조치','방법','기준','요령','발생','발생시','대상','실시','관리','따른','따라','절차','등의','범위','의무','처리','구제역','아프리카돼지열병','조류인플루엔자','고병원성','농장','발생농장','가축의','지역','필요한','있는','없는','위하여','하여야','관한','어떤','검출시','고병원성ai','어떻게','어디에','어디','하나요','되나요','받나요','있나요','무엇','무엇인가요','조건','검출','확인','방역조치','언제','알려주세요','근거','비교','차이','차이점']);
 export const concepts=[
@@ -107,7 +107,7 @@ export function retrieve(entries,question,asOf,target){
   if(group.scopes.length<(benefits.length?3:2))group.scopes.push({paragraph:row.unit.paragraph,item:row.unit.item});
  }
  if(target)groups.sort((a,b)=>Number(b.doc.disease===target)-Number(a.doc.disease===target)||b.score-a.score);
- if(benefits.length)groups.sort((a,b)=>({'법률':0,'시행령':1}[a.doc.type]??9)-({'법률':0,'시행령':1}[b.doc.type]??9)||b.score-a.score);
+ if(benefits.length||anchors.some(a=>a.name==='보상'))groups.sort((a,b)=>({'법률':0,'시행령':1}[a.doc.type]??9)-({'법률':0,'시행령':1}[b.doc.type]??9)||b.score-a.score);
  for(const g of groups)if(benefits.length){
   // Include a separately numbered exception explicitly tied to a selected paragraph.
   for(const u of legalUnits(g.article).units.filter(u=>!u.item)){
