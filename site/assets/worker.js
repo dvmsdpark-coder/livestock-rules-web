@@ -1,5 +1,5 @@
-import {eligible,search} from './search.js?v=20261024-11';
-import {presentResults,articleDetail} from './evidence.js?v=20261024-11';
+import {eligible,search} from './search.js?v=20261024-12';
+import {presentResults,articleDetail} from './evidence.js?v=20261024-12';
 const loading=new Map();
 async function load(doc){
  if(!loading.has(doc.id))loading.set(doc.id,(async()=>{

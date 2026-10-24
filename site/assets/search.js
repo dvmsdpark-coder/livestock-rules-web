@@ -1,8 +1,8 @@
 // Browser and Node share this deterministic, model-free search implementation.
-import {activeArticles,searchableChunk} from './provisions.js?v=20261024-11';
-import {legalUnits} from './evidence.js?v=20261024-11';
-import {actualAnnexes,annexReferences} from './annexes.js?v=20261024-11';
-import {retrieve} from './retrieval.js?v=20261024-11';
+import {activeArticles,searchableChunk} from './provisions.js?v=20261024-12';
+import {legalUnits} from './evidence.js?v=20261024-12';
+import {actualAnnexes,annexReferences} from './annexes.js?v=20261024-12';
+import {retrieve} from './retrieval.js?v=20261024-12';
 const compact=s=>s.replace(/[\s“”"「」『』·ㆍ]/gu,'').replace(/[?？.]+$/u,'');
 const normalize=s=>s.replace(/\s+/gu,' ').trim();
 const stop=new Set(['구제역','FMD','ASF','HPAI','가축','경우','발생','규정','관련','대한','대하여','어떻게','무엇','언제','어디','해야','하나요','되나요','알려','주세요','합니까','인가요','방법']);
@@ -70,7 +70,8 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
  if(annexKind){
   mode='annex';const number=query.match(/(?:별지|별표|제)\s*(?:제\s*)?(\d+)\s*호?(?:\s*의\s*(\d+))?/u);
   const terms=words(query.replace(/별지|별표|서식|제\d+호(?:의\d+)?|알려주세요|찾아주세요|보여주세요/gu,' '));
-  for(const {doc,index} of entries)for(const a of actualAnnexes(index)){
+  const namedOwners=entries.filter(e=>q.includes(compact(e.doc.title)));
+  for(const {doc,index} of (namedOwners.length?namedOwners:entries))for(const a of actualAnnexes(index)){
    if(/시행령/u.test(query)&&doc.type!=='시행령'||/시행규칙/u.test(query)&&doc.type!=='시행규칙')continue;
    if(a.kind!==annexKind||number&&(a.number[0]!==number[1]||(a.number[1]||null)!==(number[2]||null)))continue;
    if(!number&&terms.length&&!terms.some(t=>a.heading.includes(t)))continue;

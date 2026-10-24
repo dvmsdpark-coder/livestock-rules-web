@@ -25,7 +25,7 @@ def main():
     source, scheme = Path(sys.argv[1]), sys.argv[2]
     profiles = {
         'income': ('소득안정비용 지원 요령', 'income-support-notice', '농림축산식품부고시 제2026-97호', '2026-10-01', 11),
-        'compensation': ('살처분 가축 등에 대한 보상금 등 지급요령', 'compensation-notice', '농림축산식품부고시 제2026-62호', '2026-06-02', 7),
+        'compensation': ('살처분 가축 등에 대한 보상금 등 지급요령', 'compensation-notice', '농림축산식품부고시 제2026-62호', '2026-06-02', 41),
     }
     title, family, version, date, count = profiles[scheme]
     body = source.read_bytes()
@@ -46,8 +46,7 @@ def main():
     for a in namespace['parse_articles'](pages, title):
         index['articles'].append({'number': a['number'], 'title': a['title'],
                                   'parts': [record(p, a['heading']) for p in a['parts']]})
-    # Source review: income table pp5-9, forms pp10 and11. Compensation supplied
-    # PDF contains only an appendix list, not the actual tables/forms.
+    # Reviewed source boundaries are specific to the supplied PDF revisions.
     if scheme == 'income':
         for a in namespace['parse_annexes'](pages[4:], title):
             headings = {('table', '1'): '[별표 1] 소득안정비용의 지원 범위와 기준', ('form', '1'): '[별지 제1호서식] 소득안정비용 지원 신청서', ('form', '2'): '[별지 제2호서식] 소득안정비용 지원 신청표'}
@@ -55,12 +54,29 @@ def main():
             index['annexes'].append({'kind': a['section_kind'], 'number': list(a['number']),
                 'heading': a['heading'][:160], 'deleted': a['deleted'], 'endPage': a['parts'][-1]['page'],
                 'part': record(a['parts'][0], a['heading'][:160])})
+    if scheme == 'compensation':
+        assert hashlib.sha256(body).hexdigest() == 'a9c1d886c1dbe0c37fd6133b7552a5778b8b2ebd7bff3822a521e61389f6baf8', 'Review annex boundaries for the new PDF hash'
+        reviewed = [
+            ('table', ['1', None], 11, 23, '보상금 평가액 상한선'),
+            ('table', ['1', '2'], 24, 24, '도태 보상금 지급기준'),
+            ('table', ['2', None], 25, 27, '도태 장려금 지급기준'),
+            ('table', ['3', None], 28, 31, '생계안정비용 지원기준 등'),
+            ('form', ['1', None], 32, 32, '보상금 지급기준 결정서'),
+            ('form', ['2', None], 33, 33, '보상금 평가서'),
+            ('form', ['3', None], 34, 35, '보상금 지급 신청서'),
+            ('form', ['3', '1'], 36, 37, '보상금 지급 신청서(축산계열화사업자)'),
+            ('form', ['4', None], 38, 39, '도태 장려금 지급 신청서'),
+            ('form', ['5', None], 40, 41, '생계안정비용 지원 신청서'),
+        ]
+        for kind, number, start, end, label in reviewed:
+            prefix = ('별표 ' if kind == 'table' else '별지 제') + number[0] + ('의'+number[1] if number[1] else '') + ('호서식' if kind == 'form' else '')
+            heading = '['+prefix+'] '+label
+            assert pages[start-1]['text_content'].startswith('[별'), 'Annex start changed'
+            index['annexes'].append({'kind':kind, 'number':number, 'heading':heading, 'deleted':False, 'endPage':end, 'part':record(pages[start-1],heading)})
     uid = str(uuid.uuid5(uuid.NAMESPACE_URL, 'livestock-rules-web/'+family+'/'+hashlib.sha256(body).hexdigest()))
     doc = {'id': uid, 'family': family, 'title': title, 'type': '고시', 'disease': '공통', 'version': version,
            'from': date, 'to': None, 'pages': count, 'sha256': hashlib.sha256(body).hexdigest(),
            'pdf': f'pdf/{uid}.pdf', 'data': f'data/{uid}.json', 'article_titles': [a['title'] for a in index['articles']]}
-    if scheme == 'compensation':
-        doc['search_note'] = '제공 PDF에는 별표·별지 목록만 있고 실제 첨부 표·서식은 포함되어 있지 않습니다. 해당 고시의 첨부자료는 별도로 확인해야 합니다.'
     encoded = json.dumps(index, ensure_ascii=False, separators=(',', ':')).encode()
     doc.update(data_sha256=hashlib.sha256(encoded).hexdigest(), data_bytes=len(encoded))
     (ROOT/'site'/doc['pdf']).write_bytes(body)
@@ -69,7 +85,7 @@ def main():
     manifest = json.loads(target.read_text(encoding='utf-8'))
     manifest['documents'] = [d for d in manifest['documents'] if d['family'] != family]+[doc]
     manifest['generated_at'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
-    target.write_text(json.dumps(manifest, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+    target.write_bytes((json.dumps(manifest, ensure_ascii=False, indent=2)+'\n').encode())
     print(json.dumps({'id': uid, 'articles': len(index['articles']), 'annexes': [(a['number'], a['part']['page'], a['endPage']) for a in index['annexes']]}, ensure_ascii=False))
 
 if __name__ == '__main__':

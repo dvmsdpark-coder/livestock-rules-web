@@ -1,6 +1,6 @@
-import {annexReferences} from './annexes.js?v=20261024-11';
+import {annexReferences} from './annexes.js?v=20261024-12';
 // Source-only presentation and internal legal references. No generated legal text.
-import {activeArticles} from './provisions.js?v=20261024-11';
+import {activeArticles} from './provisions.js?v=20261024-12';
 const squash=s=>s.replace(/\s+/gu,'');
 const clean=s=>s.replace(/[\sㆍ·]/gu,'');
 const circled='①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳';
