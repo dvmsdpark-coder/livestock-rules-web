@@ -1,4 +1,5 @@
-import {eligible,search} from './search.js?v=20261024-1';
+import {eligible,search} from './search.js?v=20261024-2';
+import {presentResults,articleDetail} from './evidence.js?v=20261024-2';
 const loading=new Map();
 async function load(doc){
  if(!loading.has(doc.id))loading.set(doc.id,(async()=>{
@@ -10,7 +11,13 @@ async function load(doc){
  })().catch(e=>{loading.delete(doc.id);throw e;}));
  return loading.get(doc.id);
 }
-self.onmessage=async({data:{id,manifest,question,filters}})=>{
- try{const corpus=await Promise.all(manifest.documents.filter(d=>eligible(d,filters)).map(load));self.postMessage({id,result:search(corpus,question,filters,manifest.documents)});}
- catch(e){self.postMessage({id,error:e.message});}
+self.onmessage=async({data:{id,action,manifest,question,filters,target}})=>{
+ try{
+  // Navigation can cross document-type filters, but must keep the same date.
+  const loaded=await Promise.all(manifest.documents.filter(d=>eligible(d,{...filters,type:'전체',disease:'전체'})).map(load));
+  const corpus=loaded.map(e=>({...e,asOf:filters.asOf}));
+  if(action==='article'){self.postMessage({id,action,detail:articleDetail(corpus,target)});return;}
+  const result=search(corpus,question,filters,manifest.documents);result.view=presentResults(corpus,result,question);
+  self.postMessage({id,result});
+ }catch(e){self.postMessage({id,action,error:e.message});}
 };

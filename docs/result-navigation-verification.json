@@ -1,0 +1,15 @@
+{
+  "sourceDocuments": 9,
+  "definitionArticleAndItem": true,
+  "questionFocusedReporting": true,
+  "fullContextCollapsed": true,
+  "lawProvisoPreserved": true,
+  "reverseCitations": true,
+  "verifiedDelegationPhraseLink": true,
+  "inlineParentLawLink": true,
+  "previousArticleButton": true,
+  "searchPreservedAfterClosing": true,
+  "explicitParagraphAndItemQuery": true,
+  "mobileDialogWidth": true,
+  "noPageErrors": true
+}
