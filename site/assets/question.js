@@ -4,6 +4,7 @@ const compounds=['축산계열화사업자','계열화사업자','가축방역�
 export function normalizeQuestion(question){
  let q=question.normalize('NFC').replace(/\s+/gu,' ').trim().replace(/^안녕하세요[.!。]?\s*/u,'').replace(/(?:\s*알려\s*주세요){2,}$/u,' 알려주세요');
  for(const word of compounds.sort((a,b)=>b.length-a.length))q=q.replace(new RegExp([...word].join('\\s*'),'gu'),word);
+ q=q.replace(/(?<!가축)방역사(?=의|은|는|이|가|을|를|자격|역할|업무|직무|권한|[\s?？.]|$)/gu,'가축방역사').replace(/(?<!가축)방역관(?=의|은|는|이|가|을|를|자격|역할|업무|직무|권한|[\s?？.]|$)/gu,'가축방역관');
  q=q.replace(/축산\s*계열화\s*사업자|(?<!축산)계열화사업자|계열사/gu,'축산계열화사업자');
  // Contact is reporting only in an explicit disease/animal discovery context.
  if(/의심|발견/u.test(q)&&/구제역|ASF|HPAI|AI|가축|돼지|소를|닭/u.test(q)&&/어디|누구|어느/u.test(q))q=q.replace(/연락/gu,'신고');

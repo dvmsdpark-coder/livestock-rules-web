@@ -1,7 +1,8 @@
+import {qualificationRequest,qualificationRetrieval} from './qualifications.js?v=20261024-20';
 // Corpus-derived clause retrieval; source excerpts, never a generated legal answer.
-import {activeArticles,searchableChunk} from './provisions.js?v=20261024-19';
-import {legalUnits,references} from './evidence.js?v=20261024-19';
-import {sopIndex} from './sop-index.js?v=20261024-19';
+import {activeArticles,searchableChunk} from './provisions.js?v=20261024-20';
+import {legalUnits,references} from './evidence.js?v=20261024-20';
+import {sopIndex} from './sop-index.js?v=20261024-20';
 const flat=s=>s.normalize('NFKC').replace(/[\sㆍ·“”"「」『』()（）,.:：]/gu,'').toLowerCase();
 const generic=new Set(['가축','전염병','가축전염병','방역','규정','관련','대한','대하여','위한','경우','사항','조치','방법','기준','요령','발생','발생시','대상','실시','관리','따른','따라','절차','등의','범위','의무','처리','구제역','아프리카돼지열병','조류인플루엔자','고병원성','농장','발생농장','가축의','지역','필요한','있는','없는','위하여','하여야','관한','어떤','검출시','고병원성ai','어떻게','어디에','어디','하나요','되나요','받나요','있나요','무엇','무엇인가요','조건','검출','확인','방역조치','언제','알려주세요','근거','비교','차이','차이점','종류','분류','목록','리스트','유형','구분','항목']);
 export const concepts=[
@@ -80,6 +81,7 @@ const sectionTitle=s=>flat(s).replace(/^\d+(?:\.\d+)*[.]?/u,'').replace(/[?？]/
 const requestTitle=s=>sectionTitle(s).replace(/^(?:hpai|ai|asf|fmd|구제역|아프리카돼지열병|조류인플루엔자)/u,'').replace(/(?:을|를|은|는)?(?:알려주세요|설명해주세요|알려줘)$/u,'').replace(/[을를은는]$/u,'');
 const matches=(text,a)=>a.aliases.some(alias=>(a.name==='처리'?text.replace(/처리업|처리시설|처리장/gu,''):text).includes(alias));
 export function retrieve(entries,question,asOf,target){
+ if(qualificationRequest(question))return qualificationRetrieval(entries,question,asOf);
  const indexes=entries.map(e=>indexFor(e,asOf));
  const obligationRequest=/의무|준수사항/u.test(question);
  const roleRequest=/의무|준수사항|역할|직무|권한|책무|업무(?!량)|하는\s*일|해야\s*할\s*일|무슨\s*일|어떤\s*일/u.test(question);
