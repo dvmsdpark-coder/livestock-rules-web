@@ -1,5 +1,5 @@
 // Source-only presentation and internal legal references. No generated legal text.
-import {activeArticles} from './provisions.js?v=20261024-3';
+import {activeArticles} from './provisions.js?v=20261024-5';
 const squash=s=>s.replace(/\s+/gu,'');
 const clean=s=>s.replace(/[\sㆍ·]/gu,'');
 const circled='①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳';
@@ -33,7 +33,7 @@ export function legalUnits(article){
  for(const range of ranges){
   const parent={...range,item:null,label:article.number+(range.paragraph?' 제'+range.paragraph+'항':'')};
   units.push({...parent,parts:slices(src,parent.start,parent.end)});
-  const text=src.text.slice(range.start,range.end),items=[...text.matchAll(/(?:^|\n)[ \t]*(\d+)\.[ \t]*/gu)].filter(m=>Number(m[1])<=100);
+  const text=src.text.slice(range.start,range.end),items=[...text.matchAll(/(?:^|\n)[ \t]*(\d+)\.[ \t]*/gu)].filter(m=>Number(m[1])<=100&&!/^\d{1,2}\.\s*\d{1,2}\.\s*>/u.test(text.slice(m.index).trimStart()));
   for(let i=0;i<items.length;i++){
    const start=range.start+items[i].index,end=range.start+(items[i+1]?.index??text.length),item=Number(items[i][1]);
    units.push({start,end,paragraph:range.paragraph,item,label:parent.label+' 제'+item+'호',parts:slices(src,start,end)});
@@ -139,6 +139,15 @@ function selectFocus(group,question,mode){
   const matched=parsed.units.filter(u=>(!explicit[1]||u.paragraph===Number(explicit[1]))&&(!explicit[2]||u.item===Number(explicit[2])));
   return matched.length===1?matched:[];
  }
+ if(mode==='material'){
+  return (group.materialScopes||[]).flatMap(scope=>{
+   const u=parsed.units.find(u=>u.paragraph===scope.paragraph&&u.item===scope.item);if(!u)return [];
+   const parent=parsed.units.find(p=>!p.item&&p.paragraph===u.paragraph);
+   const first=parsed.units.find(p=>p.item&&p.paragraph===u.paragraph);
+   const context=u.item&&first?slices(parsed.src,parent.start,first.start):[];
+   return [{...u,parts:[...context,...u.parts],note:u.item?'해당 항의 적용 조건과 사료 관련 호를 함께 발췌했습니다. 다른 호와 전체 맥락은 전체 조문에서 확인하세요.':null}];
+  });
+ }
  const parents=parsed.units.filter(u=>!u.item);
  if(mode==='topic')return parents.filter(u=>u.paragraph===1||!u.paragraph).slice(0,1);
  if(intent==='reporting')return parents.filter(u=>u.paragraph===1);
@@ -176,6 +185,7 @@ export function presentResults(corpus,result,question){
   g.fullParts=addRefs(g.fullParts,g.doc,corpus);
   g.primary=result.mode==='procedure'?g.docType==='SOP':result.mode==='zone'?g.match==='방역지역 정의 연결':true;
   if(result.mode==='topic')g.primary=g.topicPrimary;
+  if(result.mode==='material')g.primary=g.materialPrimary;
   if(result.mode==='related')g.primary=false;
   delete g.article;
  }

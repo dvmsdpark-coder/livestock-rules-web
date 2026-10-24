@@ -1,6 +1,6 @@
 // Browser and Node share this deterministic, model-free search implementation.
-import {activeArticles,searchableChunk} from './provisions.js?v=20261024-3';
-import {legalUnits} from './evidence.js?v=20261024-3';
+import {activeArticles,searchableChunk} from './provisions.js?v=20261024-5';
+import {legalUnits} from './evidence.js?v=20261024-5';
 const compact=s=>s.replace(/[\s“”"「」『』·ㆍ]/gu,'').replace(/[?？.]+$/u,'');
 const normalize=s=>s.replace(/\s+/gu,' ').trim();
 const stop=new Set(['구제역','FMD','ASF','HPAI','가축','경우','발생','규정','관련','대한','대하여','어떻게','무엇','언제','어디','해야','하나요','되나요','알려','주세요','합니까','인가요','방법']);
@@ -37,6 +37,7 @@ function procedureIntent(question,disease){
  return null;
 }
 const messages={definition:'질문한 용어의 정의 항목을 찾았습니다. 위임 규정과 적용 범위는 원문에서 함께 확인하세요.',
+ material:'사료의 오염물건 처리와 이동·공급 관련 근거입니다. 질병을 선택하면 해당 고시를 먼저 표시합니다. 발생농장·방역지역 및 예외 조건을 구분해 확인하세요. 등록된 법령·고시에서 찾은 결과이며 SOP 전체 절차를 대신하지 않습니다.',
  topic:'살처분 명령과 대상에 관한 조문입니다. 질병을 선택하면 해당 질병의 세부 기준을 함께 표시합니다. 예외와 적용 조건은 전체 조문에서 확인하세요.',
  article:'제목 또는 번호가 일치하는 조문입니다. 여러 쪽에 걸친 조문은 이어 표시합니다.',
  procedure:'관련 조문과 SOP 절차를 찾았습니다. 백신접종·미접종 유형과 원문의 적용 조건을 구분해 확인하세요.',
@@ -88,6 +89,30 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
   // Without a disease selection, show the common legal basis first.
   // Disease-specific rules retain their separate source and scenario.
   results=results.map(r=>({...r,topicPrimary:target?r.disease===target:r.docType==='법률'}));
+ }else if(q.includes('사료')&&!/수입|수출|검역|보상|벌칙|과태료|판매|신고|재활용|제조업|제\d+조/u.test(q)&&(/발생|전염병|조치|처리|폐기|소각|매몰|공급|운반|반출|반입|이동|소독|보관|방역|남은/u.test(q)||q==='사료')){
+  mode='material';
+  const transport=/공급|운반|반출|반입|이동|차량/u.test(q),disposal=/처리|폐기|소각|매몰|오염|남은/u.test(q);
+  for(const entry of entries){const {doc}=entry;if(doc.type==='SOP')continue;
+   for(const a of activeArticles(entry,filters.asOf)){
+    let scopes=[],primary=false;
+    if(doc.type==='법률'&&a.number==='제23조'){scopes=[{paragraph:1,item:null},{paragraph:2,item:null}];primary=!target&&!transport;}
+    else if(doc.type==='법률'&&a.number==='제19조'){scopes=[{paragraph:1,item:1}];primary=!target&&transport;}
+    else if(doc.type==='시행규칙'&&a.number==='제22조의3'){scopes=[{paragraph:null,item:1}];primary=!target;}
+    else if(doc.type==='고시'&&(/소독.*조치/u.test(a.title)||/지역.*방역/u.test(a.title))){
+     const isDisposal=/소독.*조치/u.test(a.title);
+     if(transport&&!disposal&&isDisposal||disposal&&!transport&&!isDisposal)continue;
+     const units=legalUnits(a).units;
+     for(const parent of units.filter(u=>!u.item)){
+      const children=units.filter(u=>u.item&&u.paragraph===parent.paragraph);
+      const selected=children.length?children.filter(u=>/사\s*료/u.test(u.parts.map(p=>p.text).join(''))):/사\s*료/u.test(parent.parts.map(p=>p.text).join(''))?[parent]:[];
+      scopes.push(...selected.map(u=>({paragraph:u.paragraph,item:u.item})));
+     }
+     primary=Boolean(target)&&(transport&&!disposal?!isDisposal:isDisposal);
+    }
+    if(!scopes.length)continue;
+    for(const part of a.parts)add(doc,part,{match:'사료 조치 연결',materialScopes:scopes,materialPrimary:primary});
+   }
+  }
  }else if(intent){
   mode='procedure';const titles={reporting:['죽거나병든가축의신고'],movement_release:target==='ASF'?['방역지역전환및해제']:target==='고병원성AI'?['관리지역보호지역의방역','예찰지역의방역']:['이동제한해제등'],farm_disinfection:['소독등조치']}[intent];articles(titles);
   if(target)for(const {doc,index} of entries)if(doc.type==='SOP'&&doc.disease===target)for(const p of index.procedures)if(p.intent===intent)for(const part of p.parts)add(doc,part,{match:'SOP 절차 연결'});

@@ -91,3 +91,42 @@ test('culling topic respects document filters',()=>{
  const c=corpus(),r=search(c,'살처분',{asOf:'2026-10-24',disease:'ASF',type:'고시'}),v=presentResults(c,r,'살처분');
  assert.equal(v.groups.length,1);assert.equal(v.groups[0].articleNumber,'제18조');assert(v.groups[0].primary);
 });
+
+test('outbreak feed question opens common disposal basis rather than unrelated sellers',()=>{
+ const {r,v}=run('전염병 발생시 사료에 대한 조치');assert.equal(r.mode,'material');
+ assert(v.groups.some(g=>g.primary&&g.docType==='법률'&&g.articleNumber==='제23조'));
+ const rule=v.groups.find(g=>g.primary&&g.docType==='시행규칙');assert.equal(rule.locator,'제22조의3 제1호');
+ const text=rule.focus[0].parts.map(p=>p.text).join('');assert(text.includes('10. 14.>'));assert(text.includes('법 제19조제1항제1호'));
+ assert(!v.groups.some(g=>/신고|명예|벌칙|검역/u.test(g.articleTitle)));
+ const law=v.groups.find(g=>g.articleNumber==='제23조'&&g.docType==='법률');assert(law.focus[1].parts[0].text.includes('옮기거나 세척하지 못한다'));
+});
+for(const disease of ['구제역','ASF','HPAI'])test(disease+' feed disposal preserves conditions and exceptions',()=>{
+ const {v}=run(disease+' 발생농장 사료 처리');const primary=v.groups.filter(g=>g.primary);
+ assert(primary.length);assert(primary.every(g=>g.docType==='고시'));
+ assert(v.groups.every(g=>g.disease==='공통'||g.disease===(disease==='HPAI'?'고병원성AI':disease)));
+ assert(primary.some(g=>g.focus.some(u=>u.parts.map(p=>p.text).join('').includes('소각'))));
+ assert(primary.some(g=>g.focus.some(u=>/다만|제외/u.test(u.parts.map(p=>p.text).join('')))));
+ if(disease==='구제역')assert.equal(primary.length,2);
+});
+test('feed supply routes to regional rules and preserves the parent geographic scope',()=>{
+ const {v}=run('구제역 사료 공급 차량');const primary=v.groups.filter(g=>g.primary);assert(primary.length>=2);
+ assert(primary.every(g=>/지역/u.test(g.articleTitle)));
+ assert(primary.some(g=>g.focus.some(u=>u.parts.map(p=>p.text).join('').includes('지정된 차량'))));
+ assert(primary.every(g=>g.focus.every(u=>u.parts.map(p=>p.text).join('').includes('지역'))));
+});
+test('feed specifics and exact article numbers are not overwritten by the feed topic',()=>{
+ for(const q of ['사료 수입 검역','사료 판매자 신고','사료 폐기 보상','사료 사체 재활용','사료 제23조'])assert.notEqual(run(q).r.mode,'material');
+});
+test('feed excerpts and their parent conditions remain exact source substrings',()=>{
+ const {c,v}=run('전염병 발생시 사료에 대한 조치');
+ for(const g of v.groups)for(const u of g.focus)for(const p of u.parts){
+  const original=c.find(e=>e.doc.id===g.documentId).index.pages.find(page=>page.page===p.page);
+  assert(original.text.includes(p.text),g.title+' '+u.label);
+ }
+});
+test('feed filters and effective dates are enforced',()=>{
+ const c=corpus();for(const [disease,type,date] of [['ASF','고시','2026-10-24'],['전체','시행규칙','2026-10-01'],['ASF','고시','2020-01-01']]){
+ const r=search(c,'사료 조치',{asOf:date,disease,type});
+ assert(r.results.every(r=>r.docType===type&&(disease==='전체'||r.disease===disease||r.disease==='공통')&&r.from<=date));
+ }
+});
