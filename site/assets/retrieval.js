@@ -1,8 +1,9 @@
 // Corpus-derived clause retrieval; source excerpts, never a generated legal answer.
-import {activeArticles,searchableChunk} from './provisions.js?v=20261024-6';
-import {legalUnits} from './evidence.js?v=20261024-6';
+import {activeArticles,searchableChunk} from './provisions.js?v=20261024-7';
+import {legalUnits} from './evidence.js?v=20261024-7';
+import {sopIndex} from './sop-index.js?v=20261024-7';
 const flat=s=>s.normalize('NFKC').replace(/[\sㆍ·“”"「」『』()（）,.:：]/gu,'').toLowerCase();
-const generic=new Set(['가축','전염병','가축전염병','방역','규정','관련','대한','대하여','위한','경우','사항','조치','방법','기준','요령','발생','발생시','대상','실시','관리','따른','따라','절차','등의','범위','의무','처리','구제역','아프리카돼지열병','조류인플루엔자','고병원성','농장','발생농장','가축의','지역','필요한','있는','없는','위하여','하여야','관한']);
+const generic=new Set(['가축','전염병','가축전염병','방역','규정','관련','대한','대하여','위한','경우','사항','조치','방법','기준','요령','발생','발생시','대상','실시','관리','따른','따라','절차','등의','범위','의무','처리','구제역','아프리카돼지열병','조류인플루엔자','고병원성','농장','발생농장','가축의','지역','필요한','있는','없는','위하여','하여야','관한','어떤','검출시','고병원성ai','어떻게','어디에','어디','하나요','되나요','받나요','있나요','무엇','무엇인가요','조건','검출','확인','방역조치','언제','알려주세요']);
 export const concepts=[
  ['분뇨',['분뇨','가축분뇨','분변','똥']],
  ['재입식',['재입식','재사육','다시입식','다시키우','다시키워','다시사육','가축입식']],
@@ -40,6 +41,7 @@ const cache=new WeakMap();
 function indexFor(entry,asOf){
  let dates=cache.get(entry.index);if(!dates){dates=new Map();cache.set(entry.index,dates);}if(dates.has(asOf))return dates.get(asOf);
  const rows=[],vocabulary=new Set();
+ if(entry.doc.type==='SOP')for(const word of sopIndex(entry).vocabulary)if(!generic.has(word))vocabulary.add(flat(word));
  for(const article of activeArticles(entry,asOf)){
   if(entry.doc.type==='SOP')continue;
   for(const raw of article.title.match(/[가-힣A-Za-z]{2,}/gu)||[]){
@@ -70,7 +72,7 @@ const matches=(text,a)=>a.aliases.some(alias=>(a.name==='처리'?text.replace(/�
 export function retrieve(entries,question,asOf,target){
  const indexes=entries.map(e=>indexFor(e,asOf)),anchors=anchorsFor(question,indexes);
  const subjects=anchors.filter(a=>!actionNames.has(a.name)),required=subjects.length?subjects:anchors;
- if(!anchors.length)return {status:'no_terms',anchors:[],hits:[],supplement:[]};
+ if(!anchors.length)return {status:'no_terms',anchors:[],hits:[],sopHits:[],supplement:[]};
  const rows=indexes.flatMap((i,n)=>i.rows.map(row=>({...row,entry:entries[n]}))),total=rows.length||1;
  const weights=new Map(anchors.map(a=>[a.name,Math.log(1+total/(1+rows.filter(r=>matches(r.text+r.heading+r.context,a)).length))]));
  const scored=[],actions=anchors.filter(a=>actionNames.has(a.name));
@@ -96,15 +98,28 @@ export function retrieve(entries,question,asOf,target){
  }
  if(target)groups.sort((a,b)=>Number(b.doc.disease===target)-Number(a.doc.disease===target)||b.score-a.score);
  const hits=groups.slice(0,6);
- // SOP chunks and partially matched clauses are explicitly labelled candidates.
- const supplement=[];
- for(const entry of entries)if(entry.doc.type==='SOP')for(const part of entry.index.chunks){
-  if(!searchableChunk(entry,part,asOf)||['form','figure','table'].includes(part.kind))continue;
-  const text=flat(part.text);if(!required.every(a=>matches(text,a)))continue;
-  const matched=anchors.filter(a=>matches(text,a));if(!matched.length)continue;
-  supplement.push({doc:entry.doc,part,score:matched.length+anchors.filter(a=>matches(flat(part.heading||''),a)).length});
+ // Rank complete numbered SOP units, including page continuations, rather than page hits.
+ const sopHits=[];
+ for(const entry of entries)if(entry.doc.type==='SOP')for(const section of sopIndex(entry).sections){
+  const context=flat(section.heading+' '+section.scenario);
+  for(const unit of section.units){
+   const own=flat(unit.parts.map(p=>p.text).join(' '));
+   if(!own||!required.every(a=>matches(own+context,a)))continue;
+   if(actions.length&&!actions.some(a=>matches(own+context,a)))continue;
+   const direct=anchors.filter(a=>matches(own,a));if(!direct.length)continue;
+   const headingHits=anchors.filter(a=>matches(context,a));
+   const exactHeading=flat(question).includes(flat(section.heading))?30:0;
+   const stageBoost=/고병원성|확진/u.test(question)&&/고병원성.*확진|확진.*조치/u.test(section.heading)?8:0;
+   sopHits.push({doc:entry.doc,section,unit,score:direct.length*2+headingHits.length*4+direct.length/anchors.length+stageBoost+exactHeading-(section.layout==='table'?20:0)});
+  }
  }
- supplement.sort((a,b)=>b.score-a.score);
+ sopHits.sort((a,b)=>b.score-a.score||a.section.parts[0].page-b.section.parts[0].page);
+ const sopGroups=[];
+ for(const hit of sopHits){let g=sopGroups.find(g=>g.section.key===hit.section.key);
+  if(!g){g={doc:hit.doc,section:hit.section,units:[],score:hit.score};sopGroups.push(g);}
+  if(g.units.length<2)g.units.push(hit.unit);
+ }
+ const supplement=[];
  const needsDetail=/희석|몇\s*배|농도|용량/u.test(question);
- return {needsDetail,status:needsDetail?'needs_detail':hits.length?'matched':supplement.length?'candidates':'no_match',anchors:anchors.map(a=>a.name),hits,supplement:supplement.slice(0,3)};
+ return {needsDetail,status:needsDetail?'needs_detail':hits.length||sopGroups.length?'matched':'no_match',anchors:anchors.map(a=>a.name),hits,sopHits:sopGroups.slice(0,4),supplement};
 }

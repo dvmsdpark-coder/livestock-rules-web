@@ -67,6 +67,252 @@
       "chunks": 474
     }
   ],
+  "sop": {
+    "total": 15,
+    "passed": 15,
+    "cases": [
+      {
+        "id": "wild-confirmed",
+        "question": "야생조류에서 고병원성AI 검출시 어떤 방역조치?",
+        "disease": "고병원성AI",
+        "page": 75,
+        "heading": "3 고병원성 확진 시 조치",
+        "hit": true,
+        "visibleHit": true,
+        "pages": [
+          75,
+          76,
+          77,
+          78,
+          79
+        ]
+      },
+      {
+        "id": "wild-antigen",
+        "question": "HPAI 야생조류 H5 H7 항원 확인 시 조치",
+        "disease": "고병원성AI",
+        "page": 70,
+        "heading": "2 H5･H7형 항원 확인 시 조치",
+        "hit": true,
+        "visibleHit": true,
+        "pages": [
+          70,
+          71,
+          72,
+          73,
+          74
+        ]
+      },
+      {
+        "id": "wild-location",
+        "question": "HPAI 검출지점에 대한 조치",
+        "disease": "고병원성AI",
+        "page": 80,
+        "heading": "4 검출지점에 대한 조치",
+        "hit": true,
+        "visibleHit": true,
+        "pages": [
+          80,
+          81
+        ]
+      },
+      {
+        "id": "wild-region",
+        "question": "HPAI 야생조류 방역지역 설정 운영",
+        "disease": "고병원성AI",
+        "page": 82,
+        "heading": "5 방역지역 설정･운영",
+        "hit": true,
+        "visibleHit": true,
+        "pages": [
+          82,
+          83,
+          84
+        ]
+      },
+      {
+        "id": "wild-boar",
+        "question": "ASF 야생멧돼지 방역",
+        "disease": "ASF",
+        "page": 173,
+        "heading": "20. 야생멧돼지에서 검출 시 방역조치",
+        "hit": true,
+        "visibleHit": true,
+        "pages": [
+          173,
+          174
+        ]
+      },
+      {
+        "id": "feed-asf",
+        "question": "ASF 사료 공급 요령",
+        "disease": "ASF",
+        "page": 159,
+        "heading": "16. 사료 공급 요령",
+        "hit": true,
+        "visibleHit": true,
+        "pages": [
+          159,
+          160
+        ]
+      },
+      {
+        "id": "manure-asf",
+        "question": "ASF 가축분뇨 처리",
+        "disease": "ASF",
+        "page": 165,
+        "heading": "17. 가축분뇨 처리요령",
+        "hit": true,
+        "visibleHit": true,
+        "pages": [
+          165,
+          166,
+          167
+        ]
+      },
+      {
+        "id": "restock-asf",
+        "question": "ASF 살처분 농장 재입식 요령",
+        "disease": "ASF",
+        "page": 170,
+        "heading": "19. 살처분 농장의 가축 재입식 요령",
+        "hit": true,
+        "visibleHit": true,
+        "pages": [
+          170,
+          171,
+          172
+        ]
+      },
+      {
+        "id": "sample-fmd",
+        "question": "구제역 시료채취 송부",
+        "disease": "구제역",
+        "page": 79,
+        "heading": "3 시료채취, 송부 및 진단 요령",
+        "hit": true,
+        "visibleHit": true,
+        "pages": [
+          79,
+          80,
+          81,
+          82
+        ]
+      },
+      {
+        "id": "sample-fmd-unvaccinated",
+        "question": "구제역 시료채취 송부",
+        "disease": "구제역",
+        "page": 169,
+        "heading": "3 시료채취, 송부 및 진단 요령",
+        "hit": true,
+        "visibleHit": true,
+        "pages": [
+          169,
+          170,
+          171,
+          172
+        ]
+      },
+      {
+        "id": "restock-fmd",
+        "question": "구제역 재입식 요령",
+        "disease": "구제역",
+        "page": 155,
+        "heading": "20 살처분 농장의 가축 재입식 요령",
+        "hit": true,
+        "visibleHit": true,
+        "pages": [
+          155,
+          156
+        ]
+      },
+      {
+        "id": "restock-fmd-unvaccinated",
+        "question": "구제역 재입식 요령",
+        "disease": "구제역",
+        "page": 283,
+        "heading": "24 살처분 농장의 가축 재입식 요령",
+        "hit": true,
+        "visibleHit": true,
+        "pages": [
+          283,
+          284,
+          285
+        ]
+      },
+      {
+        "id": "checkpoint-hpai",
+        "question": "HPAI 이동통제초소 운영",
+        "disease": "고병원성AI",
+        "page": 166,
+        "heading": "11 이동통제초소 및 거점소독시설 운용요령",
+        "hit": true,
+        "visibleHit": true,
+        "pages": [
+          166,
+          167,
+          168,
+          169,
+          170,
+          171
+        ]
+      },
+      {
+        "id": "worker-hpai",
+        "question": "HPAI 살처분 작업자 안전",
+        "disease": "고병원성AI",
+        "page": 153,
+        "heading": "9 살처분 및 사체처리 요령",
+        "hit": true,
+        "visibleHit": true,
+        "pages": [
+          153,
+          154,
+          155,
+          156,
+          157
+        ]
+      },
+      {
+        "id": "lowpath-hpai",
+        "question": "HPAI 저병원성 방역조치",
+        "disease": "고병원성AI",
+        "page": 187,
+        "heading": "15 저병원성 조류인플루엔자 등의 방역조치",
+        "hit": true,
+        "visibleHit": true,
+        "pages": [
+          187,
+          188,
+          189
+        ]
+      }
+    ],
+    "coverage": [
+      {
+        "document": "7b763e5d-e1f8-5711-aedc-19ec89ab044f",
+        "title": "아프리카돼지열병 긴급행동지침(SOP)",
+        "sections": 35,
+        "units": 563,
+        "pages": 183
+      },
+      {
+        "document": "3d9ae693-1bb3-5f8c-af9e-0e3512252566",
+        "title": "조류인플루엔자 긴급행동지침(SOP)",
+        "sections": 48,
+        "units": 1047,
+        "pages": 182
+      },
+      {
+        "document": "de2a0c26-cb9d-4f83-b3f9-4d31f29fbbef",
+        "title": "구제역 긴급행동지침(SOP)",
+        "sections": 68,
+        "units": 1614,
+        "pages": 268
+      }
+    ]
+  },
   "natural": {
     "total": 31,
     "hitInSix": 31,
@@ -550,7 +796,8 @@
         },
         "mode": "ranked",
         "terms": [
-          "재입식"
+          "재입식",
+          "돼지"
         ],
         "hitInSix": true,
         "visibleHit": true,
@@ -735,6 +982,8 @@
         "mode": "ranked",
         "terms": [
           "축산차량",
+          "받아야",
+          "운전자",
           "교육"
         ],
         "hitInSix": true,
@@ -751,24 +1000,6 @@
             "disease": "공통",
             "article": "제17조의3",
             "primary": true
-          },
-          {
-            "type": "시행규칙",
-            "disease": "공통",
-            "article": "제20조의3",
-            "primary": true
-          },
-          {
-            "type": "시행규칙",
-            "disease": "공통",
-            "article": "제50조",
-            "primary": false
-          },
-          {
-            "type": "법률",
-            "disease": "공통",
-            "article": "제60조",
-            "primary": false
           }
         ]
       },

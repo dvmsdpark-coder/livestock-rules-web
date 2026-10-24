@@ -1,0 +1,107 @@
+[
+  {
+    "id": "wild-confirmed",
+    "question": "야생조류에서 고병원성AI 검출시 어떤 방역조치?",
+    "disease": "고병원성AI",
+    "page": 75,
+    "heading": "3 고병원성 확진 시 조치"
+  },
+  {
+    "id": "wild-antigen",
+    "question": "HPAI 야생조류 H5 H7 항원 확인 시 조치",
+    "disease": "고병원성AI",
+    "page": 70,
+    "heading": "2 H5･H7형 항원 확인 시 조치"
+  },
+  {
+    "id": "wild-location",
+    "question": "HPAI 검출지점에 대한 조치",
+    "disease": "고병원성AI",
+    "page": 80,
+    "heading": "4 검출지점에 대한 조치"
+  },
+  {
+    "id": "wild-region",
+    "question": "HPAI 야생조류 방역지역 설정 운영",
+    "disease": "고병원성AI",
+    "page": 82,
+    "heading": "5 방역지역 설정･운영"
+  },
+  {
+    "id": "wild-boar",
+    "question": "ASF 야생멧돼지 방역",
+    "disease": "ASF",
+    "page": 173,
+    "heading": "20. 야생멧돼지에서 검출 시 방역조치"
+  },
+  {
+    "id": "feed-asf",
+    "question": "ASF 사료 공급 요령",
+    "disease": "ASF",
+    "page": 159,
+    "heading": "16. 사료 공급 요령"
+  },
+  {
+    "id": "manure-asf",
+    "question": "ASF 가축분뇨 처리",
+    "disease": "ASF",
+    "page": 165,
+    "heading": "17. 가축분뇨 처리요령"
+  },
+  {
+    "id": "restock-asf",
+    "question": "ASF 살처분 농장 재입식 요령",
+    "disease": "ASF",
+    "page": 170,
+    "heading": "19. 살처분 농장의 가축 재입식 요령"
+  },
+  {
+    "id": "sample-fmd",
+    "question": "구제역 시료채취 송부",
+    "disease": "구제역",
+    "page": 79,
+    "heading": "3 시료채취, 송부 및 진단 요령"
+  },
+  {
+    "id": "sample-fmd-unvaccinated",
+    "question": "구제역 시료채취 송부",
+    "disease": "구제역",
+    "page": 169,
+    "heading": "3 시료채취, 송부 및 진단 요령"
+  },
+  {
+    "id": "restock-fmd",
+    "question": "구제역 재입식 요령",
+    "disease": "구제역",
+    "page": 155,
+    "heading": "20 살처분 농장의 가축 재입식 요령"
+  },
+  {
+    "id": "restock-fmd-unvaccinated",
+    "question": "구제역 재입식 요령",
+    "disease": "구제역",
+    "page": 283,
+    "heading": "24 살처분 농장의 가축 재입식 요령"
+  },
+  {
+    "id": "checkpoint-hpai",
+    "question": "HPAI 이동통제초소 운영",
+    "disease": "고병원성AI",
+    "page": 166,
+    "heading": "11 이동통제초소 및 거점소독시설 운용요령"
+  },
+  {
+    "id": "worker-hpai",
+    "question": "HPAI 살처분 작업자 안전",
+    "disease": "고병원성AI",
+    "page": 153,
+    "heading": "9 살처분 및 사체처리 요령"
+  },
+  {
+    "id": "lowpath-hpai",
+    "question": "HPAI 저병원성 방역조치",
+    "disease": "고병원성AI",
+    "page": 187,
+    "heading": "15 저병원성 조류인플루엔자 등의 방역조치"
+  }
+]

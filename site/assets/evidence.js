@@ -1,5 +1,5 @@
 // Source-only presentation and internal legal references. No generated legal text.
-import {activeArticles} from './provisions.js?v=20261024-6';
+import {activeArticles} from './provisions.js?v=20261024-7';
 const squash=s=>s.replace(/\s+/gu,'');
 const clean=s=>s.replace(/[\sㆍ·]/gu,'');
 const circled='①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳';
@@ -114,6 +114,7 @@ function selectFocus(group,question,mode){
  if(['form','table','figure'].includes(group.kind))return [];
  const intent=questionIntent(question);
  if(group.docType==='SOP'){
+  if(group.sopFocus)return group.sopFocus.map(u=>({...u,note:'SOP 항목 발췌 · 이어지는 페이지와 전체 절의 조건을 함께 확인하세요.'}));
   if(intent==='cleaning'){
    const src=source(group.parts),start=src.text.match(/(?:^|\n)[ \t]*(?:<\s*기본원칙\s*>|\d+\.[ \t]*기본원칙)[^\n]*\n/u);
    if(start){const tail=src.text.slice(start.index+start[0].length),end=tail.search(/\n[ \t]*\d+\.[ \t]+[가-힣]/u);return [{label:'기본원칙',parts:slices(src,start.index,end<0?src.text.length:start.index+start[0].length+end)}];}
@@ -167,7 +168,7 @@ export function presentResults(corpus,result,question){
    article=activeArticles(entry,result.asOf).find(a=>a.title==='정의'&&a.parts.some(p=>p.page===row.page&&p.text.includes(row.text)))||null;
    if(article)article=articleIn(entry,article.number,result.asOf);
   }
-  const key=row.documentId+'|'+(article?.number||row.heading)+'|'+(row.scenario||'')+'|'+(row.match.includes('정의')?row.heading:'');
+  const key=row.documentId+'|'+(row.sopKey||article?.number||row.heading)+'|'+(row.scenario||'')+'|'+(row.match.includes('정의')?row.heading:'');
   let group=groups.find(g=>g.key===key);
   if(!group){group={...row,key,doc:entry.doc,article,parts:[],fullParts:[],focus:[]};groups.push(group);}
   if(!group.parts.some(p=>p.page===row.page&&p.text===row.text))group.parts.push({page:row.page,text:row.text,display:row.display||readable(row.text)});
@@ -175,7 +176,7 @@ export function presentResults(corpus,result,question){
  for(const g of groups){
   g.fullParts=uniqueParts(g.article?.parts||g.parts).map(p=>({page:p.page,text:p.text,display:p.display||readable(p.text)}));
   const location=g.article?locate(g.article,g.parts):null;
-  g.locator=location?.label||g.article?.number||(['form','table'].includes(g.kind)?g.heading:'SOP 절차');
+  g.locator=location?.label||g.article?.number||(['form','table'].includes(g.kind)?g.heading:g.sopKey?g.heading:'SOP 절차');
   if(g.docType!=='SOP'&&!g.article)g.locator=['form','table','figure'].includes(g.kind)?g.heading:'PDF '+g.page+'쪽 · 관련 후보';
   g.articleNumber=g.article?.number||null;g.articleTitle=g.article?.title||g.heading;
   g.target=g.article?{documentId:g.documentId,articleNumber:g.article.number,paragraph:location?.paragraph||null,item:location?.item||null}:null;

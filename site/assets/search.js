@@ -1,7 +1,7 @@
 // Browser and Node share this deterministic, model-free search implementation.
-import {activeArticles,searchableChunk} from './provisions.js?v=20261024-6';
-import {legalUnits} from './evidence.js?v=20261024-6';
-import {retrieve} from './retrieval.js?v=20261024-6';
+import {activeArticles,searchableChunk} from './provisions.js?v=20261024-7';
+import {legalUnits} from './evidence.js?v=20261024-7';
+import {retrieve} from './retrieval.js?v=20261024-7';
 const compact=s=>s.replace(/[\s“”"「」『』·ㆍ]/gu,'').replace(/[?？.]+$/u,'');
 const normalize=s=>s.replace(/\s+/gu,' ').trim();
 const stop=new Set(['구제역','FMD','ASF','HPAI','가축','경우','발생','규정','관련','대한','대하여','어떻게','무엇','언제','어디','해야','하나요','되나요','알려','주세요','합니까','인가요','방법']);
@@ -30,7 +30,7 @@ function words(question){
 }
 function procedureIntent(question,disease){
  const q=compact(question);
- const excluded=/면제|예외|과태료|처벌|안하면|하지않|보상|살처분|위생관리업|입식|수입|고용|입국|출국|서식|별지|별표/u.test(q);
+ const excluded=/야생|철새|전통시장|동물원|면제|예외|과태료|처벌|안하면|하지않|보상|살처분|위생관리업|입식|수입|고용|입국|출국|서식|별지|별표/u.test(q);
  if(!excluded&&q.includes('신고')&&!q.includes('이동제한')&&/어디|누구에게|어느기관|신고처|신고기관/u.test(q)&&(disease||/가축|의심축/u.test(q)))return 'reporting';
  if(!disease||excluded||q.includes('신고'))return null;
  if(q.includes('이동제한')&&!q.includes('소독')&&/해제|언제|풀리|풀어|며칠/u.test(q))return 'movement_release';
@@ -48,7 +48,7 @@ const messages={definition:'질문한 용어의 정의 항목을 찾았습니다
  related:'관련 단어가 포함된 원문 후보입니다. 질문에 대한 확정적인 답변은 아니며 해당 PDF의 전후 맥락을 확인하세요.'};
 export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
  const query=normalize(question),q=compact(query),term=definitionTerm(query);
- const named=[['구제역',/구제역|\bFMD\b/iu],['ASF',/아프리카\s*돼지\s*열병|\bASF\b/iu],['고병원성AI',/조류\s*인플루엔자|조류독감|\bHPAI\b|\bAI\b/iu]].filter(([,pattern])=>pattern.test(query)).map(([d])=>d);
+ const named=[['구제역',/구제역|\bFMD\b/iu],['ASF',/아프리카\s*돼지\s*열병|\bASF\b/iu],['고병원성AI',/조류\s*인플루엔자|조류독감|고병원성\s*AI|\bHPAI\b|\bAI\b/iu]].filter(([,pattern])=>pattern.test(query)).map(([d])=>d);
  if(named.length>1)return {mode:'related',results:[],message:'서로 다른 질병의 기준을 합쳐 제시하지 않습니다. 질병별로 나누어 검색해주세요.'};
  const target=named[0]||(['구제역','ASF','고병원성AI'].includes(filters.disease)?filters.disease:null);
  if(named.length&&!['전체','공통',target].includes(filters.disease))return {mode:'related',results:[],message:'질문과 선택한 질병이 다릅니다. 검색 범위를 확인하세요.'};
@@ -80,18 +80,18 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
    const pattern=new RegExp('^\\s*\\d+\\.\\s*[“"「『]'+escaped+'[”"」』]\\s*(?:이란|란|이라\\s*함은|라\\s*함은)','u');
    for(const u of legalUnits(a).units)if(u.item&&pattern.test(u.parts.map(p=>p.text).join('\n')))for(const p of u.parts)add(entry.doc,{...p,heading:'정의 · '+term,continued:p!==u.parts[0]},{match:'정의 항목 일치'});
   }
- }else if(target&&/방역지역|방역구역|방역대(?!책|본부)/u.test(q)&&/설정|정하|정해|나누|구분|반경|범위/u.test(q)&&!/해제|과태료|예외|소독/u.test(q)){
+ }else if(filters.type!=='SOP'&&target&&/방역지역|방역구역|방역대(?!책|본부)/u.test(q)&&/설정|정하|정해|나누|구분|반경|범위/u.test(q)&&!/해제|과태료|예외|소독/u.test(q)){
   mode='zone';for(const {doc,index} of entries){if(doc.type==='SOP'||doc.disease!==target)continue;
    for(const term of ['방역지역','관리지역','보호지역','예찰지역'])for(const d of index.definitions)if(d.term===term)for(const p of d.parts||[d.part])add(doc,p,{match:'방역지역 정의 연결'});
   }
   articles(['시장군수구청장의조치','시장군수의조치']);
- }else if(/^(?:(?:구제역|FMD|ASF|아프리카돼지열병|고병원성AI|HPAI|AI|조류인플루엔자|조류독감)(?:이발생하면|발생시|의|은|는)?)?살처분(?:(?:의)?(?:명령|대상|기준|범위|요건|조치|절차|방법))?(?:은|는|을|를)?(?:(?:어떻게|언제|누가)?(?:하나요|합니까|되나요|해야하나요|하죠)|알려주세요|알려줘)?$/iu.test(q)){
+ }else if(entries.some(e=>e.doc.type!=='SOP')&&/^(?:(?:구제역|FMD|ASF|아프리카돼지열병|고병원성AI|HPAI|AI|조류인플루엔자|조류독감)(?:이발생하면|발생시|의|은|는)?)?살처분(?:(?:의)?(?:명령|대상|기준|범위|요건|조치|절차|방법))?(?:은|는|을|를)?(?:(?:어떻게|언제|누가)?(?:하나요|합니까|되나요|해야하나요|하죠)|알려주세요|알려줘)?$/iu.test(q)){
   mode='topic';
   articles(['살처분명령','살처분명령등','살처분등조치','살처분등']);
   // Without a disease selection, show the common legal basis first.
   // Disease-specific rules retain their separate source and scenario.
   results=results.map(r=>({...r,topicPrimary:target?r.disease===target:r.docType==='법률'}));
- }else if(q.includes('사료')&&!/수입|수출|검역|보상|벌칙|과태료|판매|신고|재활용|제조업|제\d+조/u.test(q)&&(/발생|전염병|조치|처리|폐기|소각|매몰|공급|운반|반출|반입|이동|소독|보관|방역|남은/u.test(q)||q==='사료')){
+ }else if(entries.some(e=>e.doc.type!=='SOP')&&q.includes('사료')&&!/수입|수출|검역|보상|벌칙|과태료|판매|신고|재활용|제조업|제\d+조/u.test(q)&&(/발생|전염병|조치|처리|폐기|소각|매몰|공급|운반|반출|반입|이동|소독|보관|방역|남은/u.test(q)||q==='사료')){
   mode='material';
   const transport=/공급|운반|반출|반입|이동|차량/u.test(q),disposal=/처리|폐기|소각|매몰|오염|남은/u.test(q);
   for(const entry of entries){const {doc}=entry;if(doc.type==='SOP')continue;
@@ -124,7 +124,7 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
   const number=requested?.[0].match(/^제\d+조(?:의\d+)?/u)?.[0]||null;
   const requestedType=/시행규칙/u.test(q)?'시행규칙':/시행령/u.test(q)?'시행령':/예방법|^법제/u.test(q)?'법률':null;
   for(const entry of entries){const {doc,index}=entry;if(doc.type==='SOP'||requestedType&&doc.type!==requestedType)continue;for(const a of activeArticles(entry,filters.asOf))if(number?a.number===number:compact(a.title)===topic)for(const part of a.parts)add(doc,part,{match:'조문 일치'});}
-  const knownTopic=catalog.some(d=>(d.article_titles||[]).some(t=>compact(t)===topic));
+  const knownTopic=filters.type!=='SOP'&&catalog.some(d=>(d.article_titles||[]).some(t=>compact(t)===topic));
   if(results.length||number||knownTopic)mode='article';else{
    const found=retrieve(entries,query,filters.asOf,target);
    if(found.hits.length){
@@ -132,6 +132,13 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
     for(const hit of found.hits)for(const part of hit.article.parts)add(hit.doc,part,{
      match:'질문어·조문 연결',retrievalScopes:hit.scopes,retrievalScore:hit.score,matchedTerms:hit.matched,
      retrievalPrimary:!found.needsDetail&&found.hits.indexOf(hit)<3&&(!target||hit.doc.disease===target||!found.hits.some(h=>h.doc.disease===target))});
+   }
+   if(found.sopHits.length){
+    mode='ranked';
+    for(const hit of found.sopHits)for(const part of hit.section.parts)add(hit.doc,part,{
+     heading:hit.section.heading,scenario:hit.section.scenario,match:'SOP 절·항목 검색',
+     kind:hit.section.layout||'body',sopKey:hit.section.key,sopFocus:hit.units,retrievalPrimary:!found.needsDetail&&hit.section.layout!=='table'&&found.sopHits.indexOf(hit)<3,
+     matchedTerms:found.anchors});
    }
    for(const hit of found.supplement)add(hit.doc,hit.part,{match:'SOP 관련 후보',retrievalPrimary:false,matchedTerms:found.anchors});
    if(!results.length&&!found.anchors.length){
@@ -143,7 +150,7 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
     results=results.slice(0,6);
    }
    // Keep diagnostics separate from the existence of a rule.
-   diagnostics={status:entries.length?found.status:'no_documents',terms:found.anchors,articleCandidates:found.hits.length,sopCandidates:found.supplement.length};
+   diagnostics={status:entries.length?found.status:'no_documents',terms:found.anchors,articleCandidates:found.hits.length,sopCandidates:found.sopHits.length};
 
   }
  }
