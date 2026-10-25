@@ -9,7 +9,11 @@ export function actualAnnexes(index){
   const key=a.kind+':'+a.number.join(':');
   const group=groups.get(key)||[];if(!group.some(b=>b.part.page===a.part.page))group.push(a);groups.set(key,group);
  }
- return [...groups.values()].flatMap(g=>g.length===1?g:[]);
+ const candidates=[...groups.values()].flatMap(g=>g.length===1?g:[]);
+ const inline=a=>/^[^\n]*[\]〕〉]\s*(?:에\s*따[라른]|에서|의\s*(?:규정|기준))/u.test(a.part.text.split('\n')[0]);
+ const selected=candidates.map((a,i)=>({...a,readerOrdinal:i})).filter(a=>!inline(a));
+ const beginsPage=a=>{const page=index.pages.find(p=>p.page===a.part.page),first=a.part.text.split('\n').find(s=>s.trim());const at=page?.text.indexOf(first);return at>=0&&/^[\s\d−–-]*$/u.test(page.text.slice(0,at));};
+ return selected.map((a,i)=>{const next=selected.slice(i+1).find(b=>b.part.page>a.part.page);if(!next||!beginsPage(next))return a;const removedBoundary=candidates.some(b=>inline(b)&&b.part.page===a.endPage);if(a.endPage===next.part.page||removedBoundary)return {...a,endPage:next.part.page-1};return a;});
 }
 const pattern=/(?<![가-힣A-Za-z0-9])(?:(「[^」]{1,100}」|『[^』]{1,100}』|가축전염병\s*예방법(?:\s*시행(?:령|규칙))?|시행령|시행규칙|같은\s*(?:법|영|규칙)|이\s*(?:법|영|규칙)|법|영|규칙)\s*)?(별표|별지)\s*(?:제\s*)?(\d+)(?:\s*호\s*의\s*(\d+)|\s*의\s*(\d+)\s*호?|\s*호)?\s*(?:서식)?/gu;
 export function annexReferences(text,sourceDoc,corpus){

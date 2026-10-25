@@ -28,7 +28,8 @@ function joinPair(left,right){
  if(left.columns!==right.columns||!left.xs||!right.xs||left.xs.some((x,i)=>Math.abs(x-right.xs[i])>3))return null;
  const result=structuredClone(left),next=structuredClone(right),last=result.rows.length-1;
  const bottom=result.rows.flatMap((row,r)=>row.filter(c=>c.openBottom&&r+c.rowspan-1===last).map(cell=>({cell,row:r})));
- const matches=next.rows[0].flatMap(cell=>{const prior=bottom.find(p=>p.cell.col===cell.col&&p.cell.colspan===cell.colspan);return cell.openTop&&prior?[{cell,prior}]:[];});if(!matches.length)return null;
+ const startsItem=/^\s*(?:\d{1,2}|[가-힣])[).](?=\s|[가-힣「『])/u.test(next.rows[0].find(c=>c.col===0)?.text||'');
+ const matches=next.rows[0].flatMap(cell=>{const prior=bottom.find(p=>p.cell.col===cell.col&&p.cell.colspan===cell.colspan);const shared=prior&&cell.col>0&&!cell.text.trim()&&(prior.cell.rowspan>1||/법|제\s*\d+\s*조/u.test(prior.cell.text));return cell.openTop&&prior&&(!startsItem||shared)?[{cell,prior}]:[];});if(!matches.length){if(!startsItem)return null;result.rows.push(...next.rows);result.pages.push(...next.pages);return completeGrid(result)&&glyphs(tableText(result))===glyphs(tableText(left)+tableText(right))?result:null;}
  const collapse=matches.length===next.rows[0].length;
  for(const {cell,prior} of matches){prior.cell.text+="\n"+cell.text;prior.cell.fragments.push(...cell.fragments);prior.cell.rowspan=(collapse?last:last+1)+cell.rowspan-prior.row;prior.cell.openBottom=cell.openBottom;next.rows[0]=next.rows[0].filter(c=>c!==cell);}
  result.rows.push(...(collapse?next.rows.slice(1):next.rows));result.pages.push(...next.pages);
@@ -39,7 +40,7 @@ export function joinedAnnexLayouts(pages){
  const result=structuredClone(pages);let previous=null,previousPage=null;
  for(const page of result){if(page.mode!=='mixed'){previous=null;previousPage=page.page;continue;}const blocks=[];
   for(const b of page.blocks){if(b.kind!=='table'){if(b.text?.trim()||b.kind==='image')previous=null;blocks.push(b);continue;}
-   b.pages=[page.page];for(const cell of b.rows.flat())cell.fragments=[{page:page.page,text:cell.text}];
+   b.pages=[page.page];for(const cell of b.rows.flat())cell.fragments=[{page:page.page,text:cell.text,...(cell.crop?{crop:cell.crop}:{})}];
    const joined=previous&&page.page===previousPage+1?joinPair(previous,b):null;
    if(joined){Object.assign(previous,joined);}else{blocks.push(b);previous=b;}
    previousPage=page.page;

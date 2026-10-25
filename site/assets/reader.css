@@ -29,3 +29,7 @@
 .annex-table-scroll{max-width:100%;overflow:auto;margin:18px 0 26px;border:1px solid #d6dfe7;border-radius:4px;-webkit-overflow-scrolling:touch}.annex-table{border-collapse:collapse;width:100%;min-width:560px;table-layout:fixed;font-size:14px;line-height:1.85}.annex-table[data-columns="2"]{min-width:360px}.annex-table[data-columns="5"],.annex-table[data-columns="6"],.annex-table[data-columns="7"]{min-width:800px}.annex-table caption{text-align:left;padding:9px 12px;font-size:11px;color:#63798b;background:#f4f7fa}.annex-table td{border:1px solid #d6dfe7;padding:12px;vertical-align:top;overflow-wrap:anywhere}.annex-table td .source-text,.annex-table td .source-item,.annex-table td .source-heading{font-size:14px;line-height:1.85;margin:0 0 8px;font-weight:400}.annex-table td .formatted-source{margin:0}.annex-table-scroll:focus-visible{outline:2px solid #285f91;outline-offset:2px}@media print{.annex-table-scroll{overflow:visible}.annex-table{min-width:0!important;font-size:11px}}
 
 .annex-table td .formatted-source>*{border:0;background:transparent;padding:0}
+
+.annex-cell-image{display:block;max-width:100%;height:auto;margin:0 auto}.annex-table td>a:has(.annex-cell-image){display:block}
+
+.annex-table.wide-table{min-width:1100px}

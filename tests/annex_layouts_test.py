@@ -28,6 +28,28 @@ class AnnexLayouts(unittest.TestCase):
   p,cells=self.fake_grid([(5,'대상'),(20,'1) 농장'),(40,'가) 미작성'),(60,'나) 거짓기재')],[[(40,'50'),(60,'100')],[(40,'150'),(60,'200')]])
   with patch('build_annex_layouts.source_lines',side_effect=lambda cs:[(c['top'],c['text']) for c in cs]):result=detail_cells(p,cells)
   self.assertIn(cells[1],result);self.assertEqual([b[1] for b in result if b[0]==0],[0,18,38,58])
+ def test_categorical_decisions_follow_child_rows_including_wrapped_durations(self):
+  p,cells=self.fake_grid([(5,'대상'),(30,'가. 미신고'),(60,'나. 변경')],[[(30,'경고'),(60,'시정명령')],[(30,'업무정지'),(45,'1개월'),(60,'지정취소')]])
+  with patch('build_annex_layouts.source_lines',side_effect=lambda cs:[(c['top'],c['text']) for c in cs]):result=detail_cells(p,cells)
+  self.assertEqual([b[1] for b in result if b[0]==0],[0,28,58]);self.assertIn(cells[1],result)
+ def test_notices_and_sop_have_source_bound_text_and_table_layouts(self):
+  counts={}
+  for doc in self.manifest['documents']:
+   self.assertIn(doc['id'],self.data['documents'])
+   if doc['type'] not in ['고시','SOP']:continue
+   pages=self.data['documents'][doc['id']]['pages'];counts.setdefault(doc['type'],0)
+   counts[doc['type']]+=sum(b['kind']=='table' for p in pages.values() for b in p.get('blocks',[]))
+  self.assertGreater(counts['고시'],5);self.assertGreater(counts['SOP'],10)
+ def test_embedded_formula_and_symbol_crops_are_source_bound_and_present(self):
+  images=0
+  for doc in self.manifest['documents']:
+   for p in self.data['documents'][doc['id']]['pages'].values():
+    for b in p.get('blocks',[]):
+     for row in b.get('rows',[]):
+      for cell in row:
+       if not cell.get('crop'):continue
+       image=cell['crop'];self.assertTrue(image['path'].startswith('assets/pages/'+doc['sha256']+'/'));self.assertTrue((ROOT/'site'/image['path']).exists());self.assertGreater(image['width'],0);self.assertGreater(image['height'],0);images+=1
+  self.assertGreater(images,0)
  def test_prose_annexes_are_text_instead_of_page_images(self):
   _,decree=self.document('시행령');_,rule=self.document('시행규칙')
   for p in range(29,37):self.assertEqual(decree[str(p)]['mode'],'text')
