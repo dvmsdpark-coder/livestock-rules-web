@@ -50,6 +50,12 @@ class AnnexLayouts(unittest.TestCase):
        if not cell.get('crop'):continue
        image=cell['crop'];self.assertTrue(image['path'].startswith('assets/pages/'+doc['sha256']+'/'));self.assertTrue((ROOT/'site'/image['path']).exists());self.assertGreater(image['width'],0);self.assertGreater(image['height'],0);images+=1
   self.assertGreater(images,0)
+ def test_dotted_score_rules_preserve_the_distinct_checklist_and_score_axes(self):
+  _,pages=self.document('시행규칙');table=next(b for b in pages['99']['blocks'] if b['kind']=='table' and b['columns']==4)
+  self.assertEqual(len(table['rows']),22)
+  start=next(i for i,row in enumerate(table['rows']) if any(c['col']==0 and c['text'].startswith('1.') for c in row))
+  checklist=next(c for c in table['rows'][start] if c['col']==1);self.assertEqual(checklist['rowspan'],5)
+  self.assertEqual([next(c['text'] for c in row if c['col']==3) for row in table['rows'][start:start+5]],['10','8','6','4','0'])
  def test_prose_annexes_are_text_instead_of_page_images(self):
   _,decree=self.document('시행령');_,rule=self.document('시행규칙')
   for p in range(29,37):self.assertEqual(decree[str(p)]['mode'],'text')

@@ -99,7 +99,8 @@ def page_layout(p,number,drawings,decorations=frozenset()):
   rules=[e for e in p.edges if e.get('orientation')=='h' and e['x1']-e['x0']>20 and box[1]-2<=e['top']<=box[3]+2 and e['x0']<=box[2]+2 and e['x1']>=box[0]-2]
   if rules:box=union([box,*[[e['x0'],max(box[1],e['top']),e['x1'],min(box[3],e['bottom'])] for e in rules]])
   if box[2]-box[0]<20:continue
-  tables=p.crop(box).find_tables({'explicit_horizontal_lines':[box[1],box[3]],'explicit_vertical_lines':[box[0],box[2]]})
+  # Keep sub-point dash segments before joining, otherwise score rows disappear.
+  tables=p.crop(box).find_tables({'explicit_horizontal_lines':[box[1],box[3]],'explicit_vertical_lines':[box[0],box[2]],'edge_min_length_prefilter':0})
   candidates=[t for t in tables if len(t.columns)>1]
   if len(candidates)==1:regions.append({'bbox':box,'table':candidates[0]})
   else:regions.append({'bbox':box,'table':None})
