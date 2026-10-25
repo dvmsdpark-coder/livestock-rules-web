@@ -1,8 +1,8 @@
-import {activeArticles} from './provisions.js?v=20261025-3';
-import {actualAnnexes,annexReferences} from './annexes.js?v=20261025-3';
-import {sopIndex} from './sop-index.js?v=20261025-3';
-import {articleDetail,references} from './evidence.js?v=20261025-3';
-import {annexUnits} from './annex-excerpts.js?v=20261025-3';
+import {activeArticles} from './provisions.js?v=20261025-5';
+import {actualAnnexes,annexReferences} from './annexes.js?v=20261025-5';
+import {sopIndex} from './sop-index.js?v=20261025-5';
+import {articleDetail,references} from './evidence.js?v=20261025-5';
+import {annexUnits} from './annex-excerpts.js?v=20261025-5';
 export function contents(entry){
  const articles=entry.doc.type==='SOP'?sopIndex(entry).sections.map((s,i)=>({key:'s:'+i,label:s.heading,chapter:s.scenario,parts:s.parts})):activeArticles(entry).map(a=>({key:'a:'+a.number,label:a.number+' '+a.title,chapter:a.parts[0]?.scenario||'',parts:a.parts,number:a.number}));
  const annexes=actualAnnexes(entry.index).map((a,i)=>({key:'x:'+i,label:a.heading,annexKind:a.kind,number:a.number,annex:a,parts:entry.index.pages.filter(p=>p.page>=a.part.page&&p.page<=a.endPage)}));
@@ -14,5 +14,7 @@ export function readerDetail(corpus,documentId,key){
  const node=Object.values(contents(entry)).flat().find(n=>n.key===key);if(!node)return {error:'목차에서 항목을 다시 선택해주세요.'};
  if(node.key.startsWith('a:')){const d=articleDetail(corpus,{documentId,articleNumber:node.number,asOf:entry.asOf});return {...d,label:node.label,key};}
  const parts=node.parts.map(p=>({...p,display:p.text,references:[...references(p.text,entry.doc,corpus),...annexReferences(p.text,entry.doc,corpus)].sort((a,b)=>a.start-b.start)}));
- return {doc:entry.doc,key,label:node.label,parts,citations:[],annex:node.annex,units:node.annex?annexUnits(entry,node.annex):[]};
+ const sections=entry.doc.type==='SOP'?contents(entry).articles:[],position=sections.findIndex(n=>n.key===key),last=parts.at(-1)?.page;
+ const sourceRange=position>=0?{start:parts[0].page,end:Math.max(last,(sections[position+1]?.parts[0]?.page||last+1)-1)}:null;
+ return {doc:entry.doc,key,label:node.label,sourceRange,parts,citations:[],annex:node.annex,units:node.annex?annexUnits(entry,node.annex):[]};
 }

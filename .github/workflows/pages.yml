@@ -62,6 +62,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Cache source-version page images
+        uses: actions/cache@v4
+        with:
+          path: site/assets/pages
+          key: ${{ runner.os }}-page-previews-v2-${{ hashFiles('site/data/manifest.json', 'tools/build_page_previews.py') }}
+          restore-keys: |
+            ${{ runner.os }}-page-previews-v2-
       - name: Render mobile annex images from verified source PDFs
         run: |
           python -m pip install -r maintenance/preview-requirements.txt

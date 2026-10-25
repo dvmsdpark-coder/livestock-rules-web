@@ -9,8 +9,10 @@ count=0
 for entry in listing:
     doc=entry['doc'];preview=data['documents'][doc['id']]
     assert preview['source_sha256']==doc['sha256']
+    if doc['type']=='SOP':assert len(preview['pages'])==doc['pages']
     assert set(preview['pages'])==set(map(str,entry['pages']))
     for number,p in preview['pages'].items():
+        assert isinstance(p.get('visual'),bool)
         file=(ROOT/'site'/p['path']).resolve()
         assert file.is_relative_to((ROOT/'site/assets/pages'/doc['sha256']).resolve())
         assert file.stat().st_size==p['bytes']
@@ -19,4 +21,10 @@ for entry in listing:
             assert image.format=='WEBP' and image.size==(p['width'],p['height']) and image.width==1440
             image.verify()
         count+=1
+# Source-bound visual regressions: a real body organisation chart must be visible,
+# while the HPAI page background must not turn a plain-text page into a diagram.
+for e in listing:
+    d=e['doc'];pages=data['documents'][d['id']]['pages']
+    if d['sha256']=='f317fe10748e2a09e84db8098071ee71a0d9609490a35428479e6caccb8f3e60':assert pages['45']['visual']
+    if d['sha256']=='a2b814c1053b54f9e772628e60f5dee7abe2e841b3ae69efedc026a6d5a9995d':assert not pages['30']['visual']
 print('PASS',count,'source-bound mobile page images')
