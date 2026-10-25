@@ -13,3 +13,5 @@ __pycache__/
 # Generated from source-hash-verified PDFs during deployment
 site/assets/pages/
 site/data/page-previews.json
+
+site/data/annex-layouts.json

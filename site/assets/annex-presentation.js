@@ -5,3 +5,10 @@ const reviewed={
 };
 export function proseAnnex(doc,annex){return annex.kind==='table'&&(reviewed[doc.sha256]||[]).some(n=>n[0]===annex.number[0]&&(n[1]||null)===(annex.number[1]||null));}
 export function previewPage(previews,doc,page){const entry=previews?.documents?.[doc.id];return entry?.source_sha256===doc.sha256?entry.pages[String(page)]||null:null;}
+
+// Generated layouts are usable only for this exact immutable PDF and complete annex range.
+export function annexLayouts(layouts,doc,annex){
+ if(annex?.kind!=='table')return null;
+ const entry=layouts?.documents?.[doc.id];if(entry?.source_sha256!==doc.sha256)return null;
+ const pages=[];for(let n=annex.part.page;n<=annex.endPage;n++){const layout=entry.pages[String(n)];if(!layout)return null;pages.push({page:n,...layout});}return pages;
+}

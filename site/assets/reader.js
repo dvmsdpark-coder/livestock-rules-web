@@ -1,10 +1,10 @@
 import {literalRanges} from './fulltext.js?v=20261025-7';
-import {proseAnnex,previewPage} from './annex-presentation.js?v=20261025-7';
+import {proseAnnex,previewPage,annexLayouts} from './annex-presentation.js?v=20261025-9';
 import {documentGroup,sourceBlocks} from './reader-format.js?v=20261025-7';
 const $=id=>document.getElementById(id);
 const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
 const date=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-let previews=null,findId=0,findTerm='',findResults=[],findShown=0,findJump=false,findScopeTitle='';
+let annexData=null,previews=null,findId=0,findTerm='',findResults=[],findShown=0,findJump=false,findScopeTitle='';
 let manifest,documents=[],current,tab='articles',key='',serial=0,pending=0,loading=true,group='법령';
 const worker=new Worker(new URL('./worker.js?v=20261025-7',import.meta.url),{type:'module'});
 const filters=()=>({asOf:$('readerDate').value,disease:'전체',type:'전체'});
@@ -70,11 +70,23 @@ function highlightBody(){if(!findTerm)return;for(const host of $('readerBody').q
 function showFindResults(){const root=$('fulltextResults'),limit=Math.min(findShown+40,findResults.length);for(let i=findShown;i<limit;i++){const r=findResults[i],a=el('a','fulltext-result');a.href=address(r.documentId,r.key);a.append(el('strong','',r.title+' · '+r.label),el('small','',`PDF ${r.page}쪽 · ${r.count}회 일치`));const snippet=el('span','find-snippet');snippet.append(document.createTextNode(r.snippet.slice(0,r.match.start)),el('mark','',r.snippet.slice(r.match.start,r.match.end)),document.createTextNode(r.snippet.slice(r.match.end)));a.append(snippet);a.onclick=e=>{if(e.ctrlKey||e.metaKey||e.shiftKey||e.altKey)return;e.preventDefault();findJump=true;navigate(r.documentId,r.key);};root.append(a);}findShown=limit;$('fulltextMore').hidden=findShown>=findResults.length;}
 $('fulltextForm').onsubmit=e=>{e.preventDefault();if(loading||!manifest)return;findScopeTitle=$('fulltextScope').value==='current'?(current?.doc.title||'현재 문서'):'전체 수록 문서';findTerm=$('fulltextQuery').value.trim();findResults=[];findShown=0;$('fulltextResults').replaceChildren();$('fulltextMore').hidden=true;$('fulltextStatus').textContent='본문에서 키워드를 찾고 있습니다.';$('fulltextSubmit').disabled=true;worker.postMessage({id:++findId,action:'fulltext',manifest,question:findTerm,filters:filters(),target:{documentId:$('fulltextScope').value==='current'?current?.doc.id:null}});};
 $('fulltextMore').onclick=showFindResults;$('fulltextClear').onclick=()=>{findId++;findTerm='';findResults=[];findShown=0;$('fulltextQuery').value='';$('fulltextResults').replaceChildren();$('fulltextStatus').textContent='';$('fulltextMore').hidden=true;$('fulltextSubmit').disabled=loading;for(const m of $('readerBody').querySelectorAll('mark.keyword-hit'))m.replaceWith(document.createTextNode(m.textContent));};
+function layoutPart(text,part){
+ const refs=[];for(const r of part.references||[]){const pattern=[...r.label.replace(/\s/gu,'')].map(c=>c.replace(/[.*+?^${}()|[\]\\]/gu,'\\$&')).join('\\s*');if(!pattern)continue;for(const m of text.matchAll(new RegExp(pattern,'gu')))if(!refs.some(x=>m.index<x.end&&m.index+m[0].length>x.start))refs.push({...r,start:m.index,end:m.index+m[0].length});}
+ return {...part,text,display:text,references:refs.sort((a,b)=>a.start-b.start)};
+}
+function renderAnnexLayouts(d,pages,root){
+ for(const layout of pages){const part=d.parts.find(p=>p.page===layout.page);if(layout.mode==='text'){renderParts([part],root);continue;}if(layout.mode==='image'){pageImages({...d,parts:[part]},root);continue;}
+  const section=el('section','source-part annex-layout');section.dataset.page=String(layout.page);section.append(external('PDF '+layout.page+'쪽 ↗',pdf(d.doc,layout.page)));let imageShown=false;
+  for(const block of layout.blocks){if(block.kind==='text'){section.append(partText(layoutPart(block.text,part)));continue;}if(block.kind==='image'){if(!imageShown){pageImages({...d,parts:[part]},section);imageShown=true;}continue;}
+   const scroll=el('div','annex-table-scroll');scroll.tabIndex=0;scroll.setAttribute('role','region');scroll.setAttribute('aria-label','PDF '+layout.page+'쪽 표 · 가로 스크롤');const table=el('table','annex-table');table.dataset.columns=String(block.columns);table.append(el('caption','','PDF '+layout.page+'쪽 표'));const cols=el('colgroup');for(const width of block.widths){const col=el('col');col.width=width+'%';cols.append(col);}table.append(cols);const body=el('tbody');for(const row of block.rows){const tr=el('tr');for(const cell of row){const td=el('td');td.colSpan=cell.colspan;td.rowSpan=cell.rowspan;td.append(partText(layoutPart(cell.text,part)));tr.append(td);}body.append(tr);}table.append(body);scroll.append(table);section.append(scroll);
+  }root.append(section);
+ }
+}
 function render(d){const root=$('readerBody');root.replaceChildren();root.setAttribute('aria-busy','false');if(d.error){$('readerStatus').textContent=d.error;return;}$('readerStatus').textContent='수록 원문 · 자료 기준일과 적용 조건을 함께 확인하세요.';root.classList.toggle('sop-reading',d.doc.type==='SOP');root.append(el('h2','item-heading',d.label));
  if(d.annex||key.startsWith('p:')||d.visualOnly){
-  const prose=d.annex&&proseAnnex(d.doc,d.annex);
-  root.append(el('p','layout-note',prose?'글 중심 별표입니다. 항목별 본문을 바로 읽고, 아래 원문 이미지로 대조할 수 있습니다.':'표·서식·그림의 원문 배치를 화면용 이미지로 표시합니다. 확대하면 가로로 이동하며 작은 글씨를 확인할 수 있습니다.'));
-  if(prose){annexText(d,root);const images=el('details','original-images');images.append(el('summary','','원문 이미지로 대조하기'));images.addEventListener('toggle',()=>{if(images.open&&!images.dataset.loaded){images.dataset.loaded='true';pageImages(d,images);}});root.append(images);}
+  const layouts=d.annex&&annexLayouts(annexData,d.doc,d.annex);const prose=layouts?layouts.every(p=>p.mode==='text'):d.annex&&proseAnnex(d.doc,d.annex);
+  root.append(el('p','layout-note',layouts&&!prose?'문장은 본문으로, 표는 칸 구조를 유지해 표시합니다. 이어지는 표나 도안은 원문 이미지로 확인하세요.':prose?'글 중심 별표입니다. 항목별 본문을 바로 읽고, 아래 원문 이미지로 대조할 수 있습니다.':'표·서식·그림의 원문 배치를 화면용 이미지로 표시합니다. 확대하면 가로로 이동하며 작은 글씨를 확인할 수 있습니다.'));
+  if(layouts||prose){if(layouts&&!prose)renderAnnexLayouts(d,layouts,root);else annexText(d,root);const images=el('details','original-images');images.append(el('summary','','원문 이미지로 대조하기'));images.addEventListener('toggle',()=>{if(images.open&&!images.dataset.loaded){images.dataset.loaded='true';pageImages(d,images);}});root.append(images);}
   else{const selected=d.visualOnly?previewPage(previews,d.doc,d.parts[0]?.page):null;const pages=selected?.continuation?.map(page=>({page}))||d.parts;pageImages({...d,parts:pages},root);const text=el('details','extracted-text');text.append(el('summary','','추출 텍스트 보기 · 표의 칸 배치는 반영되지 않습니다'));annexText(d,text);root.append(text);}
   root.append(external('PDF 원본 확인 ↗',pdf(d.doc,d.parts[0]?.page)));
  }else if(d.doc.type==='SOP')renderSop(d,root);else renderParts(d.parts,root);connections(d);highlightBody();if(findJump){findJump=false;requestAnimationFrame(()=>document.querySelector('#readerBody mark')?.scrollIntoView({block:'center'}));}$('copyLocation').disabled=$('printArticle').disabled=false;const nodes=current.contents[tab],pos=nodes.findIndex(n=>n.key===key);$('readerPrevious').disabled=pos<=0;$('readerNext').disabled=pos<0||pos===nodes.length-1;}
@@ -87,4 +99,4 @@ $('copyLocation').onclick=async()=>{try{await navigator.clipboard.writeText(addr
 window.addEventListener('popstate',()=>{const p=new URLSearchParams(location.hash.slice(1));if(p.get('date')&&p.get('date')!==$('readerDate').value){$('readerDate').value=p.get('date');sendCatalogue();}else if(!loading){documentOptions(p.get('doc'),p.get('item'));}});
 const initial=new URLSearchParams(location.hash.slice(1));if(initial.has('article')){initial.set('doc',initial.get('article'));if(initial.get('number'))initial.set('item','a:'+initial.get('number'));for(const field of ['article','number','paragraph','itemNumber'])initial.delete(field);history.replaceState(null,'','#'+initial.toString());}$('readerDate').value=/^\d{4}-\d{2}-\d{2}$/u.test(initial.get('date')||'')?initial.get('date'):date;
 // Preserve existing bookmarked article URLs from the former search home.
-try{const r=await fetch('./data/manifest.json?v=20261025-7');if(!r.ok)throw Error();manifest=await r.json();if(manifest.schema!==1)throw Error();try{const imageResponse=await fetch('./data/page-previews.json?v=20261025-7');if(imageResponse.ok)previews=await imageResponse.json();}catch{}sendCatalogue();}catch{$('readerStatus').textContent='자료를 불러오지 못했습니다. 새로고침해주세요.';}
+try{const r=await fetch('./data/manifest.json?v=20261025-7');if(!r.ok)throw Error();manifest=await r.json();if(manifest.schema!==1)throw Error();try{const imageResponse=await fetch('./data/page-previews.json?v=20261025-7');if(imageResponse.ok)previews=await imageResponse.json();}catch{}try{const response=await fetch('./data/annex-layouts.json?v=20261025-9');if(response.ok)annexData=await response.json();}catch{}sendCatalogue();}catch{$('readerStatus').textContent='자료를 불러오지 못했습니다. 새로고침해주세요.';}
