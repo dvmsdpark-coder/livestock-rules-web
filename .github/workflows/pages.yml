@@ -76,6 +76,7 @@ jobs:
           python tools/build_page_previews.py
           python tools/build_annex_layouts.py
           python tests/annex_layouts_test.py
+          node tools/verify_annex_layouts.mjs
           python tools/verify_page_previews.py
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4

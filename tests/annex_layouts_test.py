@@ -16,10 +16,15 @@ class AnnexLayouts(unittest.TestCase):
   for p in [54,55,56,57,58,59,60,95,96,97,110,111,139,140,142,146]:self.assertEqual(rule[str(p)]['mode'],'text',p)
  def test_mixed_general_rules_are_not_trapped_in_images(self):
   _,pages=self.document('시행령');p=pages['26'];self.assertEqual(p['mode'],'mixed');self.assertTrue(any(b['kind']=='text' and '일반기준' in b['text'] for b in p['blocks']))
- def test_continued_tables_and_dimensioned_drawings_keep_original_layout(self):
+ def test_continued_tables_are_rebuilt_and_drawings_keep_original_layout(self):
   _,d=self.document('시행령');_,r=self.document('시행규칙')
-  for p in ['26','27','28']:self.assertTrue(any(b['kind']=='image' for b in d[p]['blocks']));self.assertFalse(any(b['kind']=='table' for b in d[p]['blocks']))
+  for p in ['26','27','28']:self.assertTrue(any(b['kind']=='table' for b in d[p]['blocks']));self.assertFalse(any(b['kind']=='image' for b in d[p]['blocks']))
   for p in [94,115,116,117,118,119,120,121,122,141]:self.assertEqual(r[str(p)]['mode'],'image')
+ def test_no_textual_grid_falls_back_to_a_duplicate_page_image(self):
+  for typ in ['시행령','시행규칙']:
+   _,pages=self.document(typ)
+   for n,p in pages.items():
+    if p['mode']=='mixed':self.assertFalse(any(b['kind']=='image' for b in p['blocks']),f'{typ} {n}')
  def test_closed_simple_tables_are_selectable_text(self):
   _,pages=self.document('시행규칙');tables=[b for b in pages['69']['blocks'] if b['kind']=='table'];self.assertTrue(tables);self.assertEqual(tables[0]['columns'],2)
  def test_source_hash_and_every_converted_character_and_merged_cell(self):
