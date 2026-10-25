@@ -1,6 +1,6 @@
-import {eligible,search} from './search.js?v=20261025-1';
-import {presentResults,articleDetail} from './evidence.js?v=20261025-1';
-import {contents,readerDetail} from './reader-model.js?v=20261025-1';
+import {eligible,search} from './search.js?v=20261025-2';
+import {presentResults,articleDetail} from './evidence.js?v=20261025-2';
+import {contents,readerDetail} from './reader-model.js?v=20261025-2';
 const loading=new Map();
 async function load(doc){
  if(!loading.has(doc.id))loading.set(doc.id,(async()=>{
