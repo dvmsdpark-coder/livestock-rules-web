@@ -1,10 +1,11 @@
-import {normalizeQuestion,unmappedNouns} from './question.js?v=20261025-3';
-import {classificationRequest,classificationSources} from './classification.js?v=20261025-3';
+import {literalSubjects,satisfiesSubjects} from './query-contract.js?v=20261025-7';
+import {normalizeQuestion,unmappedNouns} from './question.js?v=20261025-7';
+import {classificationRequest,classificationSources} from './classification.js?v=20261025-7';
 // Browser and Node share this deterministic, model-free search implementation.
-import {activeArticles,searchableChunk} from './provisions.js?v=20261025-3';
-import {legalUnits} from './evidence.js?v=20261025-3';
-import {actualAnnexes,annexReferences} from './annexes.js?v=20261025-3';
-import {retrieve,concepts} from './retrieval.js?v=20261025-3';
+import {activeArticles,searchableChunk} from './provisions.js?v=20261025-7';
+import {legalUnits} from './evidence.js?v=20261025-7';
+import {actualAnnexes,annexReferences} from './annexes.js?v=20261025-7';
+import {retrieve,concepts} from './retrieval.js?v=20261025-7';
 const compact=s=>s.replace(/[\s“”"「」『』·ㆍ]/gu,'').replace(/[?？.]+$/u,'');
 const normalize=s=>s.replace(/\s+/gu,' ').trim();
 const stop=new Set(['구제역','FMD','ASF','HPAI','가축','경우','발생','규정','관련','대한','대하여','어떻게','무엇','언제','어디','해야','하나요','되나요','알려','주세요','합니까','인가요','방법','종류','분류','목록','리스트','유형','구분','항목','알려주세요','알려줘','설명해주세요','보여주세요','말해주세요']);
@@ -140,7 +141,7 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
   for(const entry of entries){const {doc,index}=entry;if(benefitQuestion||doc.type==='SOP'||requestedType&&doc.type!==requestedType)continue;for(const a of activeArticles(entry,filters.asOf))if(number?a.number===number:compact(a.title)===topic)for(const part of a.parts)add(doc,part,{match:'조문 일치'});}
   const knownTopic=!benefitQuestion&&filters.type!=='SOP'&&catalog.some(d=>(d.article_titles||[]).some(t=>compact(t)===topic));
   if(results.length||number||knownTopic)mode='article';else{
-   const found=retrieve(entries,canonicalQuery,filters.asOf,target);
+   const found=retrieve(entries,canonicalQuery,filters.asOf,target,corpus);
    if(found.hits.length){
     mode='ranked';
     for(const hit of found.hits)for(const part of hit.article.parts)add(hit.doc,part,{
@@ -164,7 +165,7 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
     results=results.slice(0,6);
    }
    // Keep diagnostics separate from the existence of a rule.
-   diagnostics={status:entries.length?found.status:'no_documents',terms:found.anchors,benefits:found.benefits||[],roleSearch:found.roleSearch||false,actors:found.actors||[],articleCandidates:found.hits.length,sopCandidates:found.sopHits.length};
+   diagnostics={status:entries.length?found.status:'no_documents',terms:found.anchors,benefits:found.benefits||[],roleSearch:found.roleSearch||false,actors:found.actors||[],articleCandidates:found.hits.length,sopCandidates:found.sopHits.length,scopeTerms:found.scopeTerms||[]};
 
   }
  }
@@ -204,6 +205,24 @@ export function search(corpus,question,filters,catalog=corpus.map(c=>c.doc)){
   }
   related.sort((a,b)=>Number(b[2])-Number(a[2]));
   for(const [doc,a,primary] of related)add(doc,a.part,{kind:a.kind,endPage:a.endPage,deleted:a.deleted,match:'조문 인용 별표·서식 연결',retrievalPrimary:primary});
+ }
+ const scopeTerms=diagnostics?.scopeTerms||literalSubjects(corpus,canonicalQuery,[...concepts.flatMap(c=>c.aliases),...catalog.flatMap(d=>d.article_titles||[])]);
+ if(scopeTerms.length&&results.length){
+  const accepted=new Set(),rejected=new Set();
+  const groupKey=r=>r.documentId+'|'+(r.sopKey||r.heading||r.page);
+  for(const row of results){const id=groupKey(row);if(accepted.has(id)||rejected.has(id))continue;const e=entries.find(e=>e.doc.id===row.documentId);let text='';
+   if(row.sopFocus)text=row.sopFocus.map(u=>u.parts.map(p=>p.text).join(' ')).join(' ');
+   else if(['table','form'].includes(row.kind))text=e.index.pages.filter(p=>p.page>=row.page&&p.page<=(row.endPage||row.page)).map(p=>p.text).join(' ');
+   else{const number=row.heading?.match(/제\s*\d+\s*조(?:의\s*\d+)?/u)?.[0]?.replace(/\s/gu,'');const article=number&&activeArticles(e,filters.asOf).find(a=>a.number===number);
+    if(article&&row.retrievalScopes?.length){const units=legalUnits(article).units;text=row.retrievalScopes.flatMap(s=>units.filter(u=>u.paragraph===s.paragraph&&u.item===s.item).flatMap(u=>u.parts)).map(p=>p.text).join(' ');text+=' '+article.title;}
+    else text=results.filter(r=>groupKey(r)===id).map(r=>r.text).join(' ');
+   }
+   text+=' '+(row.heading||'')+' '+(row.scenario||'');
+   (satisfiesSubjects(text,scopeTerms)?accepted:rejected).add(id);
+  }
+  results=results.filter(r=>accepted.has(groupKey(r)));
+  diagnostics={...diagnostics,scopeTerms,coverageRejected:rejected.size};
+  if(!results.length)diagnostics.status='no_match';
  }
  const unmapped=unmappedNouns(corpus,query,concepts.flatMap(c=>c.aliases));
  if(unmapped.length&&results.length)return {mode:'related',results:[],diagnostics:{status:'unmapped_subject',terms:[],unmapped},message:'다음 표현을 등록 원문과 연결하지 못했습니다: '+unmapped.join(', ')+'. 대상이나 조건을 확인해주세요. 이 표현을 생략한 다른 근거를 답으로 제시하지 않습니다.'};

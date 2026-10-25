@@ -1,7 +1,7 @@
-import {fulltextSearch} from './fulltext.js?v=20261025-6';
-import {eligible,search} from './search.js?v=20261025-6';
-import {presentResults,articleDetail} from './evidence.js?v=20261025-6';
-import {contents,readerDetail} from './reader-model.js?v=20261025-6';
+import {fulltextSearch} from './fulltext.js?v=20261025-7';
+import {eligible,search} from './search.js?v=20261025-7';
+import {presentResults,articleDetail} from './evidence.js?v=20261025-7';
+import {contents,readerDetail} from './reader-model.js?v=20261025-7';
 const loading=new Map();
 async function load(doc){
  if(!loading.has(doc.id))loading.set(doc.id,(async()=>{

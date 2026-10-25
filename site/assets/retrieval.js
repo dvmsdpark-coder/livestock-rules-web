@@ -1,8 +1,9 @@
-import {qualificationRequest,qualificationRetrieval} from './qualifications.js?v=20261025-3';
+import {literalSubjects,isQueryNoise} from './query-contract.js?v=20261025-7';
+import {qualificationRequest,qualificationRetrieval} from './qualifications.js?v=20261025-7';
 // Corpus-derived clause retrieval; source excerpts, never a generated legal answer.
-import {activeArticles,searchableChunk} from './provisions.js?v=20261025-3';
-import {legalUnits,references} from './evidence.js?v=20261025-3';
-import {sopIndex} from './sop-index.js?v=20261025-3';
+import {activeArticles,searchableChunk} from './provisions.js?v=20261025-7';
+import {legalUnits,references} from './evidence.js?v=20261025-7';
+import {sopIndex} from './sop-index.js?v=20261025-7';
 const flat=s=>s.normalize('NFKC').replace(/[\sㆍ·“”"「」『』()（）,.:：]/gu,'').toLowerCase();
 const generic=new Set(['가축','전염병','가축전염병','방역','규정','관련','대한','대하여','위한','경우','사항','조치','방법','기준','요령','발생','발생시','대상','실시','관리','따른','따라','절차','등의','범위','의무','처리','구제역','아프리카돼지열병','조류인플루엔자','고병원성','농장','발생농장','가축의','지역','필요한','있는','없는','위하여','하여야','관한','어떤','검출시','고병원성ai','어떻게','어디에','어디','하나요','되나요','받나요','있나요','무엇','무엇인가요','조건','검출','확인','방역조치','언제','알려주세요','근거','비교','차이','차이점','종류','분류','목록','리스트','유형','구분','항목']);
 export const concepts=[
@@ -15,13 +16,14 @@ export const concepts=[
  ['지원',['지원','지급']],
  ['이동제한',['이동제한','이동금지','반출금지']],
  ['해제',['해제','풀리','풀어']],
- ['예방접종',['예방접종','백신접종','백신맞']],
+ ['예방접종',['예방접종','백신접종','백신맞','백신','미접종']],
  ['살처분',['살처분']],
  ['사체',['사체','폐사체','죽은가축']],
  ['소독',['소독','소독하','세척']],
  ['신고',['신고','신고처','신고기관']],
  ['역학조사',['역학조사','역학조사란']],
  ['검사',['검사','검사받']],
+ ['의심',['의심','의사환축']],
  ['확진',['확진','확진시','확진된','확진될']],
  ['사료',['사료','먹이']],
  ['원유',['원유','집유']],
@@ -69,25 +71,27 @@ function indexFor(entry,asOf){
  for(const d of entry.index.definitions||[]){const t=flat(d.term);if(t.length>=2&&!generic.has(t))vocabulary.add(t);}
  const value={rows,vocabulary};dates.set(asOf,value);return value;
 }
-function anchorsFor(question,indexes){
+function anchorsFor(question,indexes,entries){
  const tokens=(question.match(/[가-힣A-Za-z]+/gu)||[]).map(flat),q=flat(question),found=concepts.filter(c=>c.name==='처리'?tokens.some(t=>/^(?:처리|처분)/u.test(t)):c.aliases.some(a=>tokens.some(t=>t.includes(a))||a.length>=4&&q.includes(a)));
  const spans=found.flatMap(c=>c.aliases.filter(a=>q.includes(a)));
  const vocabulary=new Set(indexes.flatMap(i=>[...i.vocabulary]));
  const extra=[...vocabulary].filter(t=>!generic.has(t)&&tokens.some(token=>token===t||token.startsWith(t)&&/^(?:은|는|이|가|을|를|의|에|에서|으로|란|이라|하|해|할|하면|인가|입니)/u.test(token.slice(t.length)))&&!spans.some(a=>a.includes(t)||['생계안정','소득안정'].includes(a)&&t.startsWith(a)&&/^(?:비용|자금|지원금|지원비)/u.test(t.slice(a.length))))
-  .sort((a,b)=>b.length-a.length).filter((t,i,a)=>!a.slice(0,i).some(long=>long.includes(t)));
- return [...found,...extra.slice(0,6).map(t=>({name:t,aliases:[t]}))];
+  .map(t=>{const stem=t.replace(/(?:에서는|으로|에서|에게|의|을|를|은|는)$/u,'');return vocabulary.has(stem)?stem:t;}).filter(t=>!isQueryNoise(t)).sort((a,b)=>b.length-a.length).filter((t,i,a)=>!a.slice(0,i).some(long=>long.includes(t)));
+ const known=[...found,...extra.slice(0,6).map(t=>({name:t,aliases:[t]}))];
+ const literal=literalSubjects(entries,question,known.flatMap(a=>a.aliases));
+ return [...known,...literal.filter(t=>!known.some(a=>a.aliases.includes(t))).map(t=>({name:t,aliases:[t],literalScope:true}))];
 }
 const sectionTitle=s=>flat(s).replace(/^\d+(?:\.\d+)*[.]?/u,'').replace(/[?？]/gu,'');
 const requestTitle=s=>sectionTitle(s).replace(/^(?:hpai|ai|asf|fmd|구제역|아프리카돼지열병|조류인플루엔자)/u,'').replace(/(?:을|를|은|는)?(?:알려주세요|설명해주세요|알려줘)$/u,'').replace(/[을를은는]$/u,'');
 const matches=(text,a)=>a.aliases.some(alias=>(a.name==='처리'?text.replace(/처리업|처리시설|처리장/gu,''):text).includes(alias));
-export function retrieve(entries,question,asOf,target){
+export function retrieve(entries,question,asOf,target,subjectCorpus=entries){
  if(qualificationRequest(question))return qualificationRetrieval(entries,question,asOf);
  const indexes=entries.map(e=>indexFor(e,asOf));
  const obligationRequest=/의무|준수사항/u.test(question);
  const roleRequest=/의무|준수사항|역할|직무|권한|책무|업무(?!량)|하는\s*일|해야\s*할\s*일|무슨\s*일|어떤\s*일/u.test(question);
  const roleWords=new Set(['방역관리','의무','준수사항','역할','업무','직무','권한','책무','하는일','해야할일','내용','무슨','정리','설명']);
- const anchors=anchorsFor(question,indexes).filter(a=>!roleRequest||!roleWords.has(a.name)).filter(a=>!roleRequest||!question.includes('축산계열화사업자')||a.name!=='가금');
- const actors=roleRequest?anchors.filter(a=>!concepts.some(c=>c.name===a.name)&&(indexes.some(i=>i.rows.some(r=>matches(r.heading,a)))||/관|사|본부|기관|위원회$/u.test(a.name))):[];
+ const anchors=anchorsFor(question,indexes,subjectCorpus).filter(a=>!roleRequest||!roleWords.has(a.name)).filter(a=>!roleRequest||!question.includes('축산계열화사업자')||a.name!=='가금');
+ const actors=roleRequest?anchors.filter(a=>!concepts.some(c=>c.name===a.name)&&(indexes.some(i=>i.rows.some(r=>matches(r.heading,a)))||/관|사|본부|기관|위원회|위원|위원장|책임자$/u.test(a.name))):[];
  const roleSearch=actors.length>0;
  const roleRoots=roleSearch?entries.filter(e=>e.doc.type==='법률').flatMap(e=>activeArticles(e,asOf).filter(a=>actors.some(actor=>actor.aliases.includes(flat(a.title))||actor.name==='축산계열화사업자'&&matches(flat(a.title),actor))).map(a=>({id:e.doc.id,number:a.number}))):[];
  const penaltyRequest=anchors.some(a=>a.name==='처벌');
@@ -109,13 +113,13 @@ export function retrieve(entries,question,asOf,target){
    if(r.unit.item||!benefits.some(a=>matches(r.text,a)))continue;
   }else if(roleSearch){
    if(r.unit.item)continue;
-  }else if(r.wholeParagraph)continue;
+  }else if(r.wholeParagraph&&!anchors.some(a=>a.literalScope&&matches(r.text,a)))continue;
   // Every identified subject must occur in the unit or its own article heading.
   // A parent introduction can supply conditions, but cannot alone make a sibling item relevant.
   if(r.entry.doc.disease!=='공통'&&qualifiers.length&&!qualifiers.every(t=>flat(r.article.parts.map(p=>p.text).join(' ')).includes(t)))continue;
   if(!required.filter(a=>!benefits.includes(a)).every(a=>matches(subjectText,a))||!benefits.length&&!required.every(a=>matches(subjectText,a)))continue;
   if(actions.length&&!actions.some(a=>matches(r.text+r.heading+cited,a)))continue;
-  const direct=anchors.filter(a=>matches(r.text+cited,a)),heading=anchors.filter(a=>matches(r.heading,a));
+  const direct=anchors.filter(a=>matches(r.text+r.context+cited,a)),heading=anchors.filter(a=>matches(r.heading,a));
   if(!direct.length)continue;
   const matched=anchors.filter(a=>direct.includes(a)||heading.includes(a));
   const actorHeading=roleSearch&&actors.some(a=>matches(r.heading,a));
@@ -134,6 +138,7 @@ export function retrieve(entries,question,asOf,target){
  scored.sort((a,b)=>b.score-a.score||a.article.number.localeCompare(b.article.number,'ko'));
  const groups=[];
  for(const row of scored){
+  if(!row.wholeParagraph&&scored.some(parent=>parent.wholeParagraph&&parent.entry.doc.id===row.entry.doc.id&&parent.article.number===row.article.number&&parent.unit.paragraph===row.unit.paragraph))continue;
   const key=row.entry.doc.id+':'+row.article.number;let group=groups.find(g=>g.key===key);
   if(!group){group={key,doc:row.entry.doc,article:row.article,score:row.score,actorHeading:row.actorHeading,actorRoot:row.actorRoot,roleDelegated:row.roleDelegated,scopes:[],matched:row.matched};groups.push(group);}
   if(group.scopes.length<(actors.some(a=>a.name==='축산계열화사업자')?5:benefits.length?3:2))group.scopes.push({paragraph:row.unit.paragraph,item:row.unit.item});
@@ -190,5 +195,5 @@ export function retrieve(entries,question,asOf,target){
  for(const [i,g] of selectedSop.entries())g.primary=roleSearch?hits.length===0:i===0||g.exactTitle||g.stageBoost>0||g.affinity>0&&g.score>=selectedSop[0].score*0.85;
  const supplement=[];
  const needsDetail=/희석|몇\s*배|농도|용량/u.test(question);
- return {roleSearch,actors:actors.map(a=>a.name),benefits:benefits.map(a=>a.name),needsDetail,status:needsDetail?'needs_detail':hits.length||selectedSop.length?'matched':'no_match',anchors:anchors.map(a=>a.name),hits,sopHits:selectedSop.slice(0,4),supplement};
+ return {scopeTerms:anchors.filter(a=>a.literalScope).map(a=>a.name),roleSearch,actors:actors.map(a=>a.name),benefits:benefits.map(a=>a.name),needsDetail,status:needsDetail?'needs_detail':hits.length||selectedSop.length?'matched':'no_match',anchors:anchors.map(a=>a.name),hits,sopHits:selectedSop.slice(0,4),supplement};
 }
