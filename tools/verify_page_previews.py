@@ -20,11 +20,26 @@ for entry in listing:
         with Image.open(file) as image:
             assert image.format=='WEBP' and image.size==(p['width'],p['height']) and image.width==1440
             image.verify()
+        if p['visual'] and p.get('mode')=='crop':assert p.get('visuals')
+        assert len({c['path'] for c in p.get('visuals',[])})==len(p.get('visuals',[]))
+        for crop in p.get('visuals',[]):
+            c=(ROOT/'site'/crop['path']).resolve();assert c.is_relative_to(file.parent)
+            x0,y0,x1,y1=crop['pixel_box'];assert 0<=x0<x1<=p['width'] and 0<=y0<y1<=p['height']
+            assert crop['width']==x1-x0 and crop['height']==y1-y0
+            assert c.stat().st_size==crop['bytes'] and hashlib.sha256(c.read_bytes()).hexdigest()==crop['sha256']
+            with Image.open(c) as image:assert image.size==(crop['width'],crop['height']);image.verify()
+        if p.get('mode')=='full' and p['visual']:assert p.get('continuation')
         count+=1
 # Source-bound visual regressions: a real body organisation chart must be visible,
 # while the HPAI page background must not turn a plain-text page into a diagram.
 for e in listing:
     d=e['doc'];pages=data['documents'][d['id']]['pages']
-    if d['sha256']=='f317fe10748e2a09e84db8098071ee71a0d9609490a35428479e6caccb8f3e60':assert pages['45']['visual']
+    if d['sha256']=='f317fe10748e2a09e84db8098071ee71a0d9609490a35428479e6caccb8f3e60':
+        assert pages['45']['visual'] and pages['45']['mode']=='crop'
+        assert not pages['21']['visual'] and not pages['140']['visual']
+        assert pages['320']['visual'] # notice illustration, not a chapter divider
+    if d['sha256']=='8ca92a9774fa4ca4af353140f4fed9741297780d189aeadd5ac72e26153fec4a':
+        assert pages['13']['mode']=='full' and pages['14']['mode']=='full'
+        assert pages['84']['mode']=='crop' and pages['85']['mode']=='crop'
     if d['sha256']=='a2b814c1053b54f9e772628e60f5dee7abe2e841b3ae69efedc026a6d5a9995d':assert not pages['30']['visual']
 print('PASS',count,'source-bound mobile page images')

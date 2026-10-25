@@ -2,38 +2,9 @@
 import hashlib,json,os,subprocess
 from pathlib import Path
 import pypdfium2 as pdf
+from sop_visuals import analyse
 
 ROOT=Path(__file__).resolve().parents[1]
-def image_fingerprint(obj):
-    return hashlib.sha256(bytes(obj.get_data())).hexdigest()
-
-def background_images(document):
-    # Only repeated full-page backgrounds and edge sidebars are decorations.
-    # Unique full-page scans retain their pictures and are never discarded here.
-    from collections import Counter
-    fingerprints=Counter()
-    for number in range(len(document)):
-        page=document[number];width,height=page.get_width(),page.get_height()
-        seen=set()
-        for obj in page.get_objects(filter=[pdf.raw.FPDF_PAGEOBJ_IMAGE]):
-            left,bottom,right,top=obj.get_bounds();w,h=abs(right-left),abs(top-bottom)
-            if w*h>=width*height*.9 or (w<width*.16 and h>height*.7):
-                seen.add(image_fingerprint(obj))
-        fingerprints.update(seen);page.close()
-    return {key for key,count in fingerprints.items() if count>=5}
-
-def visual_content(page,decorations=frozenset()):
-    image_area=0;paths=0;area=page.get_width()*page.get_height()
-    for obj in page.get_objects():
-        if obj.type==pdf.raw.FPDF_PAGEOBJ_PATH:paths+=1
-        elif obj.type==pdf.raw.FPDF_PAGEOBJ_IMAGE:
-            try:
-                if image_fingerprint(obj) in decorations:continue
-                left,bottom,right,top=obj.get_bounds()
-                image_area+=abs((right-left)*(top-bottom))
-            except (ValueError,RuntimeError):pass
-    return image_area>=area*0.025 or paths>=20
-
 def build():
     listing=json.loads(subprocess.check_output([os.environ.get('NODE_BINARY','node'),'tools/list-preview-pages.mjs'],cwd=ROOT))
     output={'schema':1,'documents':{}}
@@ -42,7 +13,10 @@ def build():
         doc=entry['doc'];source=ROOT/'site'/doc['pdf']
         if hashlib.sha256(source.read_bytes()).hexdigest()!=doc['sha256']:raise ValueError('PDF hash mismatch: '+doc['title'])
         pages={};document=pdf.PdfDocument(str(source))
-        decorations=background_images(document) if doc['type']=='SOP' else set()
+        analysis={}
+        if doc['type']=='SOP':
+            overrides=json.loads((ROOT/'maintenance/visual-overrides.json').read_text(encoding='utf-8')).get(doc['sha256'],{})
+            analysis=analyse(source,json.loads((ROOT/'site'/doc['data']).read_text(encoding='utf-8')),overrides)
         dest=ROOT/'site/assets/pages'/doc['sha256'];dest.mkdir(parents=True,exist_ok=True)
         for number in entry['pages']:
             target=dest/f'{number}.webp'
@@ -56,11 +30,38 @@ def build():
             else:
                 from PIL import Image
                 with Image.open(target) as image:width,height=image.size
-            visual=doc['type']=='SOP' and (number in entry.get('layoutPages',[]) or visual_content(page,decorations))
+            info=analysis.get(str(number),{})
+            visual=bool(info.get('regions'))
+            crops=[];seen_pixels=set()
+            if visual and info['mode']=='crop':
+                from PIL import Image
+                with Image.open(target) as full:
+                    for region in info['regions']:
+                        pixel=[max(0,int(region[0]/info['page_width']*width)),max(0,int(region[1]/info['page_height']*height)),min(width,int(region[2]/info['page_width']*width+.999)),min(height,int(region[3]/info['page_height']*height+.999))]
+                        if pixel[0]>=pixel[2] or pixel[1]>=pixel[3]:raise ValueError('Empty visual crop')
+                        if tuple(pixel) in seen_pixels:continue
+                        seen_pixels.add(tuple(pixel))
+                        signature=hashlib.sha256(json.dumps(pixel).encode()).hexdigest()[:12]
+                        crop_path=dest/f'crop-{number}-{signature}.webp'
+                        if not crop_path.exists():full.crop(tuple(pixel)).save(crop_path,'WEBP',quality=86,method=4)
+                        crops.append({'path':crop_path.relative_to(ROOT/'site').as_posix(),'width':pixel[2]-pixel[0],'height':pixel[3]-pixel[1],'bytes':crop_path.stat().st_size,'sha256':hashlib.sha256(crop_path.read_bytes()).hexdigest(),'pixel_box':pixel})
             size=target.stat().st_size
-            pages[str(number)]={'path':target.relative_to(ROOT/'site').as_posix(),'width':width,'height':height,'bytes':size,'sha256':hashlib.sha256(target.read_bytes()).hexdigest(),'visual':visual}
+            pages[str(number)]={'path':target.relative_to(ROOT/'site').as_posix(),'width':width,'height':height,'bytes':size,'sha256':hashlib.sha256(target.read_bytes()).hexdigest(),'visual':visual,'kind':info.get('kind','page'),'mode':info.get('mode','full'),'visuals':crops}
             count+=1;total+=size;page.close()
         document.close()
+        # Consecutive full-page table/diagram pages are one source group.
+        run=[]
+        def finish_run():
+            if run:
+                for n in run:pages[str(n)]['continuation']=list(run)
+                run.clear()
+        for n in entry['pages']:
+            info=pages[str(n)]
+            if info['visual'] and info['mode']=='full':
+                if run and n!=run[-1]+1:finish_run()
+                run.append(n)
+            else:finish_run()
+        finish_run()
         output['documents'][doc['id']]={'source_sha256':doc['sha256'],'pages':pages}
         print(doc['title'],len(pages),'pages',flush=True)
     target=ROOT/'site/data/page-previews.json';temporary=target.with_suffix('.pending')
