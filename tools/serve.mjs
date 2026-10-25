@@ -6,7 +6,7 @@ const root=fileURLToPath(new URL('../site/',import.meta.url));
 const port=Number(process.argv.find(a=>a.startsWith('--port='))?.split('=')[1]||4173);
 const base=process.argv.find(a=>a.startsWith('--base='))?.split('=')[1]||'/';
 if(!/^\/[a-zA-Z0-9_\-/]*\/$/u.test(base)&&base!=='/')throw Error('Invalid preview base path');
-const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.pdf':'application/pdf'};
+const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.pdf':'application/pdf','.webp':'image/webp'};
 const server=http.createServer((req,res)=>{
  try{
   const pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname);

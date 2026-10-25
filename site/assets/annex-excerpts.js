@@ -1,4 +1,4 @@
-import {compensationFloorRequest} from './question.js?v=20261025-2';
+import {compensationFloorRequest} from './question.js?v=20261025-3';
 // Exact native-text boundaries only. Dense grids/forms remain PDF layouts.
 const flat=s=>s.replace(/\s/gu,'');
 function cut(source,start,end){return source.spans.flatMap(p=>{

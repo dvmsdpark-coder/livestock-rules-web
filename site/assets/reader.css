@@ -8,3 +8,6 @@
 @media print{.document-choices,.document-groups{display:none!important}.source-step,.source-clause{break-inside:avoid}.source-text{line-height:1.8}}
 
 .page-furniture{font-size:12px;color:#7a8995;margin-bottom:12px}.page-furniture summary{font-size:11px;padding:4px 0}.page-furniture .source-text{font-size:12px;font-weight:400}
+
+.page-image{margin:20px 0 28px;border:1px solid #d6dfe7;border-radius:7px;background:#fff;overflow:hidden}.page-image figcaption{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:#f2f6fa;color:#5e7285;font-size:12px}.page-image figcaption button{font-size:12px;min-height:30px}.page-image-scroll{max-width:100%;overflow:auto;-webkit-overflow-scrolling:touch}.page-image img{display:block;width:100%;height:auto}.page-image.is-expanded img{width:1440px;max-width:none}.original-images,.extracted-text{border-top:1px solid #dae3eb;margin:24px 0;padding-top:8px}.page-image.is-expanded .page-image-scroll{max-height:85vh}.page-images{min-width:0}
+@media print{.page-image figcaption button{display:none}.page-image{break-inside:avoid}.page-image.is-expanded img{width:100%}.page-image.is-expanded .page-image-scroll{max-height:none;overflow:visible}}

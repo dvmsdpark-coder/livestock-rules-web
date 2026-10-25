@@ -9,3 +9,7 @@ work/
 *.sqlite*
 __pycache__/
 .DS_Store
+
+# Generated from source-hash-verified PDFs during deployment
+site/assets/pages/
+site/data/page-previews.json

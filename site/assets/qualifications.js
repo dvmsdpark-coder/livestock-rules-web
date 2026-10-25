@@ -1,6 +1,6 @@
 // Qualifications are substantive appointment requirements, not review deadlines.
-import {activeArticles} from './provisions.js?v=20261025-2';
-import {legalUnits} from './evidence.js?v=20261025-2';
+import {activeArticles} from './provisions.js?v=20261025-3';
+import {legalUnits} from './evidence.js?v=20261025-3';
 export const qualificationRequest=q=>/자격|위촉요건|임명요건|위촉조건/u.test(q.replace(/\s/gu,''))&&!/재검토|재검토기한|규제검토/u.test(q.replace(/\s/gu,''));
 export function qualificationRetrieval(entries,question,asOf){
  const q=question.replace(/\s/gu,''),titles=[...new Set(entries.filter(e=>e.doc.type!=='SOP').flatMap(e=>activeArticles(e,asOf).map(a=>a.title)))];

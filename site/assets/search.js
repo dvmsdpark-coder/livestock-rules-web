@@ -1,10 +1,10 @@
-import {normalizeQuestion,unmappedNouns} from './question.js?v=20261025-2';
-import {classificationRequest,classificationSources} from './classification.js?v=20261025-2';
+import {normalizeQuestion,unmappedNouns} from './question.js?v=20261025-3';
+import {classificationRequest,classificationSources} from './classification.js?v=20261025-3';
 // Browser and Node share this deterministic, model-free search implementation.
-import {activeArticles,searchableChunk} from './provisions.js?v=20261025-2';
-import {legalUnits} from './evidence.js?v=20261025-2';
-import {actualAnnexes,annexReferences} from './annexes.js?v=20261025-2';
-import {retrieve,concepts} from './retrieval.js?v=20261025-2';
+import {activeArticles,searchableChunk} from './provisions.js?v=20261025-3';
+import {legalUnits} from './evidence.js?v=20261025-3';
+import {actualAnnexes,annexReferences} from './annexes.js?v=20261025-3';
+import {retrieve,concepts} from './retrieval.js?v=20261025-3';
 const compact=s=>s.replace(/[\s“”"「」『』·ㆍ]/gu,'').replace(/[?？.]+$/u,'');
 const normalize=s=>s.replace(/\s+/gu,' ').trim();
 const stop=new Set(['구제역','FMD','ASF','HPAI','가축','경우','발생','규정','관련','대한','대하여','어떻게','무엇','언제','어디','해야','하나요','되나요','알려','주세요','합니까','인가요','방법','종류','분류','목록','리스트','유형','구분','항목','알려주세요','알려줘','설명해주세요','보여주세요','말해주세요']);
