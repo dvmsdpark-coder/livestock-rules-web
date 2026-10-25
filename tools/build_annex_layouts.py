@@ -1,5 +1,5 @@
 """Build source-bound text/table layouts. Ambiguous grids and drawings retain source images."""
-import hashlib,json,os,subprocess
+import hashlib,json,os,subprocess,re
 from pathlib import Path
 from collections import Counter
 import pdfplumber
@@ -18,10 +18,45 @@ def horizontal_closed(p,x0,x1,y):
   end=max(end,b)
  return end>=x1-2
 
+def cell_chars(p,box):return [c for c in p.chars if centre(c,box)]
+
+def source_lines(chars):
+ return [(min(c['top'] for c in line),text(line).strip()) for line in pdfplumber.utils.cluster_objects(chars,lambda c:c['top'],3) if line]
+
+def detail_cells(p,cells):
+ """Restore borderless subrows only when numbered items align with value columns.
+ Shared references stay merged; numerical values are never paired by text order.
+ """
+ replacements={}
+ for box in cells:
+  lines=source_lines(cell_chars(p,box));items=[(y,m.group(1)) for y,line in lines if (m:=re.match(r'^((?:\d{1,2}|[가-힣]))\)\s*',line))]
+  if not items:continue
+  limits=[max(box[1],y-2) for y,_ in items]+[box[3]]
+  peers=[];signatures=[];unresolved=False
+  for other in cells:
+   if other==box or abs(other[1]-box[1])>1 or abs(other[3]-box[3])>1:continue
+   values=source_lines(cell_chars(p,other))
+   if not values or not all(re.fullmatch(r'[\d, .]+',line) for _,line in values):continue
+   # A parent item can have no amount of its own (1) → 가), 나)).
+   # All numeric columns must share the same occupied child baselines.
+   occupied=[];valid=True
+   for i in range(len(items)):
+    band=[(y,line) for y,line in values if limits[i]<=y<limits[i+1]]
+    if len(band)>1 or band and abs(band[0][0]-items[i][0])>=5:valid=False;break
+    if band:occupied.append(i)
+   if valid and occupied:peers.append(other);signatures.append(tuple(occupied))
+   else:unresolved=True
+  if unresolved or len(peers)<2 or len(set(signatures))!=1:continue
+  cuts=[y for y in limits[:-1] if box[1]+4<y<box[3]-4 and any((c['top']+c['bottom'])/2<y for c in cell_chars(p,box))]
+  for target in [box,*peers]:
+   boundaries=[target[1],*cuts,target[3]];replacements[tuple(target)]=[(target[0],a,target[2],b) for a,b in zip(boundaries,boundaries[1:])]
+ return [part for box in cells for part in replacements.get(tuple(box),[box])]
+
 def table_block(p,t):
- xs=sorted(set(round(v,2) for c in t.cells for v in (c[0],c[2])));ys=sorted(set(round(v,2) for c in t.cells for v in (c[1],c[3])))
+ cells=detail_cells(p,t.cells)
+ xs=sorted(set(round(v,2) for c in cells for v in (c[0],c[2])));ys=sorted(set(round(v,2) for c in cells for v in (c[1],c[3])))
  rows=[[] for _ in ys[:-1]];captured=[];occupied=set()
- for box in sorted(t.cells,key=lambda b:(b[1],b[0])):
+ for box in sorted(cells,key=lambda b:(b[1],b[0])):
   x0,y0,x1,y1=map(lambda v:round(v,2),box);chars=[c for c in p.chars if centre(c,box)]
   slots={(r,c) for r in range(ys.index(y0),ys.index(y1)) for c in range(xs.index(x0),xs.index(x1))}
   if occupied.intersection(slots):return None
