@@ -1,7 +1,7 @@
 // List intent resolves a named subject to its original definition, not any
 // paragraph containing a generic word such as 종류. Aliases stay explicit.
-import {activeArticles} from './provisions.js?v=20261024-22';
-import {legalUnits} from './evidence.js?v=20261024-22';
+import {activeArticles} from './provisions.js?v=20261025-1';
+import {legalUnits} from './evidence.js?v=20261025-1';
 const flat=s=>s.replace(/[\s“”"「」『』·ㆍ?？.]/gu,'');
 const escape=s=>s.replace(/[.*+?^${}()|[\]\\]/gu,'\\$&');
 export function classificationRequest(question){
