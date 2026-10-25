@@ -29,3 +29,6 @@
 배포 시 `tools/build_page_previews.py`가 승인 색인의 실제 별표·별지 범위만 선택해 원본 PDF의 SHA-256을 확인하고 가로 1440px WebP를 생성합니다. `tools/verify_page_previews.py`로 페이지 누락·경로·해시·이미지 크기를 검사한 뒤 Pages에 배포합니다. 따라서 PDF 갱신 후 GitHub 배포 시 이미지도 자동 생성됩니다. 생성물은 Git에 저장하지 않습니다.
 
 로컬 미리보기에서도 이미지를 보려면 `python -m pip install -r maintenance/preview-requirements.txt`를 설치한 후 `python tools/build_page_previews.py`를 실행합니다. Node가 PATH에 없다면 `NODE_BINARY`에 실행 파일 경로를 지정합니다. 이미지 파일이 없어도 텍스트와 PDF 원본 링크는 유지되며, 다른 PDF 버전의 이미지를 대체 표시하지 않습니다.
+
+
+SOP 본문은 색 상자나 단계별 들여쓰기를 사용하지 않고 번호 열과 본문 열을 일정하게 정렬합니다. 원문에서 번호 다음 공백이 빠진 경우에도 줄 시작의 절차 번호를 구분해 표시합니다. 원문 OCR의 번호·띄어쓰기 자체를 수정하지 않으며 PDF 원문과 대조할 수 있습니다.
