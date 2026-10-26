@@ -39,6 +39,12 @@ class AnnexLayouts(unittest.TestCase):
   doc=next((d for d in self.manifest['documents'] if d['sha256']=='25ef0494687bf942ebabde909478e218baf7a4d2ec2efe269198d478cd0a6d11'),None)
   if not doc:self.skipTest('Original rule revision not included in this release')
   page=self.data['documents'][doc['id']]['pages']['95'];self.assertEqual(page['mode'],'text');self.assertIn('실시하여야 한다. 방문자는',page['text']);self.assertNotIn('한\n다. 방문자는',page['text']);self.assertEqual(len(__import__('re').findall(r'^다\.',page['text'],__import__('re').M)),2)
+ def test_native_parallel_notification_fields_are_eight_siblings(self):
+  doc=next((d for d in self.manifest['documents'] if d['sha256']=='25ef0494687bf942ebabde909478e218baf7a4d2ec2efe269198d478cd0a6d11'),None)
+  if not doc:self.skipTest('Original rule revision not included in this release')
+  text=self.data['documents'][doc['id']]['pages']['142']['text']
+  expected=['가. 검역장소','나. 축주명','다. 품종','라. 수수','마. 원산지','바. 도입일자','사. 검역종료일','아. 예방접종등 기타 특기사항']
+  self.assertTrue(all('\n'+label in text for label in expected));self.assertNotIn('검역장소 나.',text)
  def test_borderless_items_are_split_while_common_reference_stays_merged(self):
   p,cells=self.fake_grid([(5,'대상'),(30,'1) 농장'),(60,'2) 영업자')],[[(30,'100'),(60,'200')],[(30,'300'),(60,'400')]])
   with patch('build_annex_layouts.source_lines',side_effect=lambda cs:[(c['top'],c['text']) for c in cs]):result=detail_cells(p,cells)
