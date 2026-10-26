@@ -30,3 +30,18 @@ test('a new parent starts a fresh branch even when its child uses a different nu
  const text='2. 매몰기준 가. 장소 1) 선정 사) 제외 (1) 구역 나. 사체의 매몰 (1) 매몰 방법 (가) 구덩이 (나) 바닥';
  const b=sourceBlocks(text).filter(b=>b.marker);assert.deepEqual(b.map(b=>b.depth),[0,1,2,3,4,1,2,3,3]);
 });
+
+test('circled population bands inside an annex note remain local children and never reset the following parent outline',()=>{
+ const text='2. 시험가축의 선정\n다. 종류 및 마리수\n2) 최소 5수 이상\n※ 축사 규모별 시험축 ① 2만 수 이하(5수 이상), ② 2만 수～5만 수(10수 이상),\n③ 5만 수～10만 수(20수 이상), ④ 10만 수 이상(30수 이상)\n3) 재입식 시험가축 배치\n3. 입식시험의 방법\n가. 발생농장의 입식시험';
+ const b=sourceBlocks(text,false,{mode:'annex'}),rows=b.filter(b=>b.marker),parent=rows.find(b=>b.marker==='2)'),note=rows.find(b=>b.marker==='※'),bands=rows.filter(b=>/[①-④]/u.test(b.marker));
+ assert.equal(bands.length,4);assert(bands.every(b=>b.kind==='subitem'&&b.depth>note.depth));assert.equal(new Set(bands.map(b=>b.depth)).size,1);assert.equal(rows.find(b=>b.marker==='3)').depth,parent.depth);assert.equal(rows.find(b=>b.marker==='3.').depth,0);assert.equal(rows.at(-1).depth,1);assert.equal(b.map(b=>b.text).join(''),text);
+});
+test('annex annotation lists retain depth over a page boundary while statutory article paragraphs stay at their own root',()=>{
+ const state={mode:'annex'};sourceBlocks('1. 기준\n가. 대상\n2) 규모\n※ 적용 수수 ① 5수 이상',false,state);const b=sourceBlocks('② 10수 이상 ③ 20수 이상\n3) 다음 절차',false,state).filter(b=>b.marker);assert.equal(b[0].depth,4);assert.equal(b[1].depth,4);assert.equal(b[2].depth,2);
+ const legal=sourceBlocks('제3조(기준) ① 첫 항\n1. 첫 호\n② 다음 항\n1. 다음 호');assert.deepEqual(legal.filter(b=>b.kind==='clause').map(b=>b.depth),[0,0]);assert.deepEqual(legal.filter(b=>b.family==='numberDot').map(b=>b.depth),[1,1]);
+});
+test('procedure and table circled lists keep sibling alignment without making the next item a new article',()=>{
+ for(const [sop,state] of [[true,{}],[false,{mode:'cell'}]]){const b=sourceBlocks('1. 절차\n2) 규모 ① 5수 ② 10수 ③ 20수\n3) 다음 절차',sop,state).filter(b=>b.marker);const circles=b.filter(b=>b.family==='clause');assert.equal(new Set(circles.map(b=>b.depth)).size,1);assert(circles[0].depth>b.find(b=>b.marker==='2)').depth);assert.equal(b.at(-1).depth,b.find(b=>b.marker==='2)').depth);}
+});
+
+test('consecutive annotations are siblings instead of growing deeper after each circled list',()=>{const b=sourceBlocks('1. 기준\n가. 대상\n2) 규모\n※ 첫 주석 ① 5수 ② 10수\n※ 다음 주석 ① 20수 ② 30수',false,{mode:'annex'});assert.deepEqual(b.filter(b=>b.kind==='note').map(b=>b.depth),[3,3]);assert.deepEqual(b.filter(b=>b.kind==='subitem').map(b=>b.depth),[4,4,4,4]);});

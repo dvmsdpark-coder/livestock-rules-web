@@ -20,10 +20,22 @@ export function sourceBlocks(text,sop=false,state={},protectedRanges=[]){
    if(!/^[ \t\n]+[^\s]/u.test(after))continue;
   }else if(['numberDot','koreanDot'].includes(family)&&!/^[ \t]+\S/u.test(after))continue;
   let depth=state.depth??0,kind='item';
-  if(family==='chapter'){kind='heading';depth=0;state.clause=false;state.order=null;state.stack=[];}
-  else if(family==='clause'){kind='clause';depth=0;state.clause=true;state.stack=[];}
+  if(!['clause','note','bullet'].includes(family)){state.circleDepth=null;state.noteDepth=null;}
+  if(family==='chapter'){kind='heading';depth=0;state.clause=false;state.order=null;state.stack=[];state.decimal=false;}
+  else if(family==='clause'){
+   if(state.mode==='annex'||state.mode==='cell'||sop){
+    // Circled labels in appendices/procedures are local lists, not article paragraphs.
+    const hasParent=Boolean(state.stack?.length||state.decimal);
+    const childDepth=state.noteDepth!=null?state.noteDepth+1:hasParent?(state.depth??0)+1:0;
+    depth=state.circleDepth??childDepth;
+    kind=depth?'subitem':'item';state.circleDepth=depth;
+   }else{kind='clause';depth=0;state.clause=true;state.stack=[];state.noteDepth=null;}
+  }
   else if(family==='decimal'){kind='step';depth=marker.replace(/[.,]$/u,'').split(/[.,]/u).length-1;state.decimal=true;}
-  else if(family==='bullet'||family==='note'){kind=family;depth=(state.depth??0)+1;}
+  else if(family==='bullet'||family==='note'){
+   kind=family;depth=(state.depth??0)+1;
+   if(family==='note'){depth=state.noteDepth??depth;state.noteDepth=depth;state.circleDepth=null;}
+  }
   else {
    if(state.mode==='cell'&&!state.order){
     // Tables restart their own outline: (가), (나), … can contain 1), 2), … .

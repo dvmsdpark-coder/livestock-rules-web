@@ -41,3 +41,6 @@
 #readerBody .annex-table .formatted-source>.outline-row{margin-left:calc(var(--outline-depth,0) * 1em);margin-bottom:.65em}
 #readerBody .annex-table .formatted-source>.outline-continuation{margin-left:calc(var(--outline-depth,0) * 1em + 1.5em)}
 @media(max-width:650px){#readerBody .formatted-source>.outline-row{margin-left:calc(var(--outline-depth,0) * 1em)}#readerBody .formatted-source>.outline-continuation{margin-left:calc(var(--outline-depth,0) * 1em + 2em)}}
+
+/* Circled labels inside an appendix note stay grouped beneath that note. */
+#readerBody .formatted-source>.outline-row.source-subitem{margin-bottom:.2em;line-height:1.8}

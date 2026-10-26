@@ -1,7 +1,7 @@
 import {maskPageFurniture} from './source-cleanup.js?v=20261026-5';
 import {literalRanges} from './fulltext.js?v=20261026-1';
 import {proseAnnex,previewPage,annexLayouts,withoutAnnexHeading,joinedAnnexLayouts} from './annex-presentation.js?v=20261026-3';
-import {documentGroup,sourceBlocks} from './reader-format.js?v=20261026-4';
+import {documentGroup,sourceBlocks} from './reader-format.js?v=20261026-6';
 const $=id=>document.getElementById(id);
 const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
 const date=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
@@ -19,6 +19,7 @@ function navigate(id,k,replace=false){selectDocument(id,k);if(!current)return;co
 function targetKey(r){if(r.kind==='annex'){const d=documents.find(d=>d.doc.id===r.documentId);return d?.contents.annexes.find(n=>n.key&&n.annexKind===r.annexKind&&n.number?.[0]===r.number?.[0]&&(n.number?.[1]||null)===(r.number?.[1]||null))?.key||'p:'+r.page;}return 'a:'+r.articleNumber;}
 function referenceLink(label,r){return internal(label,r.documentId,targetKey(r));}
 function partText(part,state={},layoutEdges=null){
+ state.mode??=tab==='annexes'?'annex':'legal';
  const container=el('div','formatted-source'),raw=part.display||part.text,records=current.doc.type==='SOP'&&state.mode!=='cell'?previewPage(previews,current.doc,part.page)?.furniture||[]:[],text=maskPageFurniture(raw,records,layoutEdges),sop=current.doc.type==='SOP'&&tab!=='annexes';
  for(const block of sourceBlocks(text,sop,state,part.references||[])){
   if(!block.text.trim())continue;
