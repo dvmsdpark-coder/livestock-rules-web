@@ -1,7 +1,7 @@
-import {fulltextSearch} from './fulltext.js?v=20261026-1';
+import {fulltextSearch} from './fulltext.js?v=20261027-1';
 import {eligible,search} from './search.js?v=20261026-1';
 import {presentResults,articleDetail} from './evidence.js?v=20261026-1';
-import {contents,readerDetail} from './reader-model.js?v=20261026-1';
+import {contents,readerDetail} from './reader-model.js?v=20261027-1';
 const loading=new Map();
 async function load(doc){
  if(!loading.has(doc.id))loading.set(doc.id,(async()=>{
@@ -19,7 +19,7 @@ self.onmessage=async({data:{id,action,manifest,question,filters,target}})=>{
   const loaded=await Promise.all(manifest.documents.filter(d=>eligible(d,{...filters,type:'전체',disease:'전체'})).map(load));
   const corpus=loaded.map(e=>({...e,asOf:filters.asOf}));
   if(action==='fulltext'){self.postMessage({id,action,results:fulltextSearch(corpus,question,target?.documentId||null)});return;}
-  if(action==='catalogue'){self.postMessage({id,action,documents:corpus.map(e=>({doc:e.doc,contents:Object.fromEntries(Object.entries(contents(e)).map(([tab,nodes])=>[tab,nodes.map(({key,label,chapter,annexKind,number})=>({key,label,chapter,annexKind,number}))]))}))});return;}
+  if(action==='catalogue'){self.postMessage({id,action,documents:corpus.map(e=>({doc:e.doc,contents:Object.fromEntries(Object.entries(contents(e)).map(([tab,nodes])=>[tab,nodes.map(({key,aliases,label,chapter,annexKind,number})=>({key,aliases,label,chapter,annexKind,number}))]))}))});return;}
   if(action==='read'){self.postMessage({id,action,detail:readerDetail(corpus,target.documentId,target.key)});return;}
   if(action==='article'){self.postMessage({id,action,detail:articleDetail(corpus,target)});return;}
   const result=search(corpus,question,filters,manifest.documents);result.view=presentResults(corpus,result,question);

@@ -12,6 +12,12 @@ if(doc.id==='73aa19cc-15fb-5758-8a8c-10cc64ab8085'&&annex.number[0]==='2'){
  assert.deepEqual(pairs,[['송아지','200,000'],['초임만삭','500,000'],['초산우','400,000'],['다산우(2-5산)','300,000'],['노산우ㆍ기타','200,000'],['임신우(초임단계이후)','400,000'],['300～499kg 이하(암ㆍ수)','200,000'],['299kg 이하(암ㆍ수)','300,000'],['모돈','150,000'],['웅돈','150,000']]);
  assert.equal(payment.rows[1].find(c=>c.col===0).rowspan,5);assert.equal(payment.rows[1].find(c=>c.col===3).rowspan,5);
 }
+if(doc.sha256==='25ef0494687bf942ebabde909478e218baf7a4d2ec2efe269198d478cd0a6d11'&&annex.number[0]==='18'){
+ const rows=rendered.flatMap(t=>t.rows),clean=s=>s.replace(/\s/gu,'');
+ for(const [disease,expected] of [['돼지오제스키병',[['혈청중화시험','1두','4,800원'],['간이진단킷트검사','1두','2,600원'],['감별진단킷트검사(항체효소면역법)','1두','4,700원']]],['돼지생식기호흡기증후군',[['간접형광항체법','1두','4,000원'],['효소면역법','1두','8,700원']]],['뉴캣슬병',[['혈구응집억제반응법','5수','16,300원'],['효소면역법','5수','18,300원']]],['조류인플루엔자',[['효소면역법','5수','18,800원'],['혈구응집억제반응법','5수','17,300원'],['한천겔침강반응법','5수','9,900원']]]]){
+  const start=rows.findIndex(row=>row.some(c=>c.col===1&&clean(c.text)===disease));assert(start>=0,disease);assert.equal(rows[start].find(c=>c.col===1).rowspan,expected.length);assert.deepEqual(rows.slice(start,start+expected.length).map(row=>[2,3,4].map(col=>clean(row.find(c=>c.col===col).text))),expected);
+ }
+}
 if(doc.type==='시행령'&&annex.number[0]==='1'&&annex.number[1]==='2'){assert.equal(rendered.length,1);assert.deepEqual(rendered[0].pages,[26,27,28]);assert.equal(rendered[0].rows.length,9);}
 if(doc.type==='시행령'&&annex.number[0]==='3'){
  const rows=rendered.flatMap(t=>t.rows),amounts=row=>[2,3,4].map(col=>row.find(c=>c.col===col)?.text.replace(/\s/gu,'')||'');

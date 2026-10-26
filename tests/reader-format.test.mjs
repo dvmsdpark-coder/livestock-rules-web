@@ -70,3 +70,5 @@ test('table formula notes keep category dashes above age bands without splitting
  const b=sourceBlocks(text,false,{mode:'cell'});assert.deepEqual(b.filter(b=>b.marker).map(b=>b.depth),[1,2,2,2,1,2]);assert.equal(b.map(b=>b.text).join(''),text);
  assert(!sourceBlocks('○ 젖소ㆍ육우ㆍ한우\nㆍ소종축의 상한가격 기준',false,{mode:'annex',nativeLines:true}).some(b=>b.marker==='ㆍ'));
 });
+
+test('circled entries within footnotes keep note styling and triple-star notes split from their last entry',()=>{const text='□ 시료채취\n○ 채취내역\n- 지점\n* 도축장 실내 :\n① 생계투입구,\n② 현수실\n** 도축장 실외 :\n① 정문출입구,\n② 계류장 *** 도축장 내외부 상태에 따라 가감\n- 검사방법';const blocks=sourceBlocks(text,true,{mode:'annex'});const notes=blocks.filter(b=>b.family==='note');assert.deepEqual(notes.map(b=>b.marker),['*','**','***']);assert.equal(blocks.filter(b=>b.family==='clause'&&b.noteChild).length,4);assert(blocks.find(b=>b.marker==='***').text.includes('가감'));assert(!blocks.findLast(b=>b.family==='clause').text.includes('***'));});

@@ -1,4 +1,5 @@
 // Build searchable SOP sections from approved body text; preserve physical-page substrings.
+import {sopStructure} from './sop-structure.js?v=20261027-1';
 const compact=s=>s.replace(/\s/gu,'');
 const cache=new WeakMap();
 const readable=s=>s.replace(/([^\n])\n(?!\s*(?:\d+(?:\.\d+)*[. ]|[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]|[가-힣]\.\s|[-▷※]))/gu,'$1 ').trim();
@@ -41,7 +42,31 @@ export function sopIndex(entry){
   }
  }
  finish();
- const value={sections:sections.filter(s=>s.parts.some(p=>p.text.trim())),vocabulary};cache.set(entry.index,value);return value;
+ const value={sections:sections.filter(s=>s.parts.some(p=>p.text.trim())),vocabulary};value.readerSections=readerSections(entry,value.sections);cache.set(entry.index,value);return value;
+}
+
+// Reading follows source typography. Keep the legacy search index independent,
+// and redirect old child-section links to their enclosing source section.
+function readerSections(entry,legacy){
+ const source=sopStructure[entry.doc.sha256];if(!source)return legacy.map((s,i)=>({...s,readerOrdinal:i,aliases:[]}));
+ const out=[];let current=null;
+ const needle=s=>new RegExp([...compact(s)].map(c=>c.replace(/[.*+?^${}()|[\]\\]/gu,'\\$&')).join('\\s*'),'u');
+ for(const old of legacy)for(const part of old.parts){
+  const headings=source.headings.filter(h=>h.page===part.page).map(h=>({...h,match:needle(h.heading).exec(part.text)})).filter(h=>h.match).sort((a,b)=>a.match.index-b.match.index);
+  let at=0;
+  const add=text=>{if(!text.trim())return;if(!current){current={...old,parts:[],units:[],aliases:[]};out.push(current);}current.parts.push({...part,text,display:readable(text)});};
+  for(const h of headings){const prefix=part.text.slice(at,h.match.index),transfer=at===0&&current&&current.parts.at(-1)?.page<part.page;if(!transfer)add(prefix);current={...old,key:entry.doc.id+':reader:'+h.page+':'+h.match.index,heading:h.match[0].trim(),parts:[],units:[],aliases:[]};out.push(current);if(transfer)add(prefix);at=h.match.index;}
+  add(part.text.slice(at));
+ }
+ const starts=out.map(s=>({page:s.parts[0].page,offset:entry.index.pages.find(p=>p.page===s.parts[0].page).text.indexOf(s.parts[0].text)}));
+ for(let i=0;i<legacy.length;i++){
+  const old=legacy[i],page=old.parts[0].page,pageText=entry.index.pages.find(p=>p.page===page).text,offset=needle(old.heading).exec(pageText)?.index??pageText.indexOf(old.parts[0].text);
+  const exact=out.findIndex(s=>s.parts[0].page===page&&compact(s.heading)===compact(old.heading));
+  let position=0;for(let n=0;n<starts.length;n++)if(starts[n].page<page||starts[n].page===page&&starts[n].offset<=offset)position=n;if(exact>=0)position=exact;
+  const owner=out[position];owner.aliases.push('s:'+i);owner.readerOrdinal??=i;
+ }
+ for(let i=0;i<out.length;i++){out[i].readerOrdinal??=1000+i;out[i].units=[{label:'본문',parts:out[i].parts}];}
+ return out;
 }
 
 

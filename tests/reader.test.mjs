@@ -1,7 +1,17 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
 import {contents,readerDetail} from '../site/assets/reader-model.js';
+import {sopIndex} from '../site/assets/sop-index.js';
 const root=new URL('../site/',import.meta.url),manifest=JSON.parse(fs.readFileSync(new URL('data/manifest.json',root)));
 const corpus=manifest.documents.map(doc=>({doc,index:JSON.parse(fs.readFileSync(new URL(doc.data,root))),asOf:'2026-10-25'}));
+test('SOP reading headings follow source hierarchy and preserve all approved source characters',()=>{
+ for(const e of corpus.filter(e=>e.doc.type==='SOP')){const s=sopIndex(e),clean=x=>x.replace(/\s/gu,'');assert.equal(clean(s.readerSections.flatMap(s=>s.parts.map(p=>p.text)).join('')),clean(s.sections.flatMap(s=>s.parts.map(p=>p.text)).join('')));for(const n of s.readerSections)for(const p of n.parts)assert(e.index.pages.find(x=>x.page===p.page).text.includes(p.text));}
+ const f=corpus.find(e=>e.doc.disease==='구제역'&&e.doc.type==='SOP'),nodes=contents(f).articles;
+ assert(!nodes.some(n=>/^3\.\s*소독방법/u.test(n.label)));
+ const a=nodes.find(n=>n.parts[0].page===254);assert.match(a.label,/^15\s/u);assert(a.parts.some(p=>p.page===255&&p.text.includes('3. 소독방법')));
+ const d=readerDetail(corpus,f.doc.id,'s:54');assert.equal(d.key,a.key);assert.equal(d.sourceRange.end,255);
+ const missing=nodes.find(n=>n.parts[0].page===280);assert.match(missing.label,/^23\s/u);assert.equal(readerDetail(corpus,f.doc.id,'s:64').key,missing.key);
+ const asf=corpus.find(e=>e.doc.disease==='ASF'&&e.doc.type==='SOP');assert(contents(asf).articles.some(n=>n.parts[0].page===168&&/^18\./u.test(n.label)));
+});
 test('reader exposes every physical page including figures and blank pages',()=>{for(const e of corpus){const c=contents(e);assert.equal(c.pages.length,e.index.pages.length);assert.equal(new Set(Object.values(c).flat().map(n=>n.key)).size,Object.values(c).flat().length);for(const n of c.pages){const d=readerDetail(corpus,e.doc.id,n.key);assert.equal(d.parts[0].text,e.index.pages.find(p=>'p:'+p.page===n.key).text);}}});
 test('reader resolves substantive decree annex 2 and exact compensation floor units',()=>{const e=corpus.find(e=>e.doc.type==='시행령'),a=contents(e).annexes.find(n=>n.number[0]==='2'&&!n.number[1]);assert(a);const d=readerDetail(corpus,e.doc.id,a.key);assert(d.units.some(u=>u.parts.some(p=>/100분의 20/u.test(p.text))));assert(d.parts.every(p=>p.page>=a.annex.part.page&&p.page<=a.annex.endPage));});
 test('reader legal detail retains exact source and resolved outgoing and incoming references',()=>{const e=corpus.find(e=>e.doc.type==='법률'),d=readerDetail(corpus,e.doc.id,'a:제48조');assert(!d.error);assert(d.citations.some(c=>c.documentId!==e.doc.id));for(const p of d.parts){assert(e.index.pages.find(x=>x.page===p.page).text.includes(p.text));for(const r of p.references){assert(corpus.some(x=>x.doc.id===r.documentId));assert(r.start>=0&&r.end<=(p.display||p.text).length);}}});

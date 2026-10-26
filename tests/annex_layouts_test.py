@@ -3,7 +3,7 @@ from pathlib import Path
 import pdfplumber
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'tools'))
-from build_annex_layouts import count,detail_cells,aligned_amount_cells
+from build_annex_layouts import count,detail_cells,aligned_amount_cells,aligned_fee_cells
 from types import SimpleNamespace
 from unittest.mock import patch
 class AnnexLayouts(unittest.TestCase):
@@ -45,6 +45,41 @@ class AnnexLayouts(unittest.TestCase):
   text=self.data['documents'][doc['id']]['pages']['142']['text']
   expected=['가. 검역장소','나. 축주명','다. 품종','라. 수수','마. 원산지','바. 도입일자','사. 검역종료일','아. 예방접종등 기타 특기사항']
   self.assertTrue(all('\n'+label in text for label in expected));self.assertNotIn('검역장소 나.',text)
+ def test_fee_rows_attach_parenthetical_method_text_and_keep_shared_disease_cell(self):
+  cells=[(0,0,10,90),(10,0,20,90),(20,0,30,90),(30,0,40,90)]
+  entries=[[(35,'질병')],[(8,'중화시험'),(30,'간이검사'),(50,'감별검사'),(64,'(효소면역법)')],[(10,'1두'),(33,'1두'),(56,'1두')],[(10,'4,800원'),(33,'2,600원'),(56,'4,700원')]]
+  chars=[dict(x0=col*10+1,x1=col*10+2,top=y,bottom=y+10,text=s) for col,ls in enumerate(entries) for y,s in ls];page=SimpleNamespace(chars=chars)
+  with patch('build_annex_layouts.text',side_effect=lambda cs:'\n'.join(c['text'] for c in cs)):
+   result=aligned_fee_cells(page,cells)
+   self.assertEqual(len(result),10);self.assertIn(cells[0],result)
+   for c in chars:
+    if 30<c['x0']<40:c['top']+=8;c['bottom']+=8
+   self.assertEqual(aligned_fee_cells(page,cells),cells)
+ def test_serology_method_quantity_and_fee_are_paired_with_wrapped_parenthetical_explanation(self):
+  doc=next((d for d in self.manifest['documents'] if d['sha256']=='25ef0494687bf942ebabde909478e218baf7a4d2ec2efe269198d478cd0a6d11'),None)
+  if not doc:self.skipTest('Original rule revision not included in this release')
+  table=next(b for b in self.data['documents'][doc['id']]['pages']['149']['blocks'] if b['kind']=='table');rows=table['rows']
+  for disease,expected in [('돼지오제스키병',[('혈청중화시험','1두','4,800원'),('간이진단킷트검사','1두','2,600원'),('감별진단킷트검사(항체효소면역법)','1두','4,700원')]),('돼지생식기호흡기증후군',[('간접형광항체법','1두','4,000원'),('효소면역법','1두','8,700원')]),('뉴캣슬병',[('혈구응집억제반응법','5수','16,300원'),('효소면역법','5수','18,300원')]),('조류인플루엔자',[('효소면역법','5수','18,800원'),('혈구응집억제반응법','5수','17,300원'),('한천겔침강반응법','5수','9,900원')])]:
+   start=next(i for i,row in enumerate(rows) if any(c['col']==1 and c['text']==disease for c in row));self.assertEqual(next(c for c in rows[start] if c['col']==1)['rowspan'],len(expected))
+   actual=[tuple(''.join(next(c['text'] for c in row if c['col']==col).split()) for col in [2,3,4]) for row in rows[start:start+len(expected)]];self.assertEqual(actual,expected)
+ def test_sop_equipment_has_one_item_quantity_and_matching_remark_per_row(self):
+  for id,page in [('7b763e5d-e1f8-5711-aedc-19ec89ab044f',193),('3d9ae693-1bb3-5f8c-af9e-0e3512252566',215)]:
+   table=next(b for b in self.data['documents'][id]['pages'][str(page)]['blocks'] if b['kind']=='table');rows=table['rows'];self.assertEqual(len(rows),31)
+   clean=lambda s:''.join(s.split())
+   actual={clean(r[0]['text']):[clean(c['text']) for c in r[1:]] for r in rows[1:]}
+   self.assertEqual(actual['비누'],['3개','물비누1개포함']);self.assertEqual(actual['고압스프레이어'],['1조','입구설치용']);self.assertEqual(actual['구급약품'],['1조','응급치료용']);self.assertEqual(actual['나침반'],['1개',''])
+ def test_residue_fee_child_methods_match_separate_unit_and_price_rows(self):
+  p=self.data['documents']['1265dc44-6eb2-4934-a5a8-85b1f2f3638f']['pages']['157'];table=next(b for b in p['blocks'] if b['kind']=='table' and any('그 밖의 대동물' in c['text'] for r in b['rows'] for c in r));rows=table['rows'];start=next(i for i,r in enumerate(rows) if '그 밖의 대동물' in r[0]['text'])
+  for row,expected in zip(rows[start:start+2],[('근육·피하주사제','6,180,000원'),('그 밖의 투여경로','4,944,000원')]):self.assertIn(expected[0],row[0]['text']);self.assertEqual(row[1]['text'],'1성분');self.assertEqual(row[2]['text'],expected[1])
+ def test_figures_are_cropped_and_surrounding_sampling_instructions_are_native_text(self):
+  for id,page,expected in [('7b763e5d-e1f8-5711-aedc-19ec89ab044f',191,['4. 시료 포장 및 운반요령','마. 모든 시료']),('3d9ae693-1bb3-5f8c-af9e-0e3512252566',197,['3.4 타 축종','3.5 시료 포장 방법']),('3d9ae693-1bb3-5f8c-af9e-0e3512252566',202,['□ 시료채취요령','VTM'])]:
+   blocks=self.data['documents'][id]['pages'][str(page)]['blocks'];figures=[b for b in blocks if b['kind']=='image'];self.assertEqual(len(figures),1);self.assertTrue((ROOT/'site'/figures[0]['crop']['path']).exists());prose=''.join(b['text'] for b in blocks if b['kind']=='text')
+   for word in expected:self.assertIn(word,prose)
+ def test_text_boxes_and_nested_tables_in_hpai_annexes_do_not_require_page_image_fallbacks(self):
+  pages=self.data['documents']['3d9ae693-1bb3-5f8c-af9e-0e3512252566']['pages']
+  for n in [221,227,*range(278,290)]:
+   page=pages[str(n)];self.assertNotEqual(page['mode'],'image');self.assertFalse(any(b['kind']=='image' for b in page.get('blocks',[])),n)
+  for n in range(281,285):self.assertTrue(any(b['kind']=='table' and b['columns']==3 for b in pages[str(n)]['blocks']),n)
  def test_borderless_items_are_split_while_common_reference_stays_merged(self):
   p,cells=self.fake_grid([(5,'대상'),(30,'1) 농장'),(60,'2) 영업자')],[[(30,'100'),(60,'200')],[(30,'300'),(60,'400')]])
   with patch('build_annex_layouts.source_lines',side_effect=lambda cs:[(c['top'],c['text']) for c in cs]):result=detail_cells(p,cells)

@@ -2,14 +2,15 @@
 export const documentGroup=doc=>doc.type==='SOP'?'SOP':doc.type==='고시'?'고시':'법령';
 const letters='가나다라마바사아자차카타파하거너더러머버서어저처커터퍼허고노도로모보소오조초코토포호';
 const order=['numberDot','koreanDot','numberClose','koreanClose','numberParen','koreanParen'];
-const token=new RegExp('(?:^|(?<=\\s))(?:(?<chapter>[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]+[.． ]+|제\\s*\\d+\\s*[장절]\\s*)|(?<decimal>\\d{1,2}(?:[.,]\\d{1,2})+\\.?)(?!\\d)|(?<numberParen>\\(\\d{1,2}\\))|(?<koreanParen>\\(['+letters+']\\))|(?<numberClose>\\d{1,2}\\))|(?<koreanClose>['+letters+']\\))|(?<numberDot>\\d{1,2}\\.)(?!\\d)|(?<koreanDot>['+letters+']\\.)|(?<clause>[①-⑳])|(?<bullet>[-□○◦▷▶](?=[ \\t])|[ㆍ·](?=\\d|[^\\n]{1,24}[：:~～]))|(?<note>※|\\*{1,2}(?=[ \\t])))','gu');
+const token=new RegExp('(?:^|(?<=\\s))(?:(?<chapter>[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]+[.． ]+|제\\s*\\d+\\s*[장절]\\s*)|(?<decimal>\\d{1,2}(?:[.,]\\d{1,2})+\\.?)(?!\\d)|(?<numberParen>\\(\\d{1,2}\\))|(?<koreanParen>\\(['+letters+']\\))|(?<numberClose>\\d{1,2}\\))|(?<koreanClose>['+letters+']\\))|(?<numberDot>\\d{1,2}\\.)(?!\\d)|(?<koreanDot>['+letters+']\\.)|(?<clause>[①-⑳])|(?<bullet>[-□○◦▷▶](?=[ \\t])|[ㆍ·](?=\\d|[^\\n]{1,24}[：:~～]))|(?<note>※|\\*{1,3}(?=[ \\t])))','gu');
 export function sourceBlocks(text,sop=false,state={},protectedRanges=[]){
  const dates=[...text.matchAll(/\d{4}\s*\.\s*\d{1,2}\s*\.\s*\d{1,2}\s*\.?/gu)].map(m=>({start:m.index,end:m.index+m[0].length}));
  const cuts=new Map([[0,{kind:sop?'prose':'paragraph',depth:state.continuationDepth??state.depth??0}]]);
  for(const m of text.matchAll(token)){
   const start=m.index,family=Object.keys(m.groups).find(k=>m.groups[k]!==undefined),marker=m[0],after=text.slice(start+marker.length),lineStart=!text.slice(text.lastIndexOf('\n',start-1)+1,start).trim();
   if(protectedRanges.some(r=>start>r.start&&start<r.end)||dates.some(r=>start>=r.start&&start<r.end))continue;
-  if(['chapter','bullet','note'].includes(family)&&!lineStart)continue;
+  if(['chapter','bullet'].includes(family)&&!lineStart)continue;
+  if(family==='note'&&!lineStart&&!(state.noteDepth!=null&&state.circleDepth!=null&&marker.startsWith('*')))continue;
   if(family==='bullet'&&/[ㆍ·]/u.test(marker)&&state.mode!=='cell')continue;
   if(state.nativeLines&&!lineStart&&family!=='clause')continue;
   if(family==='decimal'){
@@ -59,7 +60,7 @@ export function sourceBlocks(text,sop=false,state={},protectedRanges=[]){
    const stack=state.stack??=[];while(stack.length&&stack.at(-1).rank>=rank)stack.pop();
    depth=(stack.length?stack.at(-1).depth+1:Math.max(0,rank)+(state.clause?1:0));stack.push({rank,depth});
   }
-  cuts.set(start,{kind,depth,marker,markerStart:start,markerEnd:start+marker.length,family});
+  cuts.set(start,{kind,depth,noteChild:family==='clause'&&state.noteDepth!=null,marker,markerStart:start,markerEnd:start+marker.length,family});
   if(family==='numberDot'||family==='decimal')state.root=marker.split(/[.,]/u)[0];
   state.continuationDepth=depth;
   if(!['bullet','note'].includes(family))state.depth=depth;

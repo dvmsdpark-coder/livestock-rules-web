@@ -76,6 +76,7 @@ jobs:
           python tests/page_furniture_test.py
           python tests/prose_flow_test.py
           python tools/build_page_previews.py
+          python tools/build_sop_structure.py
           python tools/build_annex_layouts.py
           python tests/annex_layouts_test.py
           node tools/verify_annex_layouts.mjs

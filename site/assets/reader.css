@@ -50,3 +50,6 @@
 @media(max-width:650px){#readerBody{--outline-step:16px}}
 
 #readerBody .annex-table .source-repeated-lines{white-space:pre-line}
+
+#readerBody .formatted-source>.source-note-child{font-size:14px;color:#617284}
+.annex-figure{margin:18px 0}.annex-figure-image{display:block;max-width:100%;height:auto;margin:auto}

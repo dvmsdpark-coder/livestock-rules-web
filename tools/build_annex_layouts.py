@@ -10,6 +10,10 @@ from PIL import Image
 ROOT=Path(__file__).resolve().parents[1]
 # Reviewed drawings/labels: dimensions and relative positions carry meaning.
 DRAWINGS={'25ef0494687bf942ebabde909478e218baf7a4d2ec2efe269198d478cd0a6d11':set([94,*range(115,123),141])}
+FIGURE_CROPS={
+ '8ca92a9774fa4ca4af353140f4fed9741297780d189aeadd5ac72e26153fec4a':{191:[[70,95,520,258]]},
+ 'a2b814c1053b54f9e772628e60f5dee7abe2e841b3ae69efedc026a6d5a9995d':{197:[[145,85,410,245]],202:[[140,480,415,657]]},
+}
 def centre(c,b):return b[0]-.2<=(c['x0']+c['x1'])/2<=b[2]+.2 and b[1]-.2<=(c['top']+c['bottom'])/2<=b[3]+.2
 def text(chars):return restore_prose(chars,pdfplumber.utils.extract_text(chars,x_tolerance=2,y_tolerance=3) or '')
 def count(s):return Counter(c for c in s if not c.isspace())
@@ -87,8 +91,80 @@ def aligned_amount_cells(p,cells):
    boundaries=[box[1],*cuts,box[3]];replacements[tuple(box)]=[(box[0],a,box[2],b) for a,b in zip(boundaries,boundaries[1:])]
  return [part for box in cells for part in replacements.get(tuple(box),[box])]
 
+def aligned_fee_cells(p,cells):
+ """Restore method / unit / won-fee triples, including parenthesized wraps.
+ Price and unit baselines must agree; all method groups need spatial evidence.
+ """
+ def lines(chars):
+  return [{'chars':group,'text':text(group).strip()} for group in pdfplumber.utils.cluster_objects(chars,lambda c:c['top'],3) if group]
+ def compact(value):return re.sub(r'\s','',value)
+ def centers(chars):return [(c['top']+c['bottom'])/2 for c in chars if c['text'].strip()]
+ def middle(chars):
+  points=centers(chars);return (min(points)+max(points))/2
+ replacements={}
+ for price in cells:
+  price_chars=cell_chars(p,price)
+  if sum(c['text'].count('원') for c in price_chars)<2:continue
+  fees=lines(price_chars)
+  if len(fees)<2 or not all(re.fullmatch(r'\d[\d,]*(?:\.\d+)?원',compact(line['text'])) for line in fees):continue
+  def left_of(box):return next((b for b in cells if abs(b[2]-box[0])<1 and abs(b[1]-box[1])<1 and abs(b[3]-box[3])<1),None)
+  unit=left_of(price);method=left_of(unit) if unit else None
+  if not unit or not method:continue
+  units=lines(cell_chars(p,unit))
+  if len(units)!=len(fees) or not all(re.fullmatch(r'\d+(?:\.\d+)?(?:두|수|건|개|매|마리|점|명|회|성분)',compact(line['text'])) for line in units):continue
+  if any(abs(middle(u['chars'])-middle(f['chars']))>3 for u,f in zip(units,fees)):continue
+  methods=[]
+  for line in lines(cell_chars(p,method)):
+   prior=text(methods[-1]) if methods else ''
+   continued=methods and (line['text'].startswith(('(','（')) or prior.count('(')+prior.count('（')>prior.count(')')+prior.count('）'))
+   if continued:methods[-1].extend(line['chars'])
+   else:methods.append(list(line['chars']))
+  if len(methods)==len(fees)+1 and all(re.match(r'^\d+\)',text(group).strip()) for group in methods[1:]):methods=[methods[0]+methods[1],*methods[2:]]
+  if len(methods)!=len(fees) or not all(re.search(r'[가-힣A-Za-z]',text(group)) for group in methods):continue
+  groups=[[*m,*u['chars'],*f['chars']] for m,u,f in zip(methods,units,fees)]
+  if any(abs(middle(m)-middle(u['chars']))>max(c['bottom']-c['top'] for c in [*m,*u['chars']])*.9 for m,u in zip(methods,units)):continue
+  cuts=[]
+  for left,right in zip(groups,groups[1:]):
+   lo=max(centers(left));hi=min(centers(right))
+   if hi-lo<=1:break
+   cuts.append((lo+hi)/2)
+  if len(cuts)!=len(fees)-1:continue
+  targets=[method,unit,price]
+  if any(centre(im,box) for im in getattr(p,'annex_images',[]) for box in targets):continue
+  for box in targets:
+   boundaries=[box[1],*cuts,box[3]];replacements[tuple(box)]=[(box[0],a,box[2],b) for a,b in zip(boundaries,boundaries[1:])]
+ return [part for box in cells for part in replacements.get(tuple(box),[box])]
+
+def equipment_cells(p,cells):
+ """Use quantity baselines to restore one equipment item per row.
+ Wrapped labels and sparse remarks stay with the matching source baseline.
+ """
+ replacements={}
+ for unit in cells:
+  entries=source_lines(cell_chars(p,unit))
+  if len(entries)<3 or not all(re.fullmatch(r'(?:각\s*)?[\d,]+\s*(?:개|조|부|벌|짝|켤레|켈레|권|봉지|리터|㎏|kg|회\s*용\s*\(개\))',line) for _,line in entries):continue
+  label=next((b for b in cells if abs(b[2]-unit[0])<1 and abs(b[1]-unit[1])<1 and abs(b[3]-unit[3])<1),None)
+  if not label:continue
+  labels=source_lines(cell_chars(p,label))
+  if not all(any(abs(y-z)<4 for z,_ in labels) for y,_ in entries):continue
+  targets=[b for b in cells if b[0]>=label[0] and abs(b[1]-unit[1])<1 and abs(b[3]-unit[3])<1]
+  groups=[[] for _ in entries]
+  for box in targets:
+   for chars in pdfplumber.utils.cluster_objects(cell_chars(p,box),lambda c:c['top'],3):
+    y=min(c['top'] for c in chars);i=min(range(len(entries)),key=lambda j:abs(entries[j][0]-y));groups[i].extend(chars)
+  if any(not g for g in groups):continue
+  cuts=[]
+  for left,right in zip(groups,groups[1:]):
+   lo=max((c['top']+c['bottom'])/2 for c in left);hi=min((c['top']+c['bottom'])/2 for c in right)
+   if hi-lo<1:break
+   cuts.append((lo+hi)/2)
+  if len(cuts)!=len(entries)-1:continue
+  for box in targets:
+   limits=[box[1],*cuts,box[3]];replacements[tuple(box)]=[(box[0],a,box[2],b) for a,b in zip(limits,limits[1:])]
+ return [part for box in cells for part in replacements.get(tuple(box),[box])]
+
 def table_block(p,t):
- cells=aligned_amount_cells(p,detail_cells(p,t.cells))
+ cells=equipment_cells(p,aligned_fee_cells(p,aligned_amount_cells(p,detail_cells(p,t.cells))))
  xs=sorted(set(round(v,2) for c in cells for v in (c[0],c[2])));ys=sorted(set(round(v,2) for c in cells for v in (c[1],c[3])))
  rows=[[] for _ in ys[:-1]];captured=[];occupied=set()
  for box in sorted(cells,key=lambda b:(b[1],b[0])):
@@ -103,7 +179,17 @@ def table_block(p,t):
  body=[c for c in p.chars if centre(c,t.bbox)]
  if count(''.join(c['text'] for c in body))!=count(''.join(c['text'] for c in captured)):return None
  return {'kind':'table','xs':xs,'rows':rows,'columns':len(xs)-1,'widths':[round((xs[i+1]-xs[i])/(xs[-1]-xs[0])*100,2) for i in range(len(xs)-1)]}
-def page_layout(p,number,drawings,decorations=frozenset()):
+def page_layout(p,number,drawings,decorations=frozenset(),reviewed_crops=(),recover_frames=True):
+ if reviewed_crops:
+  blocks=[];top=0
+  for box in sorted(reviewed_crops,key=lambda b:b[1]):
+   before=[c for c in p.chars if top<=(c['top']+c['bottom'])/2<box[1]]
+   if before:blocks.append({'kind':'text','text':text(before)})
+   blocks.append({'kind':'image','cropBox':box,'reason':'reviewed-figure-with-caption'})
+   top=box[3]
+  after=[c for c in p.chars if (c['top']+c['bottom'])/2>=top]
+  if after:blocks.append({'kind':'text','text':text(after)})
+  return {'mode':'mixed','blocks':blocks}
  images=[im for im in p.images if fingerprint(im) not in decorations]
  if number in drawings or p.curves or any(im['width']*im['height']>p.width*p.height*.015 for im in images):return {'mode':'image','reason':'drawing'}
  p.annex_images=images
@@ -114,8 +200,21 @@ def page_layout(p,number,drawings,decorations=frozenset()):
  for e in sorted(edges,key=lambda e:e['top']):
   if groups and e['top']<=max(x['bottom'] for x in groups[-1])+3:groups[-1].append(e)
   else:groups.append([e])
- regions=[]
+ expanded=[]
  for group in groups:
+  # A decorative outer frame can enclose introductory prose and a real table.
+  # Recover the inner grid rather than treating the whole frame as one table.
+  bounds=union([[e['x0'],e['top'],e['x1'],e['bottom']] for e in group])
+  inner=[e for e in group if bounds[0]+4<e['x0']<bounds[2]-4 and e['top']>bounds[1]+4 and e['bottom']<bounds[3]-4]
+  subgroups=[]
+  for edge in inner:
+   same=next((g for g in subgroups if abs(g[0]['top']-edge['top'])<3 and abs(g[0]['bottom']-edge['bottom'])<3),None)
+   if same is None:subgroups.append([edge])
+   else:same.append(edge)
+  valid=bool(subgroups) and all(len({round(e['top']) for e in p.edges if e.get('orientation')=='h' and e['x0']<min(v['x0'] for v in g)-3 and e['x1']>max(v['x0'] for v in g)+3 and g[0]['top']-2<=e['top']<=g[0]['bottom']+2})>=3 for g in subgroups)
+  expanded.extend(subgroups if valid and recover_frames else [group])
+ regions=[]
+ for group in expanded:
   box=union([[e['x0'],e['top'],e['x1'],e['bottom']] for e in group])
   # Some PDFs draw outer vertical borders only in the header. Their repeated
   # horizontal row rules still provide the exact original left/right extent.
@@ -139,6 +238,10 @@ def page_layout(p,number,drawings,decorations=frozenset()):
   b=r['bbox'];outside=[c for c in p.chars if top<=(c['top']+c['bottom'])/2<b[1]-.2]
   if outside:blocks.append({'kind':'text','text':text(outside)})
   block=table_block(p,r['table']) if r['table'] else None
+  if not block and not r['table'] and not any(centre(im,b) for im in images):
+   # A single-column closed frame contains prose, not parallel data columns.
+   inside=[e for e in edges if b[0]+3<e['x0']<b[2]-3 and e['bottom']>b[1]+3 and e['top']<b[3]-3]
+   if not inside:block={'kind':'text','text':text(cell_chars(p,b))}
   if not block:
    # A partial/ambiguous row must remain attached to its original page.
    blocks.append({'kind':'image','reason':'open-or-ambiguous-grid'})
@@ -148,10 +251,12 @@ def page_layout(p,number,drawings,decorations=frozenset()):
  if outside:blocks.append({'kind':'text','text':text(outside)})
  if not any(b['kind']=='image' for b in blocks):
   shown=''.join(b['text'] if b['kind']=='text' else ''.join(c['text'] for row in b['rows'] for c in row) for b in blocks)
-  if count(shown)!=count(''.join(c['text'] for c in p.chars)):return {'mode':'image','reason':'coverage-mismatch'}
+  if count(shown)!=count(''.join(c['text'] for c in p.chars)):
+   if recover_frames:return page_layout(p,number,drawings,decorations,reviewed_crops,recover_frames=False)
+   return {'mode':'image','reason':'coverage-mismatch'}
  return {'mode':'mixed','blocks':blocks}
 def materialise_cells(layout,number,doc,page):
- cells=[c for b in layout.get('blocks',[]) if b['kind']=='table' for row in b['rows'] for c in row if c.get('cropBox')]
+ cells=[c for b in layout.get('blocks',[]) if b['kind']=='table' for row in b['rows'] for c in row if c.get('cropBox')]+[b for b in layout.get('blocks',[]) if b.get('cropBox')]
  if not cells:return
  source=ROOT/'site/assets/pages'/doc['sha256']/f'{number}.webp'
  if not source.exists():raise ValueError('Build page previews before annex cell visuals')
@@ -176,7 +281,7 @@ def build():
     repeated.update(set(fingerprint(im) for im in page.images if im['width']*im['height']>page.width*page.height*.88 or im['width']<page.width*.17 and im['height']>page.height*.65 or im['width']>page.width*.82 and im['height']<page.height*.2))
    decorations={key for key,n in repeated.items() if n>=3}
    for n in numbers:
-    layout=page_layout(pdf.pages[n-1],n,drawings,decorations);materialise_cells(layout,n,doc,pdf.pages[n-1]);pages[str(n)]=layout
+    layout=page_layout(pdf.pages[n-1],n,drawings,decorations,FIGURE_CROPS.get(doc['sha256'],{}).get(n,()));materialise_cells(layout,n,doc,pdf.pages[n-1]);pages[str(n)]=layout
    for layout in pages.values():stats[layout['mode']]+=1
   output['documents'][doc['id']]={'source_sha256':doc['sha256'],'pages':pages}
  target=ROOT/'site/data/annex-layouts.json';target.write_text(json.dumps(output,ensure_ascii=False,separators=(',',':')),encoding='utf-8');print('Annex layouts:',dict(stats),flush=True)
