@@ -33,3 +33,8 @@ test('native prose replaces whitespace-free legacy extraction but selected units
  const missing='알 수 없는 항목';assert.deepEqual(annexProseText(missing,layout),{text:missing,nativeLines:false,nativePage:false});
  const ambiguous=annexProseText('지원 기준',{mode:'text',text:'지원 기준\n지원 기준'});assert(!ambiguous.nativeLines);assert.equal(ambiguous.text,'지원 기준');
 });
+
+test('split annex titles with a related-article suffix are displayed once without dropping substantive criteria',async()=>{
+ const {withoutAnnexHeading}=await import('../site/assets/annex-presentation.js');
+ for(const [label,source] of [['[별표 1의2] 도태 보상금 지급기준','[별표1의2]\n도태 보상금 지급기준(제3조제2항관련)'],['[별표 2] 도태 장려금 지급기준','[별표 2]\n도태 장려금 지급기준(제9조제2항 관련)'],['[별표 3] 생계안정비용 지원기준 등','[별표 3]\n생계안정비용 지원기준 등(제13조 관련)']])assert.equal(withoutAnnexHeading(source+'\n1. 실제 기준\n□ 지급 대상을 정한다.',label),'1. 실제 기준\n□ 지급 대상을 정한다.');
+});

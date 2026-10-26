@@ -64,8 +64,30 @@ def detail_cells(p,cells):
    boundaries=[target[1],*divisions,target[3]];replacements[tuple(target)]=[(target[0],a,target[2],b) for a,b in zip(boundaries,boundaries[1:])]
  return [part for box in cells for part in replacements.get(tuple(box),[box])]
 
+def aligned_amount_cells(p,cells):
+ """Split unnumbered payment rows only with matching source label/value baselines.
+ Common side cells stay merged; identical repeated notes may follow their own rows.
+ """
+ replacements={}
+ for value in cells:
+  amounts=source_lines(cell_chars(p,value))
+  if len(amounts)<2 or not all(re.fullmatch(r'\d[\d,]*(?:\.\d+)?',line) and float(line.replace(',',''))>=1000 for _,line in amounts):continue
+  labels=next((box for box in cells if abs(box[2]-value[0])<1 and abs(box[1]-value[1])<1 and abs(box[3]-value[3])<1),None)
+  if not labels:continue
+  descriptions=source_lines(cell_chars(p,labels))
+  if len(descriptions)!=len(amounts) or not all(abs(y-a)<4 and re.search(r'[가-힣A-Za-z]',line) for (y,line),(a,_) in zip(descriptions,amounts)):continue
+  cuts=[y-2 for y,_ in amounts[1:]];targets=[labels,value]
+  for other in cells:
+   if other[0]<value[2]-1 or abs(other[1]-value[1])>1 or abs(other[3]-value[3])>1:continue
+   notes=source_lines(cell_chars(p,other))
+   if len(notes)>1 and len({line for _,line in notes})==1 and all(any(abs(y-a)<4 for a,_ in amounts) for y,_ in notes):targets.append(other)
+  if any(any(c['top']<cut<c['bottom'] for c in cell_chars(p,box)) for box in targets for cut in cuts):continue
+  for box in targets:
+   boundaries=[box[1],*cuts,box[3]];replacements[tuple(box)]=[(box[0],a,box[2],b) for a,b in zip(boundaries,boundaries[1:])]
+ return [part for box in cells for part in replacements.get(tuple(box),[box])]
+
 def table_block(p,t):
- cells=detail_cells(p,t.cells)
+ cells=aligned_amount_cells(p,detail_cells(p,t.cells))
  xs=sorted(set(round(v,2) for c in cells for v in (c[0],c[2])));ys=sorted(set(round(v,2) for c in cells for v in (c[1],c[3])))
  rows=[[] for _ in ys[:-1]];captured=[];occupied=set()
  for box in sorted(cells,key=lambda b:(b[1],b[0])):

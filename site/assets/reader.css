@@ -35,12 +35,18 @@
 .annex-table.wide-table{min-width:1100px}
 
 /* A hanging marker and a consistent indent preserve legal outline levels. */
-#readerBody .formatted-source>.outline-row{display:grid;grid-template-columns:max-content minmax(0,1fr);column-gap:.55em;align-items:baseline;border:0;background:transparent;box-shadow:none;border-radius:0;padding:0;margin:0 0 .7em;margin-left:calc(var(--outline-depth,0) * 1.5em);font-weight:400}
+#readerBody .formatted-source>.outline-row{display:grid;grid-template-columns:max-content minmax(0,1fr);column-gap:.55em;align-items:baseline;border:0;background:transparent;box-shadow:none;border-radius:0;padding:0;margin:0 0 .7em;margin-left:calc(var(--outline-depth,0) * var(--outline-step));font-weight:400}
 .outline-marker{white-space:pre;font-variant-numeric:tabular-nums}.outline-copy{min-width:0;white-space:normal}
-#readerBody .formatted-source>.outline-continuation{border:0;background:transparent;padding:0;margin-left:calc(var(--outline-depth,0) * 1.5em + 2em)}
-#readerBody .annex-table .formatted-source>.outline-row{margin-left:calc(var(--outline-depth,0) * 1em);margin-bottom:.65em}
-#readerBody .annex-table .formatted-source>.outline-continuation{margin-left:calc(var(--outline-depth,0) * 1em + 1.5em)}
-@media(max-width:650px){#readerBody .formatted-source>.outline-row{margin-left:calc(var(--outline-depth,0) * 1em)}#readerBody .formatted-source>.outline-continuation{margin-left:calc(var(--outline-depth,0) * 1em + 2em)}}
+#readerBody .formatted-source>.outline-continuation{border:0;background:transparent;padding:0;margin-left:calc(var(--outline-depth,0) * var(--outline-step) + 2em)}
+#readerBody .annex-table .formatted-source>.outline-row{margin-left:calc(var(--outline-depth,0) * var(--outline-step));margin-bottom:.65em}
+#readerBody .annex-table .formatted-source>.outline-continuation{margin-left:calc(var(--outline-depth,0) * var(--outline-step) + 1.5em)}
+@media(max-width:650px){#readerBody .formatted-source>.outline-row{margin-left:calc(var(--outline-depth,0) * var(--outline-step))}#readerBody .formatted-source>.outline-continuation{margin-left:calc(var(--outline-depth,0) * var(--outline-step) + 2em)}}
 
 /* Circled labels inside an appendix note stay grouped beneath that note. */
 #readerBody .formatted-source>.outline-row.source-subitem{margin-bottom:.2em;line-height:1.8}
+
+#readerBody{--outline-step:24px}#readerBody .annex-table{--outline-step:14px}
+#readerBody .formatted-source>.outline-row.source-section{font-weight:600;margin-top:1em}
+@media(max-width:650px){#readerBody{--outline-step:16px}}
+
+#readerBody .annex-table .source-repeated-lines{white-space:pre-line}

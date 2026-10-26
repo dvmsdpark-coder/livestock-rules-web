@@ -27,7 +27,7 @@ export function annexProseText(source,layout,fullPage=false){
 // The selected annex title is already displayed once above its body.
 export function withoutAnnexHeading(text,label){
  const key=s=>s.replace(/[^\p{L}\p{N}]/gu,''),heading=key(label),lines=text.split('\n');let body=false;
- const matches=line=>{const value=key(line.replace(/^\s*\d{1,4}\s+(?=[\[［【]?\s*별(?:표|지))/u,''));return (value.length>=6||/^별(?:표|지)\d/u.test(value))&&heading.includes(value);};
+ const matches=line=>{const candidate=line.replace(/\([^()]*관련[^()]*\)\s*$/u,'');const value=key(candidate.replace(/^\s*\d{1,4}\s+(?=[\[［【]?\s*별(?:표|지))/u,''));return (value.length>=6||/^별(?:표|지)\d/u.test(value))&&heading.includes(value);};
  return lines.filter((line,i)=>{
   if(body)return true;if(!line.trim())return true;
   // A bare printed page number is furniture only immediately before this annex heading.

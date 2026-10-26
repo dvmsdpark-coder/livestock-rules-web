@@ -3,7 +3,7 @@ from pathlib import Path
 import pdfplumber
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'tools'))
-from build_annex_layouts import count,detail_cells
+from build_annex_layouts import count,detail_cells,aligned_amount_cells
 from types import SimpleNamespace
 from unittest.mock import patch
 class AnnexLayouts(unittest.TestCase):
@@ -22,6 +22,19 @@ class AnnexLayouts(unittest.TestCase):
    for n in range(5,10):
     layout=layouts[str(n)];self.assertEqual(layout['mode'],'text');self.assertGreater(layout['text'].count('\n'),10);self.assertEqual(count(layout['text']),count(''.join(c['text'] for c in pdf.pages[n-1].chars)));self.assertEqual(''.join(layout['text'].split()),''.join(c['text'] for c in pdf.pages[n-1].chars if not c['text'].isspace()))
   self.assertIn('\n가. 지원 대상:',layouts['5']['text']);self.assertIn('\n나. 지원 범위',layouts['5']['text']);self.assertIn('\n(1) 산출식:',layouts['5']['text']);self.assertIn('×',layouts['5']['text']);self.assertIn('3%',layouts['6']['text']);self.assertIn('10일 미만',layouts['6']['text']);self.assertIn('10일 이상',layouts['6']['text'])
+ def test_unnumbered_payment_labels_require_matching_amount_positions(self):
+  cells=[(0,0,10,100),(10,0,20,100),(20,0,30,100),(30,0,40,100)]
+  chars=[{'x0':col*10+1,'x1':col*10+2,'top':y,'bottom':y+1,'text':s} for col,lines in enumerate([[(5,'젖소')],[(10,'송아지'),(40,'초임만삭'),(70,'초산우')],[(10,'200,000'),(40,'500,000'),(70,'400,000')],[(10,'공통 비고')]]) for y,s in lines];page=SimpleNamespace(chars=chars)
+  with patch('build_annex_layouts.source_lines',side_effect=lambda cs:[(c['top'],c['text']) for c in cs]):
+   result=aligned_amount_cells(page,cells);self.assertEqual(len(result),8);self.assertIn(cells[0],result);self.assertIn(cells[3],result)
+   for c in chars:
+    if c['x0']>20 and c['x0']<30:c['top']+=8;c['bottom']+=8
+   self.assertEqual(aligned_amount_cells(page,cells),cells)
+ def test_compensation_notice_payment_rows_keep_labels_and_amounts_paired(self):
+  doc=next(d for d in self.manifest['documents'] if d['id']=='73aa19cc-15fb-5758-8a8c-10cc64ab8085');table=next(b for b in self.data['documents'][doc['id']]['pages']['26']['blocks'] if b['kind']=='table')
+  expected=[('송아지','200,000'),('초임만삭','500,000'),('초산우','400,000'),('다산우(2-5산)','300,000'),('노산우ㆍ기타','200,000'),('임신우(초임단계이후)','400,000'),('300～499kg 이하(암ㆍ수)','200,000'),('299kg 이하(암ㆍ수)','300,000'),('모돈','150,000'),('웅돈','150,000')]
+  actual=[(next(c['text'] for c in row if c['col']==1),next(c['text'] for c in row if c['col']==2)) for row in table['rows'][1:11]];self.assertEqual(actual,expected)
+  self.assertEqual(table['rows'][1][0]['rowspan'],5);self.assertEqual(next(c for c in table['rows'][1] if c['col']==3)['rowspan'],5)
  def test_borderless_items_are_split_while_common_reference_stays_merged(self):
   p,cells=self.fake_grid([(5,'대상'),(30,'1) 농장'),(60,'2) 영업자')],[[(30,'100'),(60,'200')],[(30,'300'),(60,'400')]])
   with patch('build_annex_layouts.source_lines',side_effect=lambda cs:[(c['top'],c['text']) for c in cs]):result=detail_cells(p,cells)

@@ -50,3 +50,23 @@ test('native PDF lines distinguish real headings from inline references to later
  const text='1. 지원 기준\n다. 지원 기준\n1) 출하 지연 농가: 아래 가) 추가 사육비, 나) 폐사율 증가분, 다) 상품가치 하락분의 총합을 지원.\n가) 추가 사육비: 사육 기간 초과\n(1) 산출식: [(수당 일일 사육비용 × 추가 사육 기간) × 사육마릿수(입식마릿수－폐사 마릿수)]\n(2) 수당 일일 사육비용: 공식 통계\n* 단, 적용 조건을 확인\n** 사육기간: 육계 33일, 산란계 365일';
  const b=sourceBlocks(text,false,{mode:'annex',nativeLines:true}),rows=b.filter(b=>b.marker);assert.deepEqual(rows.map(b=>b.marker),['1.','다.','1)','가)','(1)','(2)','*','**']);assert.deepEqual(rows.slice(0,6).map(b=>b.depth),[0,1,2,3,4,4]);assert.equal(b.map(b=>b.text).join(''),text);assert(rows.find(b=>b.marker==='1)').text.includes('아래 가) 추가 사육비, 나) 폐사율 증가분'));assert(rows.find(b=>b.marker==='(1)').text.includes('×'));
 });
+
+test('square, circle and dash lists form stable sibling levels around a criteria note',()=>{
+ const text='1. 평가 기준\n□ 산지가격 기준\n○ 가격을 준용한다.\n- 제외 조건\n※ 산지가격 적용\n- 지역 평균\n- 전국 평균\n□ 판매대금 기준\n○ 경락가격을 적용한다.\n2. 다음 기준';
+ const b=sourceBlocks(text,false,{mode:'annex',nativeLines:true}),rows=b.filter(b=>b.marker);assert.deepEqual(rows.map(b=>b.marker),['1.','□','○','-','※','-','-','□','○','2.']);assert.deepEqual(rows.map(b=>b.depth),[0,1,2,3,2,3,3,1,2,0]);assert.equal(b.map(b=>b.text).join(''),text);
+});
+test('mixed-table following provisions retain the monthly-policy circle scope without drifting inward',()=>{
+ const state={mode:'annex',nativeLines:true};sourceBlocks('2. 지원 기준\n□ 질병별 지원액\n* 표 적용 주의사항',false,state);
+ const text='○ 우선 지급 기준\n* 일 단위 계산\n- 미신청 농가 조치\n* 입식 준비기간\n○ 장기 제한 기준\n* 일 단위 계산\n- 미신청 농가 조치\n* 폐업지원금 기준\n○ 수매 조치 기준';
+ const b=sourceBlocks(text,false,state),rows=b.filter(b=>b.marker);assert.deepEqual(rows.map(b=>b.depth),[2,3,3,3,2,3,3,3,2]);assert.equal(b.map(b=>b.text).join(''),text);
+});
+test('unlabelled page continuation stays inside its bullet while legal paragraphs reset list scope',()=>{
+ const state={mode:'annex',nativeLines:true};sourceBlocks('1. 기준\n□ 지원 대상\n○ 다음의 조건을 충족한 경우',false,state);const b=sourceBlocks('이하의 기간을 산정한다.\n○ 다음 대상',false,state);assert.equal(b[0].depth,2);assert.equal(b.find(b=>b.marker==='○').depth,2);
+ const legal=sourceBlocks('제3조(기준) ① 첫 항\n□ 대상\n○ 하위\n② 다음 항\n□ 대상');assert.deepEqual(legal.filter(b=>b.marker==='□').map(b=>b.depth),[1,1]);
+});
+
+test('table formula notes keep category dashes above age bands without splitting compound livestock names',()=>{
+ const text='종계의 주령별 가격산정\n- 산란용종계\nㆍ27주령 : 생산비 + 잔존가치\nㆍ초생추～27주령미만 : 기준\nㆍ27주령이상～78주령미만\n: 주령단위 산정\n- 육용종계\nㆍ31주령 : 생산비';
+ const b=sourceBlocks(text,false,{mode:'cell'});assert.deepEqual(b.filter(b=>b.marker).map(b=>b.depth),[1,2,2,2,1,2]);assert.equal(b.map(b=>b.text).join(''),text);
+ assert(!sourceBlocks('○ 젖소ㆍ육우ㆍ한우\nㆍ소종축의 상한가격 기준',false,{mode:'annex',nativeLines:true}).some(b=>b.marker==='ㆍ'));
+});

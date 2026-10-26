@@ -2,14 +2,15 @@
 export const documentGroup=doc=>doc.type==='SOP'?'SOP':doc.type==='고시'?'고시':'법령';
 const letters='가나다라마바사아자차카타파하거너더러머버서어저처커터퍼허고노도로모보소오조초코토포호';
 const order=['numberDot','koreanDot','numberClose','koreanClose','numberParen','koreanParen'];
-const token=new RegExp('(?:^|(?<=\\s))(?:(?<chapter>[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]+[.． ]+|제\\s*\\d+\\s*[장절]\\s*)|(?<decimal>\\d{1,2}(?:[.,]\\d{1,2})+\\.?)(?!\\d)|(?<numberParen>\\(\\d{1,2}\\))|(?<koreanParen>\\(['+letters+']\\))|(?<numberClose>\\d{1,2}\\))|(?<koreanClose>['+letters+']\\))|(?<numberDot>\\d{1,2}\\.)(?!\\d)|(?<koreanDot>['+letters+']\\.)|(?<clause>[①-⑳])|(?<bullet>[-○◦▷▶])(?=[ \\t])|(?<note>※|\\*{1,2}(?=[ \\t])))','gu');
+const token=new RegExp('(?:^|(?<=\\s))(?:(?<chapter>[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]+[.． ]+|제\\s*\\d+\\s*[장절]\\s*)|(?<decimal>\\d{1,2}(?:[.,]\\d{1,2})+\\.?)(?!\\d)|(?<numberParen>\\(\\d{1,2}\\))|(?<koreanParen>\\(['+letters+']\\))|(?<numberClose>\\d{1,2}\\))|(?<koreanClose>['+letters+']\\))|(?<numberDot>\\d{1,2}\\.)(?!\\d)|(?<koreanDot>['+letters+']\\.)|(?<clause>[①-⑳])|(?<bullet>[-□○◦▷▶](?=[ \\t])|[ㆍ·](?=\\d|[^\\n]{1,24}[：:~～]))|(?<note>※|\\*{1,2}(?=[ \\t])))','gu');
 export function sourceBlocks(text,sop=false,state={},protectedRanges=[]){
  const dates=[...text.matchAll(/\d{4}\s*\.\s*\d{1,2}\s*\.\s*\d{1,2}\s*\.?/gu)].map(m=>({start:m.index,end:m.index+m[0].length}));
- const cuts=new Map([[0,{kind:sop?'prose':'paragraph',depth:state.depth??0}]]);
+ const cuts=new Map([[0,{kind:sop?'prose':'paragraph',depth:state.continuationDepth??state.depth??0}]]);
  for(const m of text.matchAll(token)){
   const start=m.index,family=Object.keys(m.groups).find(k=>m.groups[k]!==undefined),marker=m[0],after=text.slice(start+marker.length),lineStart=!text.slice(text.lastIndexOf('\n',start-1)+1,start).trim();
   if(protectedRanges.some(r=>start>r.start&&start<r.end)||dates.some(r=>start>=r.start&&start<r.end))continue;
   if(['chapter','bullet','note'].includes(family)&&!lineStart)continue;
+  if(family==='bullet'&&/[ㆍ·]/u.test(marker)&&state.mode!=='cell')continue;
   if(state.nativeLines&&!lineStart&&family!=='clause')continue;
   if(family==='decimal'){
    if(!lineStart&&!sop)continue;
@@ -21,21 +22,33 @@ export function sourceBlocks(text,sop=false,state={},protectedRanges=[]){
    if(!/^[ \t\n]+[^\s]/u.test(after))continue;
   }else if(['numberDot','koreanDot'].includes(family)&&!/^[ \t]+\S/u.test(after))continue;
   let depth=state.depth??0,kind='item';
-  if(!['clause','note','bullet'].includes(family)){state.circleDepth=null;state.noteDepth=null;}
+  if(!['clause','note','bullet'].includes(family)){state.circleDepth=null;state.noteDepth=null;state.noteMarker=null;state.bulletStack=[];state.bulletBase=null;}
   if(family==='chapter'){kind='heading';depth=0;state.clause=false;state.order=null;state.stack=[];state.decimal=false;}
   else if(family==='clause'){
    if(state.mode==='annex'||state.mode==='cell'||sop){
     // Circled labels in appendices/procedures are local lists, not article paragraphs.
-    const hasParent=Boolean(state.stack?.length||state.decimal);
-    const childDepth=state.noteDepth!=null?state.noteDepth+1:hasParent?(state.depth??0)+1:0;
+    const bulletParent=state.bulletStack?.at(-1),hasParent=Boolean(bulletParent||state.stack?.length||state.decimal);
+    const childDepth=state.noteDepth!=null?state.noteDepth+1:hasParent?(bulletParent?.depth??state.depth??0)+1:0;
     depth=state.circleDepth??childDepth;
     kind=depth?'subitem':'item';state.circleDepth=depth;
-   }else{kind='clause';depth=0;state.clause=true;state.stack=[];state.noteDepth=null;}
+   }else{kind='clause';depth=0;state.clause=true;state.stack=[];state.noteDepth=null;state.bulletStack=[];state.bulletBase=null;}
   }
   else if(family==='decimal'){kind='step';depth=marker.replace(/[.,]$/u,'').split(/[.,]/u).length-1;state.decimal=true;}
-  else if(family==='bullet'||family==='note'){
-   kind=family;depth=(state.depth??0)+1;
-   if(family==='note'){depth=state.noteDepth??depth;state.noteDepth=depth;state.circleDepth=null;}
+  else if(family==='bullet'){
+   kind='bullet';const rank=marker==='□'?0:/[○◦]/u.test(marker)?1:/[ㆍ·]/u.test(marker)?3:2;
+   const stack=state.bulletStack??=[];state.bulletBase??=state.depth??0;
+   while(stack.length&&stack.at(-1).rank>=rank)stack.pop();
+   const parent=stack.at(-1)?.depth??state.bulletBase;
+   depth=(rank===2&&state.noteMarker==='※'?state.noteDepth:parent)+1;
+   stack.push({rank,depth});state.circleDepth=null;
+   if(rank<2){state.noteDepth=null;state.noteMarker=null;}
+  }
+  else if(family==='note'){
+   kind='note';const stack=state.bulletStack||[],square=stack.find(b=>b.rank===0),circle=stack.find(b=>b.rank===1);
+   const parent=marker==='※'?square:circle||square;
+   depth=parent?parent.depth+1:state.noteDepth??(state.depth??0)+1;
+   state.noteDepth=depth;state.noteMarker=marker;state.circleDepth=null;
+   if(marker==='※')state.bulletStack=stack.filter(b=>b.rank===0);else state.bulletStack=stack.filter(b=>b.rank<2);
   }
   else {
    if(state.mode==='cell'&&!state.order){
@@ -48,6 +61,7 @@ export function sourceBlocks(text,sop=false,state={},protectedRanges=[]){
   }
   cuts.set(start,{kind,depth,marker,markerStart:start,markerEnd:start+marker.length,family});
   if(family==='numberDot'||family==='decimal')state.root=marker.split(/[.,]/u)[0];
+  state.continuationDepth=depth;
   if(!['bullet','note'].includes(family))state.depth=depth;
  }
  const entries=[...cuts].sort((a,b)=>a[0]-b[0]);
