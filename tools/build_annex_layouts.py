@@ -4,13 +4,14 @@ from pathlib import Path
 from collections import Counter
 import pdfplumber
 from sop_visuals import fingerprint
+from prose_flow import restore_prose
 from pdfplumber.table import merge_edges
 from PIL import Image
 ROOT=Path(__file__).resolve().parents[1]
 # Reviewed drawings/labels: dimensions and relative positions carry meaning.
 DRAWINGS={'25ef0494687bf942ebabde909478e218baf7a4d2ec2efe269198d478cd0a6d11':set([94,*range(115,123),141])}
 def centre(c,b):return b[0]-.2<=(c['x0']+c['x1'])/2<=b[2]+.2 and b[1]-.2<=(c['top']+c['bottom'])/2<=b[3]+.2
-def text(chars):return pdfplumber.utils.extract_text(chars,x_tolerance=2,y_tolerance=3) or ''
+def text(chars):return restore_prose(chars,pdfplumber.utils.extract_text(chars,x_tolerance=2,y_tolerance=3) or '')
 def count(s):return Counter(c for c in s if not c.isspace())
 def union(boxes):return [min(b[0] for b in boxes),min(b[1] for b in boxes),max(b[2] for b in boxes),max(b[3] for b in boxes)]
 def horizontal_closed(p,x0,x1,y):

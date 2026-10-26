@@ -35,6 +35,10 @@ class AnnexLayouts(unittest.TestCase):
   expected=[('송아지','200,000'),('초임만삭','500,000'),('초산우','400,000'),('다산우(2-5산)','300,000'),('노산우ㆍ기타','200,000'),('임신우(초임단계이후)','400,000'),('300～499kg 이하(암ㆍ수)','200,000'),('299kg 이하(암ㆍ수)','300,000'),('모돈','150,000'),('웅돈','150,000')]
   actual=[(next(c['text'] for c in row if c['col']==1),next(c['text'] for c in row if c['col']==2)) for row in table['rows'][1:11]];self.assertEqual(actual,expected)
   self.assertEqual(table['rows'][1][0]['rowspan'],5);self.assertEqual(next(c for c in table['rows'][1] if c['col']==3)['rowspan'],5)
+ def test_native_rule_sentence_ending_does_not_become_an_extra_da_item(self):
+  doc=next((d for d in self.manifest['documents'] if d['sha256']=='25ef0494687bf942ebabde909478e218baf7a4d2ec2efe269198d478cd0a6d11'),None)
+  if not doc:self.skipTest('Original rule revision not included in this release')
+  page=self.data['documents'][doc['id']]['pages']['95'];self.assertEqual(page['mode'],'text');self.assertIn('실시하여야 한다. 방문자는',page['text']);self.assertNotIn('한\n다. 방문자는',page['text']);self.assertEqual(len(__import__('re').findall(r'^다\.',page['text'],__import__('re').M)),2)
  def test_borderless_items_are_split_while_common_reference_stays_merged(self):
   p,cells=self.fake_grid([(5,'대상'),(30,'1) 농장'),(60,'2) 영업자')],[[(30,'100'),(60,'200')],[(30,'300'),(60,'400')]])
   with patch('build_annex_layouts.source_lines',side_effect=lambda cs:[(c['top'],c['text']) for c in cs]):result=detail_cells(p,cells)
