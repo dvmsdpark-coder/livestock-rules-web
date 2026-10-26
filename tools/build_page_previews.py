@@ -46,7 +46,7 @@ def build():
                         if not crop_path.exists():full.crop(tuple(pixel)).save(crop_path,'WEBP',quality=86,method=4)
                         crops.append({'path':crop_path.relative_to(ROOT/'site').as_posix(),'width':pixel[2]-pixel[0],'height':pixel[3]-pixel[1],'bytes':crop_path.stat().st_size,'sha256':hashlib.sha256(crop_path.read_bytes()).hexdigest(),'pixel_box':pixel})
             size=target.stat().st_size
-            pages[str(number)]={'path':target.relative_to(ROOT/'site').as_posix(),'width':width,'height':height,'bytes':size,'sha256':hashlib.sha256(target.read_bytes()).hexdigest(),'visual':visual,'kind':info.get('kind','page'),'mode':info.get('mode','full'),'visuals':crops}
+            pages[str(number)]={'path':target.relative_to(ROOT/'site').as_posix(),'width':width,'height':height,'bytes':size,'sha256':hashlib.sha256(target.read_bytes()).hexdigest(),'visual':visual,'kind':info.get('kind','page'),'mode':info.get('mode','full'),'visuals':crops,'furniture':info.get('furniture',[])}
             count+=1;total+=size;page.close()
         document.close()
         # Consecutive full-page table/diagram pages are one source group.

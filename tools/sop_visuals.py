@@ -3,6 +3,7 @@ import hashlib,json
 from collections import Counter
 from pathlib import Path
 import pdfplumber
+from page_furniture import page_candidates,confirmed_furniture
 
 def fingerprint(image):
     return hashlib.sha256(image['stream'].get_data()).hexdigest()
@@ -42,7 +43,7 @@ def with_caption(bounds,rows,width,height):
         x0=min(x0,b[0]);x1=max(x1,b[2]);y1=b[3];in_note=True
     return [max(0,x0-9),max(0,y0-9),min(width,x1+9),min(height,y1+9)]
 def analyse(path,index,overrides=None):
-    overrides=overrides or {};result={};bg=Counter()
+    overrides=overrides or {};result={};bg=Counter();furniture=[]
     with pdfplumber.open(path) as document:
         for p in document.pages:
             seen=set()
@@ -53,6 +54,7 @@ def analyse(path,index,overrides=None):
         decorations={k for k,n in bg.items() if n>=3}
         for n,p in enumerate(document.pages,1):
             w,h=p.width,p.height;page_area=w*h;text=(index['pages'][n-1]['text'] or '').strip();rows=lines(p)
+            furniture.extend(page_candidates(p,rows,index['pages'][n-1]['text'] or '',n))
             images=[]
             for im in p.images:
                 b=box(im);bw,bh=b[2]-b[0],b[3]-b[1]
@@ -84,6 +86,7 @@ def analyse(path,index,overrides=None):
             if n in overrides.get('full_pages',[]):regions=[[0,0,w,h]];classification='table'
             result[str(n)]={'kind':classification,'mode':'crop','regions':regions,'page_width':w,'page_height':h,'text_chars':len(text)}
             p.close()
+    for n,items in confirmed_furniture(furniture).items():result[n]['furniture']=items
     # A continued grid table is deliberately not cropped, so headers/notes remain intact.
     for n in range(1,len(result)):
         a,b=result[str(n)],result[str(n+1)]

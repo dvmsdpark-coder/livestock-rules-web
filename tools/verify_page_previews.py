@@ -2,17 +2,25 @@
 import hashlib,json,os,subprocess
 from pathlib import Path
 from PIL import Image
+from page_furniture import compact,NUMBER
 ROOT=Path(__file__).resolve().parents[1]
 listing=json.loads(subprocess.check_output([os.environ.get('NODE_BINARY','node'),'tools/list-preview-pages.mjs'],cwd=ROOT))
 data=json.loads((ROOT/'site/data/page-previews.json').read_text(encoding='utf-8'))
 count=0
 for entry in listing:
-    doc=entry['doc'];preview=data['documents'][doc['id']]
+    doc=entry['doc'];preview=data['documents'][doc['id']];index=json.loads((ROOT/'site'/doc['data']).read_text(encoding='utf-8'))
     assert preview['source_sha256']==doc['sha256']
     if doc['type']=='SOP':assert len(preview['pages'])==doc['pages']
     assert set(preview['pages'])==set(map(str,entry['pages']))
     for number,p in preview['pages'].items():
         assert isinstance(p.get('visual'),bool)
+        for item in p.get('furniture',[]):
+            assert doc['type']=='SOP' and NUMBER.fullmatch(item['text'])
+            assert item['edge'] in ('top','bottom','left','right') and item['source_edge'] in ('start','end')
+            lines=[line for line in index['pages'][int(number)-1]['text'].splitlines() if line.strip()]
+            start=item['source_edge']=='start';assert compact(lines[0] if start else lines[-1])==compact(item['text'])
+            context=compact(''.join(lines[1:] if start else lines[:-1]));assert item['context']==(context[:32] if start else context[-32:])
+
         file=(ROOT/'site'/p['path']).resolve()
         assert file.is_relative_to((ROOT/'site/assets/pages'/doc['sha256']).resolve())
         assert file.stat().st_size==p['bytes']
@@ -41,5 +49,7 @@ for e in listing:
     if d['sha256']=='8ca92a9774fa4ca4af353140f4fed9741297780d189aeadd5ac72e26153fec4a':
         assert pages['13']['mode']=='full' and pages['14']['mode']=='full'
         assert pages['84']['mode']=='crop' and pages['85']['mode']=='crop'
-    if d['sha256']=='a2b814c1053b54f9e772628e60f5dee7abe2e841b3ae69efedc026a6d5a9995d':assert not pages['30']['visual']
+    if d['sha256']=='a2b814c1053b54f9e772628e60f5dee7abe2e841b3ae69efedc026a6d5a9995d':
+        assert not pages['30']['visual']
+        assert any(f['text']=='210' and f['edge']=='bottom' for f in pages['217']['furniture'])
 print('PASS',count,'source-bound mobile page images')
