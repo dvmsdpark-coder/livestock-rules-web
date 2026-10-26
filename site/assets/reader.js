@@ -1,6 +1,6 @@
 import {literalRanges} from './fulltext.js?v=20261026-1';
 import {proseAnnex,previewPage,annexLayouts,withoutAnnexHeading,joinedAnnexLayouts} from './annex-presentation.js?v=20261026-3';
-import {documentGroup,sourceBlocks} from './reader-format.js?v=20261026-3';
+import {documentGroup,sourceBlocks} from './reader-format.js?v=20261026-4';
 const $=id=>document.getElementById(id);
 const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
 const date=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());

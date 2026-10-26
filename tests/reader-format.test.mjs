@@ -25,3 +25,8 @@ test('SOP inline steps split but dimensions, dates and protected reference label
  const b=sourceBlocks(text,true);assert.deepEqual(b.filter(b=>b.marker).map(b=>b.marker),['6.','6.1','6.2','6.3']);assert.equal(b.map(b=>b.text).join(''),text);
  const reference='별표 2 제1호 가. 기준';const span={start:0,end:reference.length};assert.equal(sourceBlocks(reference,false,{},[span]).length,1);
 });
+
+test('a new parent starts a fresh branch even when its child uses a different numbering family',()=>{
+ const text='2. 매몰기준 가. 장소 1) 선정 사) 제외 (1) 구역 나. 사체의 매몰 (1) 매몰 방법 (가) 구덩이 (나) 바닥';
+ const b=sourceBlocks(text).filter(b=>b.marker);assert.deepEqual(b.map(b=>b.depth),[0,1,2,3,4,1,2,3,3]);
+});

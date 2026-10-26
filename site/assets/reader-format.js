@@ -20,8 +20,8 @@ export function sourceBlocks(text,sop=false,state={},protectedRanges=[]){
    if(!/^[ \t\n]+[^\s]/u.test(after))continue;
   }else if(['numberDot','koreanDot'].includes(family)&&!/^[ \t]+\S/u.test(after))continue;
   let depth=state.depth??0,kind='item';
-  if(family==='chapter'){kind='heading';depth=0;state.clause=false;state.order=null;}
-  else if(family==='clause'){kind='clause';depth=0;state.clause=true;}
+  if(family==='chapter'){kind='heading';depth=0;state.clause=false;state.order=null;state.stack=[];}
+  else if(family==='clause'){kind='clause';depth=0;state.clause=true;state.stack=[];}
   else if(family==='decimal'){kind='step';depth=marker.replace(/[.,]$/u,'').split(/[.,]/u).length-1;state.decimal=true;}
   else if(family==='bullet'||family==='note'){kind=family;depth=(state.depth??0)+1;}
   else {
@@ -30,7 +30,8 @@ export function sourceBlocks(text,sop=false,state={},protectedRanges=[]){
     state.order=family==='koreanParen'?['koreanParen','numberClose','koreanClose','numberParen','numberDot','koreanDot']:order.slice(order.indexOf(family));
    }
    const grammar=state.order||order,rank=grammar.indexOf(family);
-   depth=Math.max(0,rank)+(state.clause?1:0);
+   const stack=state.stack??=[];while(stack.length&&stack.at(-1).rank>=rank)stack.pop();
+   depth=(stack.length?stack.at(-1).depth+1:Math.max(0,rank)+(state.clause?1:0));stack.push({rank,depth});
   }
   cuts.set(start,{kind,depth,marker,markerStart:start,markerEnd:start+marker.length,family});
   if(family==='numberDot'||family==='decimal')state.root=marker.split(/[.,]/u)[0];
