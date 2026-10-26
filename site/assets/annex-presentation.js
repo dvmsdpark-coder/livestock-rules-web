@@ -15,8 +15,14 @@ export function annexLayouts(layouts,doc,annex){
 
 // The selected annex title is already displayed once above its body.
 export function withoutAnnexHeading(text,label){
- const key=s=>s.replace(/[^\p{L}\p{N}]/gu,'');const heading=key(label);let body=false;
- return text.split('\n').filter(line=>{if(body)return true;const value=key(line);if(!value)return true;if(value.length>=6&&heading.includes(value))return false;body=true;return true;}).join('\n').trim();
+ const key=s=>s.replace(/[^\p{L}\p{N}]/gu,''),heading=key(label),lines=text.split('\n');let body=false;
+ const matches=line=>{const value=key(line.replace(/^\s*\d{1,4}\s+(?=[\[［【]?\s*별(?:표|지))/u,''));return (value.length>=6||/^별(?:표|지)\d/u.test(value))&&heading.includes(value);};
+ return lines.filter((line,i)=>{
+  if(body)return true;if(!line.trim())return true;
+  // A bare printed page number is furniture only immediately before this annex heading.
+  if(/^\s*\d{1,4}\s*$/u.test(line)&&matches(lines.slice(i+1).find(s=>s.trim())||''))return false;
+  if(matches(line))return false;body=true;return true;
+ }).join('\n').trim();
 }
 
 // Join only source cells explicitly clipped at both physical page boundaries.

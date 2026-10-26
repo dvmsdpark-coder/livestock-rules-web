@@ -1,6 +1,6 @@
 import {literalRanges} from './fulltext.js?v=20261026-1';
-import {proseAnnex,previewPage,annexLayouts,withoutAnnexHeading,joinedAnnexLayouts} from './annex-presentation.js?v=20261026-1';
-import {documentGroup,sourceBlocks} from './reader-format.js?v=20261026-1';
+import {proseAnnex,previewPage,annexLayouts,withoutAnnexHeading,joinedAnnexLayouts} from './annex-presentation.js?v=20261026-3';
+import {documentGroup,sourceBlocks} from './reader-format.js?v=20261026-3';
 const $=id=>document.getElementById(id);
 const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
 const date=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
@@ -17,21 +17,21 @@ function internal(label,id,k){const a=anchor(label,address(id,k));a.onclick=e=>{
 function navigate(id,k,replace=false){selectDocument(id,k);if(!current)return;const url=address(current.doc.id,key);if(replace)history.replaceState(null,'',url);else history.pushState(null,'',url);}
 function targetKey(r){if(r.kind==='annex'){const d=documents.find(d=>d.doc.id===r.documentId);return d?.contents.annexes.find(n=>n.key&&n.annexKind===r.annexKind&&n.number?.[0]===r.number?.[0]&&(n.number?.[1]||null)===(r.number?.[1]||null))?.key||'p:'+r.page;}return 'a:'+r.articleNumber;}
 function referenceLink(label,r){return internal(label,r.documentId,targetKey(r));}
-function partText(part){
+function partText(part,state={}){
  const container=el('div','formatted-source'),text=part.display||part.text,sop=current.doc.type==='SOP'&&tab!=='annexes';
- for(const block of sourceBlocks(text,sop)){
+ for(const block of sourceBlocks(text,sop,state,part.references||[])){
   if(!block.text.trim())continue;
   const p=el(block.kind==='heading'?'h3':'p','source-text source-'+block.kind);
-  const marker=sop&&['step','item'].includes(block.kind)?block.text.match(/^\s*\d+(?:[.,]\d+)*(?:[.)])?[ \t]*/u):null;
   let body=p,at=block.start;
-  if(marker){p.classList.add('sop-numbered');const short=block.kind==='item'&&block.text.trim().length<140&&!block.text.trim().includes('\n');if(short)p.classList.add('sop-section-title');p.append(el('span','sop-marker',marker[0]));body=el('span','sop-copy');p.append(body);at+=marker[0].length;}
+  if(block.marker){p.classList.add('outline-row');p.dataset.depth=String(block.depth);p.style.setProperty('--outline-depth',block.depth);p.append(el('span','outline-marker',text.slice(at,block.markerEnd)));body=el('span','outline-copy');p.append(body);at=block.markerEnd;}
+  else if(block.depth&&block.text.trim()){p.classList.add('outline-continuation');p.style.setProperty('--outline-depth',block.depth);}
   for(const r of part.references||[]){if(r.start<at||r.end>block.end)continue;body.append(document.createTextNode(text.slice(at,r.start)),referenceLink(text.slice(r.start,r.end),r));at=r.end;}
   body.append(document.createTextNode(text.slice(at,block.end)));
   if(sop&&(/⚫/u.test(block.text)&&block.text.length<220||/^\s*-\s*\d+\s*-\s*$/u.test(block.text))){const folded=el('details','page-furniture');folded.append(el('summary','','원문 머리말·쪽 표시'),p);container.append(folded);}else container.append(p);
  }
  return container;
 }
-function renderParts(parts,root){for(const p of parts){let s=root.lastElementChild;if(!s?.classList.contains('source-part')||s.dataset.page!==String(p.page)){s=el('section','source-part');s.dataset.page=String(p.page);s.append(external('PDF '+p.page+'쪽 ↗',pdf(current.doc,p.page)));root.append(s);}s.append(partText(p));}}
+function renderParts(parts,root,state={}){for(const p of parts){let s=root.lastElementChild;if(!s?.classList.contains('source-part')||s.dataset.page!==String(p.page)){s=el('section','source-part');s.dataset.page=String(p.page);s.append(external('PDF '+p.page+'쪽 ↗',pdf(current.doc,p.page)));root.append(s);}s.append(partText(p,state));}}
 function renderDocumentChoices(){const root=$('documentChoices');root.replaceChildren();for(const b of document.querySelectorAll('[data-group]')){b.setAttribute('aria-pressed',String(b.dataset.group===group));b.disabled=loading;}for(const {doc} of available()){const a=internal(doc.title,doc.id,null);a.className='document-choice';a.append(el('small','',doc.type==='SOP'?disease(doc.disease):doc.version));if(doc.id===current?.doc.id)a.setAttribute('aria-current','page');root.append(a);}}
 function sendCatalogue(){if(!manifest||!/^\d{4}-\d{2}-\d{2}$/u.test($('readerDate').value))return;loading=true;findId++;findTerm='';findJump=false;$('fulltextSubmit').disabled=true;$('fulltextResults').replaceChildren();$('fulltextStatus').textContent='';for(const b of document.querySelectorAll('[data-group]'))b.disabled=true;$('readerBody').setAttribute('aria-busy','true');$('readerStatus').textContent='기준일에 맞는 문서와 목차를 불러오고 있습니다.';pending=++serial;worker.postMessage({id:pending,action:'catalogue',manifest,filters:filters()});}
 function available(){return documents.filter(d=>documentGroup(d.doc)===group);}
@@ -59,10 +59,10 @@ function annexText(d,root){const cleaned=parts=>parts.map(p=>layoutPart(withoutA
 }
 function renderSop(d,root){
  if(!d.sourceRange){renderParts(d.parts,root);return;}
- const byPage=new Map(),visualPages=new Set();for(const part of d.parts){if(!byPage.has(part.page))byPage.set(part.page,[]);byPage.get(part.page).push(part);}
+ const byPage=new Map(),visualPages=new Set(),outline={};for(const part of d.parts){if(!byPage.has(part.page))byPage.set(part.page,[]);byPage.get(part.page).push(part);}
  for(let page=d.sourceRange.start;page<=d.sourceRange.end;page++){const p=previewPage(previews,d.doc,page);if(p?.visual){visualPages.add(page);for(const n of p.continuation||[])visualPages.add(n);}}
  for(const page of [...new Set([...byPage.keys(),...visualPages])].sort((a,b)=>a-b)){
-  if(byPage.has(page))renderParts(byPage.get(page),root);
+  if(byPage.has(page))renderParts(byPage.get(page),root,outline);
   if(visualPages.has(page)){const p=previewPage(previews,d.doc,page),section=el('section','sop-visuals');section.append(el('h3','sop-visual-title',p.mode==='full'?'여러 쪽에 걸친 표·그림 · 원문 전체 쪽':'그림·도표 발췌 · 주석·범례 포함'));pageImages({...d,visualOnly:true,parts:[{page}]},section);root.append(section);}
  }
 }
@@ -75,10 +75,11 @@ function layoutPart(text,part){
  return {...part,text,display:text,references:refs.sort((a,b)=>a.start-b.start)};
 }
 function renderAnnexLayouts(d,pages,root){
- for(const layout of pages){const part=d.parts.find(p=>p.page===layout.page);if(layout.mode==='text'){const text=withoutAnnexHeading(part.text,d.label);if(text)renderParts([layoutPart(text,part)],root);continue;}if(layout.mode==='image'){pageImages({...d,parts:[part]},root);continue;}
+ const outline={};
+ for(const layout of pages){const part=d.parts.find(p=>p.page===layout.page);if(layout.mode==='text'){const text=withoutAnnexHeading(part.text,d.label);if(text)renderParts([layoutPart(text,part)],root,outline);continue;}if(layout.mode==='image'){pageImages({...d,parts:[part]},root);continue;}
   if(!layout.blocks.length)continue;const section=el('section','source-part annex-layout');section.dataset.page=String(layout.page);section.append(external('PDF '+layout.page+'쪽 ↗',pdf(d.doc,layout.page)));let imageShown=false;
-  for(const block of layout.blocks){if(block.kind==='text'){const text=withoutAnnexHeading(block.text,d.label);if(text)section.append(partText(layoutPart(text,part)));continue;}if(block.kind==='image'){if(!imageShown){const original=el('details','original-images');original.append(el('summary','','표 원문 펼치기'));original.addEventListener('toggle',()=>{if(original.open&&!original.dataset.loaded){original.dataset.loaded='true';pageImages({...d,parts:[part]},original);}});section.append(original);imageShown=true;}continue;}
-   const scroll=el('div','annex-table-scroll');scroll.tabIndex=0;scroll.setAttribute('role','region');scroll.setAttribute('aria-label','PDF '+layout.page+'쪽 표 · 가로 스크롤');const table=el('table','annex-table');table.dataset.columns=String(block.columns);if(block.columns>=8)table.classList.add('wide-table');table.append(el('caption','','PDF '+(block.pages||[layout.page]).join('·')+'쪽 표'));const cols=el('colgroup');for(const width of block.widths){const col=el('col');col.width=width+'%';cols.append(col);}table.append(cols);const body=el('tbody');for(const row of block.rows){const tr=el('tr');for(const cell of row){const td=el('td');td.colSpan=cell.colspan;td.rowSpan=cell.rowspan;const refs=[];let offset=0;for(const fragment of cell.fragments||[{page:layout.page,text:cell.text}]){const source=d.parts.find(p=>p.page===fragment.page)||part;for(const r of layoutPart(fragment.text,source).references)refs.push({...r,start:r.start+offset,end:r.end+offset});offset+=fragment.text.length+1;}if(cell.fragments?.some(f=>f.crop)){for(const f of cell.fragments){if(f.crop){const link=external('',new URL(f.crop.path,document.baseURI).href),img=el('img','annex-cell-image');img.src=link.href;img.alt='수식·그림을 포함한 원문 셀 · 확대해서 보기';img.width=f.crop.width;img.height=f.crop.height;img.loading='lazy';link.append(img);td.append(link);}else if(f.text.trim())td.append(partText(layoutPart(f.text,d.parts.find(p=>p.page===f.page)||part)));}}else td.append(partText({...part,text:cell.text,display:cell.text,references:refs}));tr.append(td);}body.append(tr);}table.append(body);scroll.append(table);section.append(scroll);
+  for(const block of layout.blocks){if(block.kind==='text'){const text=withoutAnnexHeading(block.text,d.label);if(text)section.append(partText(layoutPart(text,part),outline));continue;}if(block.kind==='image'){if(!imageShown){const original=el('details','original-images');original.append(el('summary','','표 원문 펼치기'));original.addEventListener('toggle',()=>{if(original.open&&!original.dataset.loaded){original.dataset.loaded='true';pageImages({...d,parts:[part]},original);}});section.append(original);imageShown=true;}continue;}
+   const scroll=el('div','annex-table-scroll');scroll.tabIndex=0;scroll.setAttribute('role','region');scroll.setAttribute('aria-label','PDF '+layout.page+'쪽 표 · 가로 스크롤');const table=el('table','annex-table');table.dataset.columns=String(block.columns);if(block.columns>=8)table.classList.add('wide-table');table.append(el('caption','','PDF '+(block.pages||[layout.page]).join('·')+'쪽 표'));const cols=el('colgroup');for(const width of block.widths){const col=el('col');col.width=width+'%';cols.append(col);}table.append(cols);const body=el('tbody');for(const row of block.rows){const tr=el('tr');for(const cell of row){const td=el('td'),cellOutline={mode:'cell'};td.colSpan=cell.colspan;td.rowSpan=cell.rowspan;const refs=[];let offset=0;for(const fragment of cell.fragments||[{page:layout.page,text:cell.text}]){const source=d.parts.find(p=>p.page===fragment.page)||part;for(const r of layoutPart(fragment.text,source).references)refs.push({...r,start:r.start+offset,end:r.end+offset});offset+=fragment.text.length+1;}if(cell.fragments?.some(f=>f.crop)){for(const f of cell.fragments){if(f.crop){const link=external('',new URL(f.crop.path,document.baseURI).href),img=el('img','annex-cell-image');img.src=link.href;img.alt='수식·그림을 포함한 원문 셀 · 확대해서 보기';img.width=f.crop.width;img.height=f.crop.height;img.loading='lazy';link.append(img);td.append(link);}else if(f.text.trim())td.append(partText(layoutPart(f.text,d.parts.find(p=>p.page===f.page)||part),cellOutline));}}else td.append(partText({...part,text:cell.text,display:cell.text,references:refs},cellOutline));tr.append(td);}body.append(tr);}table.append(body);scroll.append(table);section.append(scroll);
   }root.append(section);
  }
 }

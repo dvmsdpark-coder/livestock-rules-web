@@ -33,3 +33,11 @@
 .annex-cell-image{display:block;max-width:100%;height:auto;margin:0 auto}.annex-table td>a:has(.annex-cell-image){display:block}
 
 .annex-table.wide-table{min-width:1100px}
+
+/* A hanging marker and a consistent indent preserve legal outline levels. */
+#readerBody .formatted-source>.outline-row{display:grid;grid-template-columns:max-content minmax(0,1fr);column-gap:.55em;align-items:baseline;border:0;background:transparent;box-shadow:none;border-radius:0;padding:0;margin:0 0 .7em;margin-left:calc(var(--outline-depth,0) * 1.5em);font-weight:400}
+.outline-marker{white-space:pre;font-variant-numeric:tabular-nums}.outline-copy{min-width:0;white-space:normal}
+#readerBody .formatted-source>.outline-continuation{border:0;background:transparent;padding:0;margin-left:calc(var(--outline-depth,0) * 1.5em + 2em)}
+#readerBody .annex-table .formatted-source>.outline-row{margin-left:calc(var(--outline-depth,0) * 1em);margin-bottom:.65em}
+#readerBody .annex-table .formatted-source>.outline-continuation{margin-left:calc(var(--outline-depth,0) * 1em + 1.5em)}
+@media(max-width:650px){#readerBody .formatted-source>.outline-row{margin-left:calc(var(--outline-depth,0) * 1em)}#readerBody .formatted-source>.outline-continuation{margin-left:calc(var(--outline-depth,0) * 1em + 2em)}}

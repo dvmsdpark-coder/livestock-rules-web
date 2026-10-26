@@ -13,3 +13,15 @@ test('continued table cells join only when source boundaries and the complete gr
 test('partial-column continuation extends its source rowspan without swallowing new rows',async()=>{const {joinedAnnexLayouts}=await import('../site/assets/annex-presentation.js');const cell=(col,text,top,bottom)=>({col,text,rowspan:1,colspan:1,openTop:top,openBottom:bottom});const make=rows=>({kind:'table',columns:2,xs:[0,50,100],widths:[50,50],rows});const r=joinedAnnexLayouts([{page:1,mode:'mixed',blocks:[make([[cell(0,'소',false,true),cell(1,'질병1',false,false)]])]},{page:2,mode:'mixed',blocks:[make([[cell(0,'',true,false),cell(1,'질병2',false,false)]])]}]);const table=r[0].blocks[0];assert.equal(table.rows.length,2);assert.equal(table.rows[0][0].rowspan,2);assert.equal(table.rows[1][0].text,'질병2');});
 
 test('new numbered items on the next page stay separate and only their common reference continues',async()=>{const {joinedAnnexLayouts}=await import('../site/assets/annex-presentation.js');const cell=(col,text,top,bottom)=>({col,text,colspan:1,rowspan:1,openTop:top,openBottom:bottom});const table=rows=>({kind:'table',xs:[0,30,60,100],columns:3,widths:[30,30,40],rows});const joined=joinedAnnexLayouts([{page:1,mode:'mixed',blocks:[table([[cell(0,'4) 대상4',false,true),cell(1,'법 제12조',false,true),cell(2,'업무정지 7일',false,true)]])]},{page:2,mode:'mixed',blocks:[table([[cell(0,'5) 대상5',true,false),cell(1,'',true,false),cell(2,'경고',true,false)]])]}]);const result=joined[0].blocks[0];assert.equal(result.rows.length,2);assert.equal(result.rows[0][1].rowspan,2);assert.equal(result.rows[0][2].text,'업무정지 7일');assert.equal(result.rows[1][1].text,'경고');});
+
+test('printed book page numbers before a verified annex heading never become body or title text',async()=>{
+ const {withoutAnnexHeading}=await import('../site/assets/annex-presentation.js');const title='[별표 3] · 의심축 및 의사환축 발생농장 시료채취, 송부 및 진단 요령';
+ for(const prefix of ['188\n[별표 3]\n','188 [별표 3] '])assert.equal(withoutAnnexHeading(prefix+'의심축 및 의사환축 발생농장 시료채취, 송부 및 진단 요령\n1. 시료채취반 준비',title),'1. 시료채취반 준비');
+ assert.equal(withoutAnnexHeading('188\n1. 보상 기준',title),'188\n1. 보상 기준');assert.equal(withoutAnnexHeading('1. 기준\n188\n2. 기준',title),'1. 기준\n188\n2. 기준');
+});
+
+test('HPAI SOP annex 3 fixture strips printed page 188 but preserves its numbered procedure',async()=>{
+ const {contents}=await import('../site/assets/reader-model.js'),{withoutAnnexHeading}=await import('../site/assets/annex-presentation.js');
+ const doc=m.documents.find(d=>d.id==='3d9ae693-1bb3-5f8c-af9e-0e3512252566'),index=JSON.parse(fs.readFileSync(new URL(doc.data,root))),annex=contents({doc,index}).annexes.find(n=>n.key==='x:2');
+ assert.match(annex.parts[0].text,/^188\n/u);const cleaned=withoutAnnexHeading(annex.parts[0].text,annex.label);assert.match(cleaned,/^1\. 시/u);assert.match(cleaned,/1\.1 시료채취반/u);assert(!cleaned.includes('188'));
+});
