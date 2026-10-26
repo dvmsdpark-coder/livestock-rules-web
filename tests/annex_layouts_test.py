@@ -16,6 +16,12 @@ class AnnexLayouts(unittest.TestCase):
   cells=[(0,0,10,100),(10,0,20,100),(20,0,30,100),(30,0,40,100)]
   chars=[{'x0':col*10+1,'x1':col*10+2,'top':y,'bottom':y+1,'text':s} for col,lines in enumerate([descriptions,[(5,'법적 근거')],*values]) for y,s in lines]
   return SimpleNamespace(chars=chars),cells
+ def test_income_support_annex_uses_pdf_native_lines_and_preserves_every_formula_character(self):
+  doc=next(d for d in self.manifest['documents'] if d['id']=='1dce0635-63a4-5b58-b3a0-63cd313ed189');layouts=self.data['documents'][doc['id']]['pages']
+  with pdfplumber.open(ROOT/'site'/doc['pdf']) as pdf:
+   for n in range(5,10):
+    layout=layouts[str(n)];self.assertEqual(layout['mode'],'text');self.assertGreater(layout['text'].count('\n'),10);self.assertEqual(count(layout['text']),count(''.join(c['text'] for c in pdf.pages[n-1].chars)));self.assertEqual(''.join(layout['text'].split()),''.join(c['text'] for c in pdf.pages[n-1].chars if not c['text'].isspace()))
+  self.assertIn('\n가. 지원 대상:',layouts['5']['text']);self.assertIn('\n나. 지원 범위',layouts['5']['text']);self.assertIn('\n(1) 산출식:',layouts['5']['text']);self.assertIn('×',layouts['5']['text']);self.assertIn('3%',layouts['6']['text']);self.assertIn('10일 미만',layouts['6']['text']);self.assertIn('10일 이상',layouts['6']['text'])
  def test_borderless_items_are_split_while_common_reference_stays_merged(self):
   p,cells=self.fake_grid([(5,'대상'),(30,'1) 농장'),(60,'2) 영업자')],[[(30,'100'),(60,'200')],[(30,'300'),(60,'400')]])
   with patch('build_annex_layouts.source_lines',side_effect=lambda cs:[(c['top'],c['text']) for c in cs]):result=detail_cells(p,cells)

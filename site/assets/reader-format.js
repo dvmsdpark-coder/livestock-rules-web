@@ -2,7 +2,7 @@
 export const documentGroup=doc=>doc.type==='SOP'?'SOP':doc.type==='고시'?'고시':'법령';
 const letters='가나다라마바사아자차카타파하거너더러머버서어저처커터퍼허고노도로모보소오조초코토포호';
 const order=['numberDot','koreanDot','numberClose','koreanClose','numberParen','koreanParen'];
-const token=new RegExp('(?:^|(?<=\\s))(?:(?<chapter>[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]+[.． ]+|제\\s*\\d+\\s*[장절]\\s*)|(?<decimal>\\d{1,2}(?:[.,]\\d{1,2})+\\.?)(?!\\d)|(?<numberParen>\\(\\d{1,2}\\))|(?<koreanParen>\\(['+letters+']\\))|(?<numberClose>\\d{1,2}\\))|(?<koreanClose>['+letters+']\\))|(?<numberDot>\\d{1,2}\\.)(?!\\d)|(?<koreanDot>['+letters+']\\.)|(?<clause>[①-⑳])|(?<bullet>[-○◦▷▶])(?=[ \\t])|(?<note>※))','gu');
+const token=new RegExp('(?:^|(?<=\\s))(?:(?<chapter>[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]+[.． ]+|제\\s*\\d+\\s*[장절]\\s*)|(?<decimal>\\d{1,2}(?:[.,]\\d{1,2})+\\.?)(?!\\d)|(?<numberParen>\\(\\d{1,2}\\))|(?<koreanParen>\\(['+letters+']\\))|(?<numberClose>\\d{1,2}\\))|(?<koreanClose>['+letters+']\\))|(?<numberDot>\\d{1,2}\\.)(?!\\d)|(?<koreanDot>['+letters+']\\.)|(?<clause>[①-⑳])|(?<bullet>[-○◦▷▶])(?=[ \\t])|(?<note>※|\\*{1,2}(?=[ \\t])))','gu');
 export function sourceBlocks(text,sop=false,state={},protectedRanges=[]){
  const dates=[...text.matchAll(/\d{4}\s*\.\s*\d{1,2}\s*\.\s*\d{1,2}\s*\.?/gu)].map(m=>({start:m.index,end:m.index+m[0].length}));
  const cuts=new Map([[0,{kind:sop?'prose':'paragraph',depth:state.depth??0}]]);
@@ -10,6 +10,7 @@ export function sourceBlocks(text,sop=false,state={},protectedRanges=[]){
   const start=m.index,family=Object.keys(m.groups).find(k=>m.groups[k]!==undefined),marker=m[0],after=text.slice(start+marker.length),lineStart=!text.slice(text.lastIndexOf('\n',start-1)+1,start).trim();
   if(protectedRanges.some(r=>start>r.start&&start<r.end)||dates.some(r=>start>=r.start&&start<r.end))continue;
   if(['chapter','bullet','note'].includes(family)&&!lineStart)continue;
+  if(state.nativeLines&&!lineStart&&family!=='clause')continue;
   if(family==='decimal'){
    if(!lineStart&&!sop)continue;
    if(!lineStart&&marker.split(/[.,]/u)[0]!==state.root)continue;

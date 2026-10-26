@@ -104,7 +104,12 @@ def page_layout(p,number,drawings,decorations=frozenset()):
   candidates=[t for t in tables if len(t.columns)>1]
   if len(candidates)==1:regions.append({'bbox':box,'table':candidates[0]})
   else:regions.append({'bbox':box,'table':None})
- if not regions:return {'mode':'image','reason':'embedded-symbol'} if images else {'mode':'text'}
+ if not regions:
+  if images:return {'mode':'image','reason':'embedded-symbol'}
+  native=text(p.chars)
+  if count(native)!=count(''.join(c['text'] for c in p.chars)):return {'mode':'image','reason':'text-coverage-mismatch'}
+  return {'mode':'text','text':native}
+
  if any(not any(centre(im,r['bbox']) for r in regions) for im in images):return {'mode':'image','reason':'embedded-symbol'}
  regions.sort(key=lambda r:r['bbox'][1]);blocks=[];top=0
  for r in regions:

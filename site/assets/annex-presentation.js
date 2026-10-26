@@ -13,6 +13,17 @@ export function annexLayouts(layouts,doc,annex){
  const pages=[];for(let n=annex.part.page;n<=annex.endPage;n++){const layout=entry.pages[String(n)];if(!layout)return null;pages.push({page:n,...layout});}return pages;
 }
 
+// Full prose comes from verified PDF geometry, not the older whitespace-free index.
+// A selected excerpt may use it only when the exact non-whitespace sequence is unique.
+export function annexProseText(source,layout,fullPage=false){
+ if(layout?.mode!=='text'||typeof layout.text!=='string')return {text:source,nativeLines:false,nativePage:false};
+ const native=layout.text;if(fullPage)return {text:native,nativeLines:true,nativePage:true};
+ const positions=[];let compact='';for(let i=0;i<native.length;i++)if(!/\s/u.test(native[i])){compact+=native[i];positions.push(i);}
+ const target=source.replace(/\s/gu,''),at=target?compact.indexOf(target):-1;
+ if(at<0||compact.indexOf(target,at+1)>=0)return {text:source,nativeLines:false,nativePage:false};
+ return {text:native.slice(positions[at],positions[at+target.length-1]+1),nativeLines:true,nativePage:false};
+}
+
 // The selected annex title is already displayed once above its body.
 export function withoutAnnexHeading(text,label){
  const key=s=>s.replace(/[^\p{L}\p{N}]/gu,''),heading=key(label),lines=text.split('\n');let body=false;

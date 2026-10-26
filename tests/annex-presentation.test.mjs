@@ -25,3 +25,11 @@ test('HPAI SOP annex 3 fixture strips printed page 188 but preserves its numbere
  const doc=m.documents.find(d=>d.id==='3d9ae693-1bb3-5f8c-af9e-0e3512252566'),index=JSON.parse(fs.readFileSync(new URL(doc.data,root))),annex=contents({doc,index}).annexes.find(n=>n.key==='x:2');
  assert.match(annex.parts[0].text,/^188\n/u);const cleaned=withoutAnnexHeading(annex.parts[0].text,annex.label);assert.match(cleaned,/^1\. 시/u);assert.match(cleaned,/1\.1 시료채취반/u);assert(!cleaned.includes('188'));
 });
+
+test('native prose replaces whitespace-free legacy extraction but selected units never expand into a whole page',async()=>{
+ const {annexProseText}=await import('../site/assets/annex-presentation.js');const text='1. 지원 기준\n가. 지원 대상: 사육 농가\n나. 지원 범위\n1) 출하 지연 농가\n2) 정상 입식 지연 농가',layout={mode:'text',text};
+ assert.deepEqual(annexProseText(text.replace(/\s/gu,''),layout,true),{text,nativeLines:true,nativePage:true});
+ const slice=annexProseText('1)출하지연농가',layout);assert.equal(slice.text,'1) 출하 지연 농가');assert(slice.nativeLines);assert(!slice.nativePage);assert(!slice.text.includes('2)'));
+ const missing='알 수 없는 항목';assert.deepEqual(annexProseText(missing,layout),{text:missing,nativeLines:false,nativePage:false});
+ const ambiguous=annexProseText('지원 기준',{mode:'text',text:'지원 기준\n지원 기준'});assert(!ambiguous.nativeLines);assert.equal(ambiguous.text,'지원 기준');
+});

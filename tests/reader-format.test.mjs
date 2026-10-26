@@ -45,3 +45,8 @@ test('procedure and table circled lists keep sibling alignment without making th
 });
 
 test('consecutive annotations are siblings instead of growing deeper after each circled list',()=>{const b=sourceBlocks('1. 기준\n가. 대상\n2) 규모\n※ 첫 주석 ① 5수 ② 10수\n※ 다음 주석 ① 20수 ② 30수',false,{mode:'annex'});assert.deepEqual(b.filter(b=>b.kind==='note').map(b=>b.depth),[3,3]);assert.deepEqual(b.filter(b=>b.kind==='subitem').map(b=>b.depth),[4,4,4,4]);});
+
+test('native PDF lines distinguish real headings from inline references to later subitems and preserve formulas',()=>{
+ const text='1. 지원 기준\n다. 지원 기준\n1) 출하 지연 농가: 아래 가) 추가 사육비, 나) 폐사율 증가분, 다) 상품가치 하락분의 총합을 지원.\n가) 추가 사육비: 사육 기간 초과\n(1) 산출식: [(수당 일일 사육비용 × 추가 사육 기간) × 사육마릿수(입식마릿수－폐사 마릿수)]\n(2) 수당 일일 사육비용: 공식 통계\n* 단, 적용 조건을 확인\n** 사육기간: 육계 33일, 산란계 365일';
+ const b=sourceBlocks(text,false,{mode:'annex',nativeLines:true}),rows=b.filter(b=>b.marker);assert.deepEqual(rows.map(b=>b.marker),['1.','다.','1)','가)','(1)','(2)','*','**']);assert.deepEqual(rows.slice(0,6).map(b=>b.depth),[0,1,2,3,4,4]);assert.equal(b.map(b=>b.text).join(''),text);assert(rows.find(b=>b.marker==='1)').text.includes('아래 가) 추가 사육비, 나) 폐사율 증가분'));assert(rows.find(b=>b.marker==='(1)').text.includes('×'));
+});
