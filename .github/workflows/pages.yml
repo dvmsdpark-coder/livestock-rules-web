@@ -82,6 +82,9 @@ jobs:
           python tools/build_page_previews.py
           python tools/build_sop_structure.py
           python tools/build_annex_layouts.py
+          python tools/build_reading_pages.py
+          python tests/reading_pages_test.py
+          node tools/audit-reading-display.mjs
           python tests/annex_layouts_test.py
           node tools/verify_annex_layouts.mjs
           python tools/verify_page_previews.py

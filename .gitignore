@@ -15,3 +15,6 @@ site/assets/pages/
 site/data/page-previews.json
 
 site/data/annex-layouts.json
+
+site/data/reading-pages.json
+site/data/reading/

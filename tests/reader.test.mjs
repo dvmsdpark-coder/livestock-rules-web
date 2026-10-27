@@ -12,7 +12,7 @@ test('SOP reading headings follow source hierarchy and preserve all approved sou
  const f=corpus.find(e=>e.doc.disease==='구제역'&&e.doc.type==='SOP'),nodes=contents(f).articles;
  assert(!nodes.some(n=>/^3\.\s*소독방법/u.test(n.label)));
  const a=nodes.find(n=>n.parts[0].page===254);assert.match(a.label,/^15\s/u);assert(a.parts.some(p=>p.page===255&&p.text.includes('3. 소독방법')));
- const d=readerDetail(corpus,f.doc.id,'s:54');assert.equal(d.key,a.key);assert.equal(d.sourceRange.end,255);
+ const d=readerDetail(corpus,f.doc.id,'s:54');assert.equal(d.key,a.key);assert.equal(d.visualRange.endPage,256);assert(d.visualRange.bottom<.5);
  const missing=nodes.find(n=>n.parts[0].page===280);assert.match(missing.label,/^23\s/u);assert.equal(readerDetail(corpus,f.doc.id,'s:64').key,missing.key);
  const asf=corpus.find(e=>e.doc.disease==='ASF'&&e.doc.type==='SOP');assert(contents(asf).articles.some(n=>n.parts[0].page===168&&/^18\./u.test(n.label)));
 });
@@ -56,3 +56,14 @@ test('FMD source divider chapters group all body items and preserve the standard
  assert.deepEqual([...new Set(nodes.map(n=>n.chapter.match(/^제\d+장/u)?.[0]))],['제1장','제2장','제3장','제4장','제5장']);
  const d=readerDetail(corpus,e.doc.id,'s:4');assert.match(d.label,/평시 표준행동요령/u);assert.match(d.chapter,/^제3장/u);
 });
+
+
+test('HPAI mid-page section boundaries keep continuation prose with its source section',()=>{
+ const e=corpus.find(e=>e.doc.id==='3d9ae693-1bb3-5f8c-af9e-0e3512252566'),three=readerDetail(corpus,e.doc.id,'s:1003'),four=readerDetail(corpus,e.doc.id,'s:1004'),five=readerDetail(corpus,e.doc.id,'s:1');
+ assert(three.parts[0].text.trimStart().startsWith('3 임상증상'));assert(!three.parts[0].text.includes('사양관리'));
+ assert(four.parts.some(p=>p.page===13));assert(five.parts[0].text.trimStart().startsWith('5 진단'));
+ assert.match(readerDetail(corpus,e.doc.id,'s:0').label,/^1 정의/u);
+});
+
+
+test('FMD adding a glossary cannot redirect the former risk-management bookmark',()=>{const e=corpus.find(e=>e.doc.type==='SOP'&&e.doc.disease==='구제역');assert.match(readerDetail(corpus,e.doc.id,'s:1').label,/위기관리 종합체계도/u);});

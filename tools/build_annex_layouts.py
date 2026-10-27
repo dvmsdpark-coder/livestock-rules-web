@@ -197,7 +197,7 @@ def table_block(p,t):
   occupied.update(slots)
   embedded=[im for im in getattr(p,'annex_images',[]) if centre(im,box)]
   if any(im['x0']<x0-1 or im['x1']>x1+1 or im['top']<y0-1 or im['bottom']>y1+1 for im in embedded):return None
-  captured.extend(chars);rows[ys.index(y0)].append({'cropBox':list(box) if embedded else None,'col':xs.index(x0),'colspan':xs.index(x1)-xs.index(x0),'rowspan':ys.index(y1)-ys.index(y0),'text':text(chars),'openTop':abs(y0-ys[0])<1 and not horizontal_closed(p,x0,x1,y0),'openBottom':abs(y1-ys[-1])<1 and not horizontal_closed(p,x0,x1,y1)})
+  captured.extend(chars);rows[ys.index(y0)].append({'sourceBox':list(box),'cropBox':list(box) if embedded else None,'col':xs.index(x0),'colspan':xs.index(x1)-xs.index(x0),'rowspan':ys.index(y1)-ys.index(y0),'text':text(chars),'openTop':abs(y0-ys[0])<1 and not horizontal_closed(p,x0,x1,y0),'openBottom':abs(y1-ys[-1])<1 and not horizontal_closed(p,x0,x1,y1)})
  if len(occupied)!=(len(xs)-1)*(len(ys)-1):return None
  body=[c for c in p.chars if centre(c,t.bbox)]
  if count(''.join(c['text'] for c in body))!=count(''.join(c['text'] for c in captured)):return None

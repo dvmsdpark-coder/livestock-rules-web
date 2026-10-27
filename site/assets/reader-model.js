@@ -1,7 +1,7 @@
 import {activeArticles} from './provisions.js?v=20261026-1';
-import {actualAnnexes,annexReferences} from './annexes.js?v=20261027-5';
-import {sopIndex} from './sop-index.js?v=20261027-5';
-import {articleDetail,referencesForParts} from './evidence.js?v=20261027-5';
+import {actualAnnexes,annexReferences} from './annexes.js?v=20261027-6';
+import {sopIndex} from './sop-index.js?v=20261027-6';
+import {articleDetail,referencesForParts} from './evidence.js?v=20261027-6';
 import {annexUnits} from './annex-excerpts.js?v=20261026-1';
 export function contents(entry){
  const articles=entry.doc.type==='SOP'?sopIndex(entry).readerSections.map(s=>({key:'s:'+s.readerOrdinal,aliases:s.aliases,label:s.heading,chapter:s.scenario,parts:s.parts,headingPage:s.headingPage,headingTop:s.headingTop})):activeArticles(entry).map(a=>({key:'a:'+a.number,label:a.number+' '+a.title,chapter:a.parts[0]?.scenario||'',parts:a.parts,number:a.number}));

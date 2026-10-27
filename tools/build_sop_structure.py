@@ -9,6 +9,17 @@ import pdfplumber
 
 ROOT=Path(__file__).resolve().parents[1]
 
+def divider_heading(value,document_title=''):
+    match=re.search(r'(?:^|\n)\s*제\s*(\d+)\s*장\s*\n(.+)',value,re.S)
+    if not match:return None
+    prefix=value[:match.start()].replace(document_title,'').replace('⚫','')
+    if not re.fullmatch(r'[\d\s-]*',prefix):return None
+    title=[]
+    for line in match[2].splitlines():
+        if re.match(r'^\s*(?:\d+[.)]|※|별표|별지)',line):break
+        if line.strip():title.append(re.sub(r'(?<![가-힣])(?:[가-힣] ){2,}[가-힣](?![가-힣])',lambda m:m[0].replace(' ',''),line.strip()))
+    return '제'+match[1]+'장 '+re.sub(r'\s+',' ',' '.join(title))if title else None
+
 def build():
     result={}
     manifest=json.loads((ROOT/'site/data/manifest.json').read_text(encoding='utf-8'))
@@ -21,10 +32,8 @@ def build():
         # Decorative divider lettering may extract as '3 / 제 장'. Use the
         # verified index label for those short pages, not a body-text guess.
         for page in index['pages']:
-            match=re.search(r'제\s*(\d+)\s*장\s*\n(.+)',page['text'],re.S)
-            if match and len(page['text'])<180:
-                label='제'+match[1]+'장 '+re.sub(r'\s+',' ',match[2]).strip()
-                chapters.append({'page':page['page'],'heading':label,'topRatio':0,'divider':True})
+            label=divider_heading(page['text'],doc['title'])
+            if label:chapters.append({'page':page['page'],'heading':label,'topRatio':0,'divider':True})
         with pdfplumber.open(path) as pdf:
             # Main numbered headings use a font at least 1.25 times the median
             # prose size. The font-size test is independent of heading wording.
@@ -42,6 +51,8 @@ def build():
                     match=re.match(r'^제\s*(\d+)\s*장\s+.+',label)
                     if match and max(c['size'] for c in row)>=threshold:
                         chapter_number=int(match[1]);chapters.append({'page':number,'heading':label,'topRatio':round(min(c['top'] for c in row)/p.height,8)})
+                    if doc['disease']=='구제역' and re.fullmatch(r'용어\s*정의',label):
+                        headings.append({'page':number,'heading':label,'top':round(min(c['top'] for c in row),2),'topRatio':round(min(c['top'] for c in row)/p.height,8),'fontSize':round(min(c['size'] for c in row),2),'subsection':True})
                     if doc['disease']=='ASF' and chapter_number==1 and re.match(r'^1\.\d+\s+[^.]+$',label) and 12<min(c['size'] for c in row)<16:
                         headings.append({'page':number,'heading':label,'top':round(min(c['top'] for c in row),2),'topRatio':round(min(c['top'] for c in row)/p.height,8),'fontSize':round(min(c['size'] for c in row),2),'subsection':True})
                     if doc['disease']=='ASF' and chapter_number==2 and not match and min(c['size'] for c in row)>=20 and len(label)<70:

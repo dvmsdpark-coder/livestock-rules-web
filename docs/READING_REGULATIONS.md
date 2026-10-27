@@ -81,3 +81,15 @@ A standalone 별표/별지 division followed by a contents list ends the precedi
 Inserted labels such as `2의2.` are independent siblings in both the legal-unit model and presentation. References written as `법 11조` accept the omitted 제 while retaining the parent-law destination. Annex references support curly-quoted titles; an unregistered external notice must not resolve to the current notice's identically numbered table.
 
 FMD decorative chapter-divider typography is resolved from the verified short-page index label, retaining all five physical chapter boundaries. The HPAI notice table 3 restores each equipment baseline as a separate row; intentionally missing quantities remain blank and following quantities do not shift into those rows.
+
+
+### Native reading flow and body tables
+
+`build_reading_pages.py` creates a source-hash-bound display layer for every registered physical page. SOP section boundaries use the original heading coordinates; text preceding a new heading remains in the preceding section. Printed numbers require repeated margin-position/physical-page sequence evidence, and verified sidebars/section dividers are excluded from reading flow. Source index text stays immutable.
+
+The reader restores article spaces only when the native PDF fragment has the same non-whitespace characters; repeated matches are allowed only when their displayed text is identical. Prose/heading runs use native line geometry. Closed body grids become HTML tables, images retain their source bounds and captions, and ambiguous layouts retain a source image. The FMD glossary is a separate source heading, and its decorative banner is not a figure.
+
+CI checks native character coverage, table grids, registered revision hashes and all article spacing alignments. It also rejects a reading-section boundary that crosses a reconstructed table.
+
+
+Native margin-number detection is independent of extraction-stream order, including odd-page numbers followed by decorative marks. Only repeated geometry/page-sequence-confirmed number rectangles are masked when they overlap a derived reading image; the original PDF and full-page source previews remain unchanged. Per-document reading JSON is loaded on demand.

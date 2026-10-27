@@ -1,5 +1,5 @@
 // Build searchable SOP sections from approved body text; preserve physical-page substrings.
-import {sopStructure} from './sop-structure.js?v=20261027-5';
+import {sopStructure} from './sop-structure.js?v=20261027-6';
 const compact=s=>s.replace(/\s/gu,'');
 const cache=new WeakMap();
 const readable=s=>s.replace(/([^\n])\n(?!\s*(?:\d+(?:\.\d+)*[. ]|[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]|[가-힣]\.\s|[-▷※]))/gu,'$1 ').trim();
@@ -62,13 +62,13 @@ function readerSections(entry,legacy){
   if(chapter?.page===part.page&&!chapter.divider&&!headings.length&&(!current||current.scenario!==scenario))headings.push({...chapter,virtual:true,match:{index:0,0:chapter.heading}});
   let at=0;
   const add=text=>{if(!text.trim())return;if(!current){current={...old,scenario,parts:[],units:[],aliases:[]};out.push(current);}current.parts.push({...part,text,display:display(text,part.page)});};
-  for(const h of headings){const prefix=part.text.slice(at,h.match.index),transfer=at===0&&current&&current.parts.at(-1)?.page<part.page;if(!transfer)add(prefix);current={...old,key:entry.doc.id+':reader:'+h.page+':'+h.match.index,generatedOrdinal:originalOrdinals.get(h.page+':'+compact(h.heading))??2000+out.length,scenario,heading:h.heading.trim(),headingPage:h.page,headingTop:h.topRatio,parts:[],units:[],aliases:[]};out.push(current);if(transfer)add(prefix);at=h.match.index;}
+  for(const h of headings){const prefix=part.text.slice(at,h.match.index);add(prefix);current={...old,key:entry.doc.id+':reader:'+h.page+':'+h.match.index,generatedOrdinal:originalOrdinals.get(h.page+':'+compact(h.heading))??2000+out.length,scenario,heading:h.heading.trim(),headingPage:h.page,headingTop:h.topRatio,parts:[],units:[],aliases:[]};out.push(current);at=h.match.index;}
   add(part.text.slice(at));
  }
- if(out.length>1&&(out[0].heading==='SOP 본문'||out[0].heading===out[0].scenario&&/^[-\s\d]*$/u.test(out[0].parts.map(p=>p.text).join('')))&&out[0].parts.every(p=>p.page===out[1].headingPage)&&compact(out[0].parts.map(p=>p.text).join('')).length<200){const prefix=out.shift();out[0].parts.unshift(...prefix.parts);}
+ if(out.length>1&&(out[0].heading==='SOP 본문'||compact(out[0].heading)===compact(out[0].scenario)&&!compact(out[0].parts.map(p=>p.text).join('')).replaceAll(compact(out[0].heading),'').replaceAll(compact(out[0].scenario),'').replace(/[\d⚫ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ-]/gu,''))&&out[0].parts.every(p=>p.page===out[1].headingPage)&&compact(out[0].parts.map(p=>p.text).join('')).length<200){const prefix=out.shift();out[0].parts.unshift(...prefix.parts);}
  const starts=out.map(s=>({page:s.parts[0].page,offset:entry.index.pages.find(p=>p.page===s.parts[0].page).text.indexOf(s.parts[0].text)}));
  for(let i=0;i<legacy.length;i++){
-  const old=legacy[i],page=old.parts[0].page,pageText=entry.index.pages.find(p=>p.page===page).text,offset=needle(old.heading).exec(pageText)?.index??pageText.indexOf(old.parts[0].text);
+  const old=legacy[i],headingPart=old.parts.find(p=>needle(old.heading).test(p.text)),page=(headingPart||old.parts[0]).page,pageText=entry.index.pages.find(p=>p.page===page).text,offset=needle(old.heading).exec(pageText)?.index??(old.heading==='SOP 본문'?source.headings.filter(h=>h.page===page).map(h=>needle(h.heading).exec(pageText)?.index).filter(i=>i!=null).sort((a,b)=>a-b)[0]:null)??pageText.indexOf((headingPart||old.parts[0]).text);
   const exact=out.findIndex(s=>s.parts[0].page===page&&compact(s.heading)===compact(old.heading));
   let position=0;for(let n=0;n<starts.length;n++)if(starts[n].page<page||starts[n].page===page&&starts[n].offset<=offset)position=n;if(exact>=0)position=exact;
   const owner=out[position];owner.aliases.push('s:'+i);owner.readerOrdinal??=i;

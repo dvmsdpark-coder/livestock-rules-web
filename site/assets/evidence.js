@@ -1,7 +1,7 @@
-import {resolveLegalReferences} from './legal-references.js?v=20261027-5';
+import {resolveLegalReferences} from './legal-references.js?v=20261027-6';
 import {normalizeQuestion} from './question.js?v=20261026-1';
 import {annexExcerpt} from './annex-excerpts.js?v=20261026-1';
-import {annexReferences} from './annexes.js?v=20261027-5';
+import {annexReferences} from './annexes.js?v=20261027-6';
 // Source-only presentation and internal legal references. No generated legal text.
 import {activeArticles} from './provisions.js?v=20261026-1';
 const squash=s=>s.replace(/\s+/gu,'');
