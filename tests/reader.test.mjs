@@ -42,3 +42,10 @@ test('HPAI last table excludes the following forms divider but keeps its illustr
  const e=corpus.find(e=>e.doc.id==='3d9ae693-1bb3-5f8c-af9e-0e3512252566'),a=contents(e).annexes.find(n=>n.annexKind==='table'&&n.number[0]==='23'),d=readerDetail(corpus,e.doc.id,a.key);
  assert.equal(a.annex.endPage,316);assert.deepEqual(d.parts.map(p=>p.page),[315,316]);assert(!d.parts.some(p=>p.text.includes('현지조사표')));assert(contents(e).pages.some(n=>n.key==='p:317'));
 });
+
+
+test('SOP reading preserves physical line breaks for source-furniture masks and nested paragraphs',()=>{
+ for(const e of corpus.filter(e=>e.doc.type==='SOP'))for(const n of contents(e).articles)for(const p of n.parts){
+  assert.equal((p.display.match(/\n/gu)||[]).length,(p.text.match(/\n/gu)||[]).length,'PDF '+p.page);
+ }
+});

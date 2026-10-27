@@ -51,7 +51,7 @@ function readerSections(entry,legacy){
  const source=sopStructure[entry.doc.sha256];if(!source)return legacy.map((s,i)=>({...s,readerOrdinal:i,aliases:[]}));
  const out=[];let current=null;
  const chapterAt=page=>(source.chapters||[]).findLast(c=>c.page<=page);
- const display=(text,page)=>{for(const c of source.chapters||[])if(c.page===page)text=text.replace(needle(c.heading),'');return readable(text)||' ';};
+ const display=(text,page)=>{for(const c of source.chapters||[])if(c.page===page)text=text.replace(needle(c.heading),'');return text||' ';};
  const needle=s=>new RegExp([...compact(s)].map(c=>c.replace(/[.*+?^${}()|[\]\\]/gu,'\\$&')).join('\\s*'),'u');
  // Retain previously generated addresses when adding missing subdivisions.
  const originalOrdinals=new Map();let originalCount=0,originalStarted=false;
