@@ -1,5 +1,5 @@
 """Geometry-based SOP visual extraction. Original pages remain available separately."""
-import hashlib,json
+import hashlib,json,re
 from collections import Counter
 from pathlib import Path
 import pdfplumber
@@ -47,6 +47,11 @@ def with_caption(bounds,rows,width,height):
     if above:top=max(top,max(above)+1)
     if below:bottom=min(bottom,min(below)-1)
     return [max(0,x0-9),top,min(width,x1+9),bottom]
+def division_index(text):
+    # Bare attachment divisions followed by a contents list are navigation,
+    # never an illustration belonging to the preceding attachment.
+    return bool(re.match(r'^\s*(?:\d+\s*)?별\s*(?:표(?:\s*/\s*별\s*지)?|지)\s*\n',text) and len(re.findall(r'^\s*\d+(?:의\d+)?[.．]',text,re.M))>=2)
+
 def analyse(path,index,overrides=None):
     overrides=overrides or {};result={};bg=Counter();furniture=[]
     with pdfplumber.open(path) as document:
@@ -85,6 +90,7 @@ def analyse(path,index,overrides=None):
             candidates=cluster([*raster,*tables,*diagrams],12)
             regions=[with_caption(b,rows,w,h) for b in candidates]
             classification='table' if tables else 'illustration' if regions else 'text'
+            if division_index(text):regions=[];classification='divider'
             if n in overrides.get('exclude',[]):regions=[];classification='divider'
             if n in overrides.get('text_only',[]):regions=[];classification='text'
             if str(n) in overrides.get('regions',{}):regions=overrides['regions'][str(n)];classification='illustration'

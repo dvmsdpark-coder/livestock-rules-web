@@ -1,4 +1,4 @@
-import {contents} from './reader-model.js?v=20261027-3';
+import {contents} from './reader-model.js?v=20261027-4';
 export function literalRanges(text,query){
  const letters=[],offsets=[];for(let i=0;i<text.length;i++){if(/\s/u.test(text[i]))continue;letters.push(text[i].toLocaleLowerCase());offsets.push(i);}
  const needle=query.replace(/\s/gu,'').toLocaleLowerCase();if(!needle)return [];

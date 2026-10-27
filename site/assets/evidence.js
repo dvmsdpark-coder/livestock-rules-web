@@ -1,4 +1,4 @@
-import {resolveLegalReferences} from './legal-references.js?v=20261027-3';
+import {resolveLegalReferences} from './legal-references.js?v=20261027-4';
 import {normalizeQuestion} from './question.js?v=20261026-1';
 import {annexExcerpt} from './annex-excerpts.js?v=20261026-1';
 import {annexReferences} from './annexes.js?v=20261027-2';

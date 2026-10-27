@@ -1,5 +1,5 @@
 // Build searchable SOP sections from approved body text; preserve physical-page substrings.
-import {sopStructure} from './sop-structure.js?v=20261027-3';
+import {sopStructure} from './sop-structure.js?v=20261027-4';
 const compact=s=>s.replace(/\s/gu,'');
 const cache=new WeakMap();
 const readable=s=>s.replace(/([^\n])\n(?!\s*(?:\d+(?:\.\d+)*[. ]|[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]|[가-힣]\.\s|[-▷※]))/gu,'$1 ').trim();
@@ -50,15 +50,22 @@ export function sopIndex(entry){
 function readerSections(entry,legacy){
  const source=sopStructure[entry.doc.sha256];if(!source)return legacy.map((s,i)=>({...s,readerOrdinal:i,aliases:[]}));
  const out=[];let current=null;
+ const chapterAt=page=>(source.chapters||[]).findLast(c=>c.page<=page);
+ const display=(text,page)=>{for(const c of source.chapters||[])if(c.page===page)text=text.replace(needle(c.heading),'');return readable(text)||' ';};
  const needle=s=>new RegExp([...compact(s)].map(c=>c.replace(/[.*+?^${}()|[\]\\]/gu,'\\$&')).join('\\s*'),'u');
+ // Retain previously generated addresses when adding missing subdivisions.
+ const originalOrdinals=new Map();let originalCount=0,originalStarted=false;
+ for(const old of legacy)for(const part of old.parts){let at=0;for(const h of source.headings.filter(h=>!h.subsection&&h.page===part.page).map(h=>({...h,match:needle(h.heading).exec(part.text)})).filter(h=>h.match).sort((a,b)=>a.match.index-b.match.index)){if(!originalStarted&&part.text.slice(at,h.match.index).trim()){originalCount++;originalStarted=true;}originalOrdinals.set(h.page+':'+compact(h.heading),1000+originalCount++);originalStarted=true;at=h.match.index;}if(!originalStarted&&part.text.slice(at).trim()){originalCount++;originalStarted=true;}}
  for(const old of legacy)for(const part of old.parts){
+  const chapter=chapterAt(part.page),scenario=chapter?.heading||old.scenario;
   const headings=source.headings.filter(h=>h.page===part.page).map(h=>({...h,match:needle(h.heading).exec(part.text)})).filter(h=>h.match).sort((a,b)=>a.match.index-b.match.index);
+  if(chapter?.page===part.page&&!headings.length&&(!current||current.scenario!==scenario))headings.push({...chapter,virtual:true,match:{index:0,0:chapter.heading}});
   let at=0;
-  const add=text=>{if(!text.trim())return;if(!current){current={...old,parts:[],units:[],aliases:[]};out.push(current);}current.parts.push({...part,text,display:readable(text)});};
-  for(const h of headings){const prefix=part.text.slice(at,h.match.index),transfer=at===0&&current&&current.parts.at(-1)?.page<part.page;if(!transfer)add(prefix);current={...old,key:entry.doc.id+':reader:'+h.page+':'+h.match.index,generatedOrdinal:1000+out.length,heading:h.match[0].trim(),headingPage:h.page,headingTop:h.topRatio,parts:[],units:[],aliases:[]};out.push(current);if(transfer)add(prefix);at=h.match.index;}
+  const add=text=>{if(!text.trim())return;if(!current){current={...old,scenario,parts:[],units:[],aliases:[]};out.push(current);}current.parts.push({...part,text,display:display(text,part.page)});};
+  for(const h of headings){const prefix=part.text.slice(at,h.match.index),transfer=at===0&&current&&current.parts.at(-1)?.page<part.page;if(!transfer)add(prefix);current={...old,key:entry.doc.id+':reader:'+h.page+':'+h.match.index,generatedOrdinal:originalOrdinals.get(h.page+':'+compact(h.heading))??2000+out.length,scenario,heading:h.heading.trim(),headingPage:h.page,headingTop:h.topRatio,parts:[],units:[],aliases:[]};out.push(current);if(transfer)add(prefix);at=h.match.index;}
   add(part.text.slice(at));
  }
- if(out.length>1&&out[0].heading==='SOP 본문'&&out[0].parts.every(p=>p.page===out[1].headingPage)&&compact(out[0].parts.map(p=>p.text).join('')).length<200){const prefix=out.shift();out[0].parts.unshift(...prefix.parts);}
+ if(out.length>1&&(out[0].heading==='SOP 본문'||out[0].heading===out[0].scenario&&/^[-\s\d]*$/u.test(out[0].parts.map(p=>p.text).join('')))&&out[0].parts.every(p=>p.page===out[1].headingPage)&&compact(out[0].parts.map(p=>p.text).join('')).length<200){const prefix=out.shift();out[0].parts.unshift(...prefix.parts);}
  const starts=out.map(s=>({page:s.parts[0].page,offset:entry.index.pages.find(p=>p.page===s.parts[0].page).text.indexOf(s.parts[0].text)}));
  for(let i=0;i<legacy.length;i++){
   const old=legacy[i],page=old.parts[0].page,pageText=entry.index.pages.find(p=>p.page===page).text,offset=needle(old.heading).exec(pageText)?.index??pageText.indexOf(old.parts[0].text);

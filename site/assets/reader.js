@@ -1,13 +1,13 @@
 import {maskPageFurniture} from './source-cleanup.js?v=20261026-5';
-import {literalRanges} from './fulltext.js?v=20261027-3';
-import {proseAnnex,previewPage,sectionPreview,annexLayouts,withoutAnnexHeading,joinedAnnexLayouts,annexProseText} from './annex-presentation.js?v=20261027-3';
-import {documentGroup,sourceBlocks} from './reader-format.js?v=20261027-3';
+import {literalRanges} from './fulltext.js?v=20261027-4';
+import {proseAnnex,previewPage,sectionPreview,annexLayouts,withoutAnnexHeading,joinedAnnexLayouts,annexProseText} from './annex-presentation.js?v=20261027-4';
+import {documentGroup,sourceBlocks} from './reader-format.js?v=20261027-4';
 const $=id=>document.getElementById(id);
 const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
 const date=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 let annexData=null,previews=null,findId=0,findTerm='',findResults=[],findShown=0,findJump=false,findScopeTitle='';
 let manifest,documents=[],current,tab='articles',key='',serial=0,pending=0,loading=true,group='법령';
-const worker=new Worker(new URL('./worker.js?v=20261027-3',import.meta.url),{type:'module'});
+const worker=new Worker(new URL('./worker.js?v=20261027-4',import.meta.url),{type:'module'});
 const filters=()=>({asOf:$('readerDate').value,disease:'전체',type:'전체'});
 const disease=d=>({고병원성AI:'고병원성 AI(HPAI)',구제역:'구제역(FMD)',ASF:'아프리카돼지열병(ASF)',공통:'공통'}[d]||d);
 function address(id,k){const u=new URL(location.href);u.search='';u.hash=new URLSearchParams({doc:id,item:k,date:$('readerDate').value}).toString();return u.href;}
@@ -69,7 +69,10 @@ function renderSop(d,root){
  const byPage=new Map(),visualPages=new Set(),outline={};for(const part of d.parts){if(!byPage.has(part.page))byPage.set(part.page,[]);byPage.get(part.page).push(part);}
  for(let page=d.sourceRange.start;page<=d.sourceRange.end;page++){const p=sectionPreview(previewPage(previews,d.doc,page),d.visualRange,page);if(p?.visual){visualPages.add(page);for(const n of p.continuation||[])if(n>=d.sourceRange.start&&n<=d.sourceRange.end&&sectionPreview(previewPage(previews,d.doc,n),d.visualRange,n)?.visual)visualPages.add(n);}}
  for(const page of [...new Set([...byPage.keys(),...visualPages])].sort((a,b)=>a-b)){
-  if(byPage.has(page))renderParts(byPage.get(page),root,outline);
+  const sourceVisual=sectionPreview(previewPage(previews,d.doc,page),d.visualRange,page),fullTable=visualPages.has(page)&&sourceVisual?.kind==='table'&&sourceVisual.mode==='full';
+  // A multi-page grid already contains all prose in its source image. Avoid
+  // displaying the flattened PDF cell stream again above the same table.
+  if(byPage.has(page)&&!fullTable)renderParts(byPage.get(page),root,outline);
   if(visualPages.has(page)){const p=previewPage(previews,d.doc,page),section=el('section','sop-visuals');section.append(el('h3','sop-visual-title',p.mode==='full'?'여러 쪽에 걸친 표·그림 · 원문 전체 쪽':'그림·도표 발췌 · 주석·범례 포함'));pageImages({...d,visualOnly:true,parts:[{page}]},section);root.append(section);}
  }
 }
@@ -90,7 +93,7 @@ function renderAnnexLayouts(d,pages,root){
   }root.append(section);
  }
 }
-function render(d){const root=$('readerBody');root.replaceChildren();root.setAttribute('aria-busy','false');if(d.error){$('readerStatus').textContent=d.error;return;}$('readerStatus').textContent='수록 원문 · 자료 기준일과 적용 조건을 함께 확인하세요.';root.classList.toggle('sop-reading',d.doc.type==='SOP'&&!d.annex);root.append(el('h2','item-heading',d.label));
+function render(d){const root=$('readerBody');root.replaceChildren();root.setAttribute('aria-busy','false');if(d.error){$('readerStatus').textContent=d.error;return;}$('readerStatus').textContent='수록 원문 · 자료 기준일과 적용 조건을 함께 확인하세요.';root.classList.toggle('sop-reading',d.doc.type==='SOP'&&!d.annex);if(d.chapter&&d.chapter!==d.label)root.append(el('p','toc-chapter',d.chapter));root.append(el('h2','item-heading',d.label));
  if(d.annex||key.startsWith('p:')||d.visualOnly){
   const sourceLayouts=d.annex&&annexLayouts(annexData,d.doc,d.annex);const layouts=sourceLayouts&&joinedAnnexLayouts(sourceLayouts);const prose=layouts?layouts.every(p=>p.mode==='text'):d.annex&&proseAnnex(d.doc,d.annex);
   root.append(el('p','layout-note',layouts&&!prose?'문장은 본문으로, 표는 행과 열을 유지해 표시합니다. 원문은 아래에서 펼쳐 대조할 수 있습니다.':prose?'글 중심 별표입니다. 항목별 본문을 바로 읽고, 아래 원문 이미지로 대조할 수 있습니다.':'표·서식·그림의 원문 배치를 화면용 이미지로 표시합니다. 확대하면 가로로 이동하며 작은 글씨를 확인할 수 있습니다.'));
@@ -107,4 +110,4 @@ $('copyLocation').onclick=async()=>{try{await navigator.clipboard.writeText(addr
 window.addEventListener('popstate',()=>{const p=new URLSearchParams(location.hash.slice(1));if(p.get('date')&&p.get('date')!==$('readerDate').value){$('readerDate').value=p.get('date');sendCatalogue();}else if(!loading){documentOptions(p.get('doc'),p.get('item'));}});
 const initial=new URLSearchParams(location.hash.slice(1));if(initial.has('article')){initial.set('doc',initial.get('article'));if(initial.get('number'))initial.set('item','a:'+initial.get('number'));for(const field of ['article','number','paragraph','itemNumber'])initial.delete(field);history.replaceState(null,'','#'+initial.toString());}$('readerDate').value=/^\d{4}-\d{2}-\d{2}$/u.test(initial.get('date')||'')?initial.get('date'):date;
 // Preserve existing bookmarked article URLs from the former search home.
-try{const r=await fetch('./data/manifest.json?v=20261026-1');if(!r.ok)throw Error();manifest=await r.json();if(manifest.schema!==1)throw Error();try{const imageResponse=await fetch('./data/page-previews.json?v=20261027-3');if(imageResponse.ok)previews=await imageResponse.json();}catch{}try{const response=await fetch('./data/annex-layouts.json?v=20261027-3');if(response.ok)annexData=await response.json();}catch{}sendCatalogue();}catch{$('readerStatus').textContent='자료를 불러오지 못했습니다. 새로고침해주세요.';}
+try{const r=await fetch('./data/manifest.json?v=20261026-1');if(!r.ok)throw Error();manifest=await r.json();if(manifest.schema!==1)throw Error();try{const imageResponse=await fetch('./data/page-previews.json?v=20261027-4');if(imageResponse.ok)previews=await imageResponse.json();}catch{}try{const response=await fetch('./data/annex-layouts.json?v=20261027-4');if(response.ok)annexData=await response.json();}catch{}sendCatalogue();}catch{$('readerStatus').textContent='자료를 불러오지 못했습니다. 새로고침해주세요.';}

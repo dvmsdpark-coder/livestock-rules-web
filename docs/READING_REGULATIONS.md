@@ -67,3 +67,10 @@ SOP 본문 키워드 검색이 별표·별지 쪽에 일치하면 PDF 쪽만 열
 읽기 화면의 인용 링크는 명시된 법령명을 기준으로 나열된 조문·항·호를 연결합니다. `같은 법 시행령`, `같은 조 제2항`, 괄호 속 인용 뒤의 원래 조문 문맥, PDF 줄바꿈과 페이지 경계를 구분합니다. 미수록 법령은 현재 문서의 같은 번호로 바꿔 연결하지 않습니다. `npm run audit:reading-links`는 적용 기준일에 수록된 모든 문서의 인용 표기를 분류하고 대상 조문과 원문 위치를 검사합니다. 세 고시의 목적조항 21개는 별도의 도착 문서·조문 회귀 검사로 확인합니다.
 
 구제역 SOP의 머리말만 있던 첫 항목은 첫 실제 본문인 정의에 합쳤습니다. 종전 주소는 유지합니다. 같은 PDF 쪽에 두 절이 있을 때 그림의 원본 좌표와 각 절 제목의 위치를 비교하여 해당 절에만 그림을 표시합니다. 괄호 안 혈청형 값의 줄바꿈이 하위 목록 번호로 바뀌지 않도록 구분합니다.
+
+
+### 2026-10-27: SOP chapter and attachment-division boundaries
+
+The ASF reader groups its source sections by physically positioned chapter headings. Decimal disease-description headings and the response phases in chapter 2 are retained as reading items; chapter labels emitted late in a PDF text stream are suppressed from their displaced body position. Existing section addresses remain aliases. Approved source substrings and their order remain available unchanged in `parts.text`.
+
+A standalone 별표/별지 division followed by a contents list ends the preceding attachment. Such divisions remain available via PDF-page browsing but are not presented as substantive figures. The HPAI table 23 retains PDF pages 315–316 and excludes the forms contents divider at 317.

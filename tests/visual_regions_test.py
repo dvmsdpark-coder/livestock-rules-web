@@ -1,9 +1,13 @@
 import sys,unittest
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
-from sop_visuals import with_caption,prose_raster
+from sop_visuals import with_caption,prose_raster,division_index
 
 class VisualRegions(unittest.TestCase):
+    def test_attachment_contents_divisions_are_not_figures(self):
+        self.assertTrue(division_index('별 지\n1. 신고서\n2. 현지조사표'))
+        self.assertTrue(division_index('310\n별 표 / 별 지\n1. 용구\n2. 신고서'))
+        self.assertFalse(division_index('[별표 23]\n1. 실제 본문\n2. 준수사항'))
     def test_caption_note_and_wrapped_note_are_preserved_but_next_section_is_not(self):
         rows=[((95,75,405,93),'그림 1. 방역 절차'),((100,305,400,315),'주: 적용 조건을 함께 확인한다.'),((100,319,400,331),'예외 조건은 다음과 같다.'),((100,350,400,365),'2. 다음 절차')]
         crop=with_caption((100,100,400,300),rows,595,842)

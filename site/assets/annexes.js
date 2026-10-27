@@ -32,7 +32,8 @@ export function actualAnnexes(index){
  const inline=a=>/^[^\n]*[\]〕〉]\s*(?:에\s*따[라른]|에서|의\s*(?:규정|기준))/u.test(a.part.text.split('\n')[0]);
  const selected=candidates.map((a,i)=>({...a,readerOrdinal:i})).filter(a=>!inline(a));
  const beginsPage=a=>{const page=index.pages.find(p=>p.page===a.part.page),first=a.part.text.split('\n').find(s=>s.trim());const at=page?.text.indexOf(first);return at>=0&&/^[\s\d−–-]*$/u.test(page.text.slice(0,at));};
- const result=selected.map((a,i)=>{const next=selected.slice(i+1).find(b=>b.part.page>a.part.page);if(!next||!beginsPage(next))return a;const removedBoundary=candidates.some(b=>inline(b)&&b.part.page===a.endPage);if(a.endPage===next.part.page||removedBoundary)return {...a,endPage:next.part.page-1};return a;});annexCache.set(index,result);return result;
+ const result=selected.map((a,i)=>{const next=selected.slice(i+1).find(b=>b.part.page>a.part.page);if(!next||!beginsPage(next))return a;const removedBoundary=candidates.some(b=>inline(b)&&b.part.page===a.endPage);if(a.endPage===next.part.page||removedBoundary)return {...a,endPage:next.part.page-1};return a;});const divisions=(index.pages||[]).filter(p=>/^\s*(?:\d+\s*)?별\s*[표지]\s*\n\s*(?:\d+[.．]|1\s)/u.test(p.text)).map(p=>p.page);
+ const bounded=result.map(a=>{const boundary=divisions.find(page=>page>a.part.page&&page<=a.endPage);return boundary?{...a,endPage:boundary-1}:a;});annexCache.set(index,bounded);return bounded;
 }
 const pattern=/(?<![가-힣A-Za-z0-9])(?:(「[^」]{1,100}」|『[^』]{1,100}』|가축전염병\s*예방법(?:\s*시행(?:령|규칙))?|시행령|시행규칙|같은\s*(?:법|영|규칙)|이\s*(?:법|영|규칙)|법|영|규칙)\s*)?(별표|별지)\s*(?:제\s*)?(\d+)(?:\s*호\s*의\s*(\d+)|\s*의\s*(\d+)\s*호?|\s*호)?\s*(?:서식)?/gu;
 export function annexReferences(text,sourceDoc,corpus){

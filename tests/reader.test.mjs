@@ -25,3 +25,20 @@ test('SOP source spans include interstitial image-only pages without changing se
 
 test('SOP appendix ranges stop before the next appendix rather than displaying it twice',()=>{for(const e of corpus.filter(e=>e.doc.type==='SOP')){const list=contents(e).annexes;for(let i=0;i<list.length-1;i++){const a=list[i],next=list[i+1];if(next.parts[0].text.trimStart().startsWith(next.annex.part.text.split('\n')[0]))assert(a.annex.endPage<next.annex.part.page,a.label);}}});
 test('inline legal annex citations are not catalogued as new SOP appendices and later addresses remain stable',()=>{const e=corpus.find(e=>e.doc.id==='3d9ae693-1bb3-5f8c-af9e-0e3512252566'),list=contents(e).annexes;assert(!list.some(n=>n.number[0]==='1'&&n.number[1]==='10'));const a=list.find(n=>n.number[0]==='14'&&!n.number[1]);assert.equal(a.annex.endPage,289);const later=list.find(n=>n.number[0]==='15'&&!n.number[1]);assert.equal(later.key,'x:'+later.annex.readerOrdinal);assert(later.annex.readerOrdinal>list.indexOf(later));assert(readerDetail(corpus,e.doc.id,later.key).label.includes('소독제'));});
+
+
+test('ASF chapters use physical source headings even when PDF text places them after the body',()=>{
+ const e=corpus.find(e=>e.doc.type==='SOP'&&e.doc.disease==='ASF'),nodes=contents(e).articles;
+ assert(!nodes.some(n=>n.label==='SOP 본문'));
+ assert.deepEqual([...new Set(nodes.map(n=>n.chapter.match(/^제\d+장/u)?.[0]))],['제1장','제2장','제3장']);
+ const first=readerDetail(corpus,e.doc.id,'s:0');assert.match(first.label,/^1\.1\s*정/u);assert.match(first.chapter,/^제1장/u);assert(first.parts.some(p=>p.text.includes('출혈열')));assert(!first.parts.some(p=>p.display.includes('제1장')));
+ for(let i=1;i<=10;i++)assert(nodes.some(n=>new RegExp('^1\\.'+i+'\\s','u').test(n.label)));
+ const phases=nodes.filter(n=>/단\s*계$/u.test(n.label));assert.equal(phases.length,3);assert(phases.every(n=>n.chapter.startsWith('제2장')));
+ const emergency=nodes.filter(n=>n.chapter.startsWith('제3장'));assert.equal(emergency.length,22);assert.deepEqual(emergency.map(n=>Number(n.label.match(/^\d+/u)[0])),Array.from({length:22},(_,i)=>i+1));
+ assert.match(readerDetail(corpus,e.doc.id,'s:1').label,/^1\./u);assert.equal(readerDetail(corpus,e.doc.id,'s:1001').key,readerDetail(corpus,e.doc.id,'s:1').key);
+});
+
+test('HPAI last table excludes the following forms divider but keeps its illustrated continuation',()=>{
+ const e=corpus.find(e=>e.doc.id==='3d9ae693-1bb3-5f8c-af9e-0e3512252566'),a=contents(e).annexes.find(n=>n.annexKind==='table'&&n.number[0]==='23'),d=readerDetail(corpus,e.doc.id,a.key);
+ assert.equal(a.annex.endPage,316);assert.deepEqual(d.parts.map(p=>p.page),[315,316]);assert(!d.parts.some(p=>p.text.includes('현지조사표')));assert(contents(e).pages.some(n=>n.key==='p:317'));
+});
