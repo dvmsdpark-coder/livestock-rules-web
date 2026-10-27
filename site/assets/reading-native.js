@@ -15,7 +15,7 @@ export function nativeReadingBlocks(page,range,number,label='',chapter=''){
   const gaps=lines.slice(1).map((l,i)=>l.box[1]-lines[i].box[1]).filter(v=>v>0&&v<50).sort((a,b)=>a-b),normal=gaps.length?gaps[Math.floor(gaps.length/2)]:18;let run=[];
   const finish=()=>{if(!run.length)return;result.push({kind:'text',text:run.map(l=>l.text).join('\n'),sourceBox:[Math.min(...run.map(l=>l.box[0])),run[0].box[1],Math.max(...run.map(l=>l.box[2])),run.at(-1).box[3]]});run=[];};
   const heading=l=>/^\s*(?:\d+(?:\.\d+)*[. ]|[가-힣]\.)\s*\S/u.test(l.text)&&l.text.length<110&&!/(?:다[.!?]?|[.!?。])$/u.test(l.text.trim());
-  for(const l of lines){if(run.length&&(l.box[1]-run.at(-1).box[1]>normal*1.22||heading(l)))finish();run.push(l);if(heading(l))finish();}finish();
+  for(const [i,l] of lines.entries()){const next=lines[i+1],isHeading=heading(l)&&(l.text.length<30||!next||heading(next)||next.box[1]-l.box[1]>normal*1.22);if(run.length&&(l.box[1]-run.at(-1).box[1]>normal*1.22||isHeading))finish();run.push(l);if(isHeading)finish();}finish();
  }
  return result.sort((a,b)=>a.sourceBox[1]-b.sourceBox[1]);
 }

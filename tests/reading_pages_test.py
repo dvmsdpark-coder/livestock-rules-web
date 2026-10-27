@@ -57,4 +57,9 @@ class ReadingPages(unittest.TestCase):
      extra=normalized(shown)-normalized(native);missing=normalized(native)-normalized(shown)
      self.assertFalse(missing,(doc['id'],n,missing));self.assertFalse(extra-normalized(page['excluded']),(doc['id'],n,extra))
      pdf.pages[int(n)-1].close()
+ def test_framed_rules_preserve_category_rows(self):
+  tables=[b for b in self.page('3d9',33)['blocks']if b['kind']=='table'];self.assertEqual([t['columns']for t in tables],[2,2]);self.assertEqual([len(t['rows'])for t in tables],[4,4]);self.assertIn('농장외부',re.sub(r'\s+','',''.join(c['text']for r in tables[0]['rows']for c in r)))
+ def test_late_vertical_sidebar_is_not_body(self):
+  p=self.page('de2',51);self.assertNotIn('미',[l['text'].strip()for l in p['lines']]);self.assertIn('미',p['excluded'])
 if __name__=='__main__':unittest.main()
+

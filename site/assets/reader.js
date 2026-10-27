@@ -1,14 +1,14 @@
-import {nativePage,nativeSpacing,nativeReadingBlocks,remapNativeReferences} from './reading-native.js?v=20261027-6';
+import {nativePage,nativeSpacing,nativeReadingBlocks,remapNativeReferences} from './reading-native.js?v=20261028-1';
 import {maskPageFurniture} from './source-cleanup.js?v=20261026-5';
-import {literalRanges} from './fulltext.js?v=20261027-6';
-import {proseAnnex,previewPage,sectionPreview,annexLayouts,withoutAnnexHeading,joinedAnnexLayouts,annexProseText} from './annex-presentation.js?v=20261027-6';
-import {documentGroup,sourceBlocks} from './reader-format.js?v=20261027-6';
+import {literalRanges} from './fulltext.js?v=20261028-1';
+import {proseAnnex,previewPage,sectionPreview,annexLayouts,withoutAnnexHeading,joinedAnnexLayouts,annexProseText} from './annex-presentation.js?v=20261028-1';
+import {documentGroup,sourceBlocks} from './reader-format.js?v=20261028-1';
 const $=id=>document.getElementById(id);
 const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
 const date=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 let readingData={documents:{}},annexData=null,previews=null,findId=0,findTerm='',findResults=[],findShown=0,findJump=false,findScopeTitle='';
 let manifest,documents=[],current,tab='articles',key='',serial=0,pending=0,loading=true,group='법령';
-const worker=new Worker(new URL('./worker.js?v=20261027-6',import.meta.url),{type:'module'});
+const worker=new Worker(new URL('./worker.js?v=20261028-1',import.meta.url),{type:'module'});
 const filters=()=>({asOf:$('readerDate').value,disease:'전체',type:'전체'});
 const disease=d=>({고병원성AI:'고병원성 AI(HPAI)',구제역:'구제역(FMD)',ASF:'아프리카돼지열병(ASF)',공통:'공통'}[d]||d);
 function address(id,k){const u=new URL(location.href);u.search='';u.hash=new URLSearchParams({doc:id,item:k,date:$('readerDate').value}).toString();return u.href;}
@@ -67,7 +67,7 @@ function annexText(d,root,layouts){const byPage=new Map((layouts||[]).map(p=>[p.
 
 const nativeLoading=new Map();
 async function loadNative(doc){
- if(!nativeLoading.has(doc.id))nativeLoading.set(doc.id,(async()=>{try{const response=await fetch('./data/reading/'+doc.sha256+'.json?v=20261027-6');if(!response.ok)return;const data=await response.json();if(data.source_sha256===doc.sha256)readingData.documents[doc.id]=data;}catch{}})());
+ if(!nativeLoading.has(doc.id))nativeLoading.set(doc.id,(async()=>{try{const response=await fetch('./data/reading/'+doc.sha256+'.json?v=20261028-1');if(!response.ok)return;const data=await response.json();if(data.source_sha256===doc.sha256)readingData.documents[doc.id]=data;}catch{}})());
  await nativeLoading.get(doc.id);
 }
 function renderSop(d,root){
@@ -97,7 +97,7 @@ function renderAnnexLayouts(d,pages,root,outline={}){
   }root.append(section);
  }
 }
-function render(d){const root=$('readerBody');root.replaceChildren();root.setAttribute('aria-busy','false');if(d.error){$('readerStatus').textContent=d.error;return;}$('readerStatus').textContent='수록 원문 · 자료 기준일과 적용 조건을 함께 확인하세요.';root.classList.toggle('sop-reading',d.doc.type==='SOP'&&!d.annex);if(d.chapter&&d.chapter!==d.label)root.append(el('p','toc-chapter',d.chapter));root.append(el('h2','item-heading',d.label));
+function render(d){const report=$('errorReport');if(report&&d.doc)report.href='mailto:sdpark0428@gmail.com?'+new URLSearchParams({subject:'방역 규정 검색기 오류 신고',body:'문서: '+d.doc.title+'\n항목: '+d.label+'\n주소: '+address(d.doc.id,d.key)+'\n\n오류 내용:\n'}).toString().replace(/\+/gu,'%20');const root=$('readerBody');root.replaceChildren();root.setAttribute('aria-busy','false');if(d.error){$('readerStatus').textContent=d.error;return;}$('readerStatus').textContent='수록 원문 · 자료 기준일과 적용 조건을 함께 확인하세요.';root.classList.toggle('sop-reading',d.doc.type==='SOP'&&!d.annex);if(d.chapter&&d.chapter!==d.label)root.append(el('p','toc-chapter',d.chapter));root.append(el('h2','item-heading',d.label));
  if(d.annex||key.startsWith('p:')||d.visualOnly){
   const sourceLayouts=d.annex&&annexLayouts(annexData,d.doc,d.annex);const layouts=sourceLayouts&&joinedAnnexLayouts(sourceLayouts);const prose=layouts?layouts.every(p=>p.mode==='text'):d.annex&&proseAnnex(d.doc,d.annex);
   root.append(el('p','layout-note',layouts&&!prose?'문장은 본문으로, 표는 행과 열을 유지해 표시합니다. 원문은 아래에서 펼쳐 대조할 수 있습니다.':prose?'글 중심 별표입니다. 항목별 본문을 바로 읽고, 아래 원문 이미지로 대조할 수 있습니다.':'표·서식·그림의 원문 배치를 화면용 이미지로 표시합니다. 확대하면 가로로 이동하며 작은 글씨를 확인할 수 있습니다.'));
@@ -114,4 +114,4 @@ $('copyLocation').onclick=async()=>{try{await navigator.clipboard.writeText(addr
 window.addEventListener('popstate',()=>{const p=new URLSearchParams(location.hash.slice(1));if(p.get('date')&&p.get('date')!==$('readerDate').value){$('readerDate').value=p.get('date');sendCatalogue();}else if(!loading){documentOptions(p.get('doc'),p.get('item'));}});
 const initial=new URLSearchParams(location.hash.slice(1));if(initial.has('article')){initial.set('doc',initial.get('article'));if(initial.get('number'))initial.set('item','a:'+initial.get('number'));for(const field of ['article','number','paragraph','itemNumber'])initial.delete(field);history.replaceState(null,'','#'+initial.toString());}$('readerDate').value=/^\d{4}-\d{2}-\d{2}$/u.test(initial.get('date')||'')?initial.get('date'):date;
 // Preserve existing bookmarked article URLs from the former search home.
-try{const r=await fetch('./data/manifest.json?v=20261026-1');if(!r.ok)throw Error();manifest=await r.json();if(manifest.schema!==1)throw Error();try{const imageResponse=await fetch('./data/page-previews.json?v=20261027-6');if(imageResponse.ok)previews=await imageResponse.json();}catch{}try{const response=await fetch('./data/annex-layouts.json?v=20261027-6');if(response.ok)annexData=await response.json();}catch{}sendCatalogue();}catch{$('readerStatus').textContent='자료를 불러오지 못했습니다. 새로고침해주세요.';}
+try{const r=await fetch('./data/manifest.json?v=20261026-1');if(!r.ok)throw Error();manifest=await r.json();if(manifest.schema!==1)throw Error();try{const imageResponse=await fetch('./data/page-previews.json?v=20261028-1');if(imageResponse.ok)previews=await imageResponse.json();}catch{}try{const response=await fetch('./data/annex-layouts.json?v=20261028-1');if(response.ok)annexData=await response.json();}catch{}sendCatalogue();}catch{$('readerStatus').textContent='자료를 불러오지 못했습니다. 새로고침해주세요.';}

@@ -34,8 +34,32 @@ def margin_candidates(page,rows,number):
         found.append({'text':label,'number':int(match[1]),'page':number,'edge':edge,'source_edge':'geometry','context':'','box':box,'band':round(box[1]/page.height,2)})
     return found
 
+def inset_label_table(page,outer):
+    # A framed callout can contain a second grid of category labels. Preserve
+    # that inner row structure instead of flattening the whole frame body.
+    if len(outer.rows)!=2:return None
+    box=outer.bbox
+    candidates=[t for t in page.crop(box).find_tables()if len(t.columns)==1 and len(t.rows)>=2 and t.bbox[0]>box[0]+2 and t.bbox[2]<box[0]+(box[2]-box[0])*.4 and t.bbox[1]>box[1]+5 and t.bbox[3]<=box[3]+1]
+    if len(candidates)!=1:return None
+    labels=candidates[0];cells=sorted(labels.cells,key=lambda b:b[1])
+    if not all(0<len(compact(text([c for c in page.chars if centre(c,b)])))<40 for b in cells):return None
+    right=[c['x0']for c in page.chars if labels.bbox[1]<=(c['top']+c['bottom'])/2<=labels.bbox[3] and c['x0']>labels.bbox[2]+.5 and c['x1']<box[2]+.5 and not c['text'].isspace()]
+    if not right:return None
+    middle=(labels.bbox[2]+min(right))/2;rows=[]
+    def cell(bounds,col,colspan=1):return {'col':col,'colspan':colspan,'rowspan':1,'sourceBox':list(bounds),'text':text([c for c in page.chars if centre(c,bounds)]),'openTop':False,'openBottom':False}
+    rows.append([cell([box[0],box[1],box[2],cells[0][1]],0,2)])
+    for i,b in enumerate(cells):
+        bottom=b[3]
+        if i==len(cells)-1 and not any(c['text'].strip() and b[3]+.2<(c['top']+c['bottom'])/2<=box[3] for c in page.chars):bottom=box[3]
+        rows.append([cell([box[0],b[1],middle,bottom],0),cell([middle,b[1],box[2],bottom],1)])
+    last=rows[-1][0]['sourceBox'][3]
+    if last<box[3]-.2:rows.append([cell([box[0],last,box[2],box[3]],0,2)])
+    shown=''.join(c['text']for row in rows for c in row);original=''.join(c['text']for c in page.chars if centre(c,box))
+    if normalized(shown)!=normalized(original):return None
+    return {'kind':'table','columns':2,'widths':[round((middle-box[0])/(box[2]-box[0])*100,2),round((box[2]-middle)/(box[2]-box[0])*100,2)],'xs':[box[0],middle,box[2]],'rows':rows,'insetLabels':True}
+
 def source_table(page,table):
- block=table_block(page,table)
+ block=inset_label_table(page,table)or table_block(page,table)
  if block:return block
  # Some source grids omit the outside vertical rule below their header. Close
  # only the known table extent; interior rules and merged cells remain native.
@@ -69,14 +93,14 @@ def build(document_id=None):
   with pdfplumber.open(source)as pdf:
    for n,p in enumerate(pdf.pages,1):
     ls=lines(p.chars);rows=[(l['box'],l['text'])for l in ls];raw='\n'.join(l['text']for l in ls);candidates+=margin_candidates(p,ls,n)
-    side=[c for c in p.chars if c['x0']>p.width*.88 and c['bottom']<p.height*.4]
+    side=[c for c in p.chars if c['x0']>p.width*.88 and c['bottom']<p.height*.86]
     key=compact(''.join(c['text']for c in side))
     if re.fullmatch(r'[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]+[가-힣/]+|별표/별지',key):sidebars[key]+=1
     p.close()
    confirmed=confirmed_furniture(candidates)
    for n,p in enumerate(pdf.pages,1):
     excluded=[];boxes=[r['box']for r in confirmed.get(str(n),[])]
-    side=[c for c in p.chars if c['x0']>p.width*.88 and c['bottom']<p.height*.4];key=compact(''.join(c['text']for c in side))
+    side=[c for c in p.chars if c['x0']>p.width*.88 and c['bottom']<p.height*.86];key=compact(''.join(c['text']for c in side))
     if sidebars[key]>=3 and side:boxes.append(union([[c['x0'],c['top'],c['x1'],c['bottom']]for c in side]))
     # A repeated footer title and its printed number form a single margin band.
     bottom=[c for c in p.chars if c['top']>p.height*.86];raw=compact(''.join(c['text']for c in bottom));title=compact(doc['title'])

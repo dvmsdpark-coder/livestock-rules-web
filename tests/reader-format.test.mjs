@@ -79,3 +79,5 @@ test('wrapped numeric values closing a parenthesis do not become SOP list items'
 test('inserted item 2의2 is a sibling of 2 and 3, even when whitespace was flattened',()=>{
  const text='① 다음 각 호의 정보. 1. 질병명 2. 농장 소재지 2의2. 계약한 계열화사업자명 3. 발생 일시',b=sourceBlocks(text),items=b.filter(b=>b.family==='numberDot');assert.deepEqual(items.map(b=>b.marker),['1.','2.','2의2.','3.']);assert.equal(new Set(items.map(b=>b.depth)).size,1);assert.equal(b.map(b=>b.text).join(''),text);
 });
+
+test('SOP Korean subitems stay below the preceding decimal heading',()=>{const b=sourceBlocks('3. 지자체\n3.1. 시도\n3.1.1 관내 농장 지도\n가. 준수한다.\n나. 점검한다.\n3.1.2 다음 점검\n가. 확인한다.',true,{});assert.deepEqual(b.filter(x=>x.marker==='가.').map(x=>x.depth),[3,3]);assert.equal(b.find(x=>x.marker==='나.').depth,3);});

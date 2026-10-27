@@ -1,5 +1,5 @@
 // Build searchable SOP sections from approved body text; preserve physical-page substrings.
-import {sopStructure} from './sop-structure.js?v=20261027-6';
+import {sopStructure} from './sop-structure.js?v=20261028-1';
 const compact=s=>s.replace(/\s/gu,'');
 const cache=new WeakMap();
 const readable=s=>s.replace(/([^\n])\n(?!\s*(?:\d+(?:\.\d+)*[. ]|[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]|[가-힣]\.\s|[-▷※]))/gu,'$1 ').trim();

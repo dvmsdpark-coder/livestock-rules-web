@@ -2,7 +2,7 @@
 export const documentGroup=doc=>doc.type==='SOP'?'SOP':doc.type==='고시'?'고시':'법령';
 const letters='가나다라마바사아자차카타파하거너더러머버서어저처커터퍼허고노도로모보소오조초코토포호';
 const order=['numberDot','koreanDot','numberClose','koreanClose','numberParen','koreanParen'];
-const token=new RegExp('(?:^|(?<=\\s))(?:(?<chapter>[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]+[.． ]+|제\\s*\\d+\\s*[장절]\\s*)|(?<decimal>\\d{1,2}(?:[.,]\\d{1,2})+\\.?)(?!\\d)|(?<numberParen>\\(\\d{1,2}\\))|(?<koreanParen>\\(['+letters+']\\))|(?<numberClose>\\d{1,2}\\))|(?<koreanClose>['+letters+']\\))|(?<numberDot>\\d{1,2}(?:의\\d{1,2})?\\.)(?!\\d)|(?<koreanDot>['+letters+']\\.)|(?<clause>[①-⑳])|(?<bullet>[-□○◦▷▶](?=[ \\t])|[ㆍ·](?=\\d|[^\\n]{1,24}[：:~～]))|(?<note>※|\\*{1,3}(?=[ \\t])))','gu');
+const token=new RegExp('(?:^|(?<=\\s))(?:(?<chapter>[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]+[.． ]+|제\\s*\\d+\\s*[장절]\\s*)|(?<decimal>\\d{1,2}(?:[.,]\\d{1,2})+\\.?)(?!\\d)|(?<numberParen>\\(\\d{1,2}\\))|(?<koreanParen>\\(['+letters+']\\))|(?<numberClose>\\d{1,2}\\))|(?<koreanClose>['+letters+']\\))|(?<numberDot>\\d{1,2}(?:의\\d{1,2})?\\.)(?!\\d)|(?<koreanDot>['+letters+']\\.)|(?<clause>[①-⑳])|(?<bullet>[-□○◦▷▶](?=[ \\t])|∙(?=\\S|[ \\t])|[ㆍ·](?=\\d|[^\\n]{1,24}[：:~～]))|(?<note>※|\\*{1,3}(?=[ \\t])))','gu');
 export function sourceBlocks(text,sop=false,state={},protectedRanges=[]){
  const initialParenDepth=state.parenthesisDepth??0,parenDepth=s=>{let d=initialParenDepth;for(const c of s)if(c==='('||c==='（')d++;else if(c===')'||c==='）')d=Math.max(0,d-1);return d;};
  const dates=[...text.matchAll(/\d{4}\s*\.\s*\d{1,2}\s*\.\s*\d{1,2}\s*\.?/gu)].map(m=>({start:m.index,end:m.index+m[0].length}));
@@ -27,7 +27,7 @@ export function sourceBlocks(text,sop=false,state={},protectedRanges=[]){
   }else if(['numberDot','koreanDot'].includes(family)&&!/^[ \t]+\S/u.test(after))continue;
   let depth=state.depth??0,kind='item';
   if(!['clause','note','bullet'].includes(family)){state.circleDepth=null;state.noteDepth=null;state.noteMarker=null;state.bulletStack=[];state.bulletBase=null;}
-  if(family==='chapter'){kind='heading';depth=0;state.clause=false;state.order=null;state.stack=[];state.decimal=false;}
+  if(family==='chapter'){kind='heading';depth=0;state.clause=false;state.order=null;state.stack=[];state.decimal=false;state.sopDecimalDepth=null;}
   else if(family==='clause'){
    if(state.mode==='annex'||state.mode==='cell'||sop){
     // Circled labels in appendices/procedures are local lists, not article paragraphs.
@@ -37,9 +37,9 @@ export function sourceBlocks(text,sop=false,state={},protectedRanges=[]){
     kind=depth?'subitem':'item';state.circleDepth=depth;
    }else{kind='clause';depth=0;state.clause=true;state.stack=[];state.noteDepth=null;state.bulletStack=[];state.bulletBase=null;}
   }
-  else if(family==='decimal'){kind='step';depth=marker.replace(/[.,]$/u,'').split(/[.,]/u).length-1;state.decimal=true;}
+  else if(family==='decimal'){kind='step';depth=marker.replace(/[.,]$/u,'').split(/[.,]/u).length-1;state.decimal=true;if(sop){state.sopDecimalDepth=depth;state.stack=[];}}
   else if(family==='bullet'){
-   kind='bullet';const rank=marker==='□'?0:/[○◦]/u.test(marker)?1:/[ㆍ·]/u.test(marker)?3:2;
+   kind='bullet';const rank=marker==='□'?0:/[○◦]/u.test(marker)?1:/[ㆍ·∙]/u.test(marker)?3:2;
    const stack=state.bulletStack??=[];state.bulletBase??=state.depth??0;
    while(stack.length&&stack.at(-1).rank>=rank)stack.pop();
    const parent=stack.at(-1)?.depth??state.bulletBase;
@@ -61,7 +61,8 @@ export function sourceBlocks(text,sop=false,state={},protectedRanges=[]){
    }
    const grammar=state.order||order,rank=grammar.indexOf(family);
    const stack=state.stack??=[];while(stack.length&&stack.at(-1).rank>=rank)stack.pop();
-   depth=(stack.length?stack.at(-1).depth+1:Math.max(0,rank)+(state.clause?1:0));stack.push({rank,depth});
+   if(sop&&family==='numberDot')state.sopDecimalDepth=null;
+   depth=(stack.length?stack.at(-1).depth+1:sop&&state.sopDecimalDepth!=null?state.sopDecimalDepth+1:Math.max(0,rank)+(state.clause?1:0));stack.push({rank,depth});
   }
   cuts.set(start,{kind,depth,noteChild:family==='clause'&&state.noteDepth!=null,marker,markerStart:start,markerEnd:start+marker.length,family});
   if(family==='numberDot'||family==='decimal')state.root=marker.split(/[.,]/u)[0];

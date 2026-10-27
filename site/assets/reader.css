@@ -53,3 +53,5 @@
 
 #readerBody .formatted-source>.source-note-child{font-size:14px;color:#617284}
 .annex-figure{margin:18px 0}.annex-figure-image{display:block;max-width:100%;height:auto;margin:auto}
+
+.portal-notice .error-report{display:block;margin-top:5px;overflow-wrap:anywhere}.portal-notice .error-report a{margin-left:0}
