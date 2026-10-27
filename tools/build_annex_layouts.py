@@ -161,11 +161,15 @@ def equipment_cells(p,cells):
  replacements={}
  for unit in cells:
   entries=source_lines(cell_chars(p,unit))
-  if len(entries)<3 or not all(re.fullmatch(r'(?:각\s*)?[\d,]+\s*(?:개|조|부|벌|짝|켤레|켈레|권|봉지|리터|㎏|kg|회\s*용\s*\(개\))',line) for _,line in entries):continue
+  if len(entries)<3 or not all(re.fullmatch(r'(?:(?:각|축사별)\s*)?[\d,]+\s*(?:개|조|부|벌|짝|켤레|켈레|권|봉지|리터|㎏|kg|회\s*용\s*\(개\)|Test\s*분)(?:\s*이상)?',line) for _,line in entries):continue
   label=next((b for b in cells if abs(b[2]-unit[0])<1 and abs(b[1]-unit[1])<1 and abs(b[3]-unit[3])<1),None)
   if not label:continue
   labels=source_lines(cell_chars(p,label))
   if not all(any(abs(y-z)<4 for z,_ in labels) for y,_ in entries):continue
+  # Uniform source label baselines can include deliberately blank quantities.
+  # Keep those rows blank rather than shifting the following quantity upward.
+  gaps=[b[0]-a[0] for a,b in zip(labels,labels[1:])]
+  if len(labels)>len(entries) and gaps and min(gaps)>8 and max(gaps)-min(gaps)<2:entries=labels
   targets=[b for b in cells if b[0]>=label[0] and abs(b[1]-unit[1])<1 and abs(b[3]-unit[3])<1]
   groups=[[] for _ in entries]
   for box in targets:

@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
-import {references,referencesForParts,articleIn,articleDetail} from '../site/assets/evidence.js';
+import {references,referencesForParts,articleIn,articleDetail,legalUnits} from '../site/assets/evidence.js';
 const manifest=JSON.parse(fs.readFileSync(new URL('../site/data/manifest.json',import.meta.url))),corpus=manifest.documents.map(doc=>({doc,index:JSON.parse(fs.readFileSync(new URL('../site/'+doc.data,import.meta.url))),asOf:'2026-10-27'}));
 const law=corpus.find(e=>e.doc.type==='법률'),decree=corpus.find(e=>e.doc.type==='시행령'),source=id=>corpus.find(e=>e.doc.id===id);
 const gold=[
@@ -41,3 +41,21 @@ test('wrapped external law titles and attachment numbers are never mistaken for 
 test('the implicit first paragraph of a single-paragraph article can resolve a cited item',()=>{
  const e=source('e6d52b81-681d-5e59-aa4c-63e78798e41e'),r=references('제13조제1항제2호',e.doc,corpus);assert.equal(r.length,1);assert.equal(r[0].articleNumber,'제13조');assert.equal(r[0].item,2);assert.equal(r[0].paragraph,null);
 });
+
+
+test('omitted 제 in 법 11조 still cites the parent law rather than the notice',()=>{
+ const e=source('e6d52b81-681d-5e59-aa4c-63e78798e41e'),d=articleDetail(corpus,{documentId:e.doc.id,articleNumber:'제10조'}),r=d.parts.flatMap(p=>p.references);assert(r.some(r=>r.label==='법 11조'&&r.documentId===law.doc.id&&r.articleNumber==='제11조'));
+});
+
+test('curly-quoted external feed-standard annex is never linked to the current ASF notice',()=>{
+ const e=source('37899984-3bca-5e02-a322-9d29397f15a5'),d=articleDetail(corpus,{documentId:e.doc.id,articleNumber:'제20조'});
+ assert(d.parts.some(p=>p.text.includes('사료등의 기준 및 규격')));assert(!d.parts.flatMap(p=>p.references).some(r=>r.kind==='annex'&&r.label.includes('별표 1')));
+});
+
+
+test('inserted decree item 2의2 has its own legal-unit scope',()=>{
+ const a=articleIn(decree,'제2조의2'),u=legalUnits(a).units;assert(u.some(u=>u.item==='2의2'));assert(!u.find(u=>u.item===2).parts.some(p=>p.text.includes('2의2.')));
+});
+
+
+test('bare 조 equipment quantities do not become article citations',()=>{assert.equal(references('긴급 용구 10조 및 1조를 준비한다.',law.doc,corpus).length,0);});

@@ -74,3 +74,8 @@ test('table formula notes keep category dashes above age bands without splitting
 test('circled entries within footnotes keep note styling and triple-star notes split from their last entry',()=>{const text='□ 시료채취\n○ 채취내역\n- 지점\n* 도축장 실내 :\n① 생계투입구,\n② 현수실\n** 도축장 실외 :\n① 정문출입구,\n② 계류장 *** 도축장 내외부 상태에 따라 가감\n- 검사방법';const blocks=sourceBlocks(text,true,{mode:'annex'});const notes=blocks.filter(b=>b.family==='note');assert.deepEqual(notes.map(b=>b.marker),['*','**','***']);assert.equal(blocks.filter(b=>b.family==='clause'&&b.noteChild).length,4);assert(blocks.find(b=>b.marker==='***').text.includes('가감'));assert(!blocks.findLast(b=>b.family==='clause').text.includes('***'));});
 
 test('wrapped numeric values closing a parenthesis do not become SOP list items',()=>{const text='혈청형(A, O, C, Asia 1, SAT 1, SAT 2 및 SAT\n3) 이다.\n1) 실제 항목';const blocks=sourceBlocks(text,true,{});assert(!blocks.some(b=>b.marker==='3)'));assert(blocks.some(b=>b.marker==='1)'));assert.equal(blocks.map(b=>b.text).join(''),text);const state={};sourceBlocks('혈청형(A, SAT',true,state);assert(!sourceBlocks('3) 이다.',true,state).some(b=>b.marker==='3)'));});
+
+
+test('inserted item 2의2 is a sibling of 2 and 3, even when whitespace was flattened',()=>{
+ const text='① 다음 각 호의 정보. 1. 질병명 2. 농장 소재지 2의2. 계약한 계열화사업자명 3. 발생 일시',b=sourceBlocks(text),items=b.filter(b=>b.family==='numberDot');assert.deepEqual(items.map(b=>b.marker),['1.','2.','2의2.','3.']);assert.equal(new Set(items.map(b=>b.depth)).size,1);assert.equal(b.map(b=>b.text).join(''),text);
+});

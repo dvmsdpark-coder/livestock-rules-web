@@ -2,7 +2,7 @@
 export const documentGroup=doc=>doc.type==='SOP'?'SOP':doc.type==='고시'?'고시':'법령';
 const letters='가나다라마바사아자차카타파하거너더러머버서어저처커터퍼허고노도로모보소오조초코토포호';
 const order=['numberDot','koreanDot','numberClose','koreanClose','numberParen','koreanParen'];
-const token=new RegExp('(?:^|(?<=\\s))(?:(?<chapter>[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]+[.． ]+|제\\s*\\d+\\s*[장절]\\s*)|(?<decimal>\\d{1,2}(?:[.,]\\d{1,2})+\\.?)(?!\\d)|(?<numberParen>\\(\\d{1,2}\\))|(?<koreanParen>\\(['+letters+']\\))|(?<numberClose>\\d{1,2}\\))|(?<koreanClose>['+letters+']\\))|(?<numberDot>\\d{1,2}\\.)(?!\\d)|(?<koreanDot>['+letters+']\\.)|(?<clause>[①-⑳])|(?<bullet>[-□○◦▷▶](?=[ \\t])|[ㆍ·](?=\\d|[^\\n]{1,24}[：:~～]))|(?<note>※|\\*{1,3}(?=[ \\t])))','gu');
+const token=new RegExp('(?:^|(?<=\\s))(?:(?<chapter>[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]+[.． ]+|제\\s*\\d+\\s*[장절]\\s*)|(?<decimal>\\d{1,2}(?:[.,]\\d{1,2})+\\.?)(?!\\d)|(?<numberParen>\\(\\d{1,2}\\))|(?<koreanParen>\\(['+letters+']\\))|(?<numberClose>\\d{1,2}\\))|(?<koreanClose>['+letters+']\\))|(?<numberDot>\\d{1,2}(?:의\\d{1,2})?\\.)(?!\\d)|(?<koreanDot>['+letters+']\\.)|(?<clause>[①-⑳])|(?<bullet>[-□○◦▷▶](?=[ \\t])|[ㆍ·](?=\\d|[^\\n]{1,24}[：:~～]))|(?<note>※|\\*{1,3}(?=[ \\t])))','gu');
 export function sourceBlocks(text,sop=false,state={},protectedRanges=[]){
  const initialParenDepth=state.parenthesisDepth??0,parenDepth=s=>{let d=initialParenDepth;for(const c of s)if(c==='('||c==='（')d++;else if(c===')'||c==='）')d=Math.max(0,d-1);return d;};
  const dates=[...text.matchAll(/\d{4}\s*\.\s*\d{1,2}\s*\.\s*\d{1,2}\s*\.?/gu)].map(m=>({start:m.index,end:m.index+m[0].length}));

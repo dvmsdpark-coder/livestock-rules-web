@@ -148,6 +148,12 @@ class AnnexLayouts(unittest.TestCase):
     if p['mode']=='mixed':self.assertFalse(any(b['kind']=='image' for b in p['blocks']),f'{typ} {n}')
  def test_closed_simple_tables_are_selectable_text(self):
   _,pages=self.document('시행규칙');tables=[b for b in pages['69']['blocks'] if b['kind']=='table'];self.assertTrue(tables);self.assertEqual(tables[0]['columns'],2)
+ def test_hpai_notice_equipment_has_eighteen_source_aligned_rows_and_sparse_quantities(self):
+  pages=self.data['documents']['e6d52b81-681d-5e59-aa4c-63e78798e41e']['pages'];table=next(b for b in pages['26']['blocks'] if b['kind']=='table');rows=table['rows'][1:]
+  self.assertEqual(len(rows),18)
+  pairs=[(''.join(r[0]['text'].split()),''.join(r[1]['text'].split())) for r in rows]
+  self.assertEqual(pairs[0][1],'6개');self.assertEqual(pairs[1][1],'6개');self.assertEqual([q for _,q in pairs[2:8]],['']*6)
+  self.assertIn(('멸균목재압저(tonguedepressor)','축사별5개'),pairs);self.assertIn(('1회용주사기3㎖','축사별20개'),pairs);self.assertEqual(pairs[-1][1],'20벌')
  def test_source_hash_and_every_converted_character_and_merged_cell(self):
   converted=0
   for doc in self.manifest['documents']:

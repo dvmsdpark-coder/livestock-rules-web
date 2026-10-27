@@ -74,3 +74,10 @@ SOP 본문 키워드 검색이 별표·별지 쪽에 일치하면 PDF 쪽만 열
 The ASF reader groups its source sections by physically positioned chapter headings. Decimal disease-description headings and the response phases in chapter 2 are retained as reading items; chapter labels emitted late in a PDF text stream are suppressed from their displaced body position. Existing section addresses remain aliases. Approved source substrings and their order remain available unchanged in `parts.text`.
 
 A standalone 별표/별지 division followed by a contents list ends the preceding attachment. Such divisions remain available via PDF-page browsing but are not presented as substantive figures. The HPAI table 23 retains PDF pages 315–316 and excludes the forms contents divider at 317.
+
+
+### Inserted items, abbreviated citations and FMD chapter dividers
+
+Inserted labels such as `2의2.` are independent siblings in both the legal-unit model and presentation. References written as `법 11조` accept the omitted 제 while retaining the parent-law destination. Annex references support curly-quoted titles; an unregistered external notice must not resolve to the current notice's identically numbered table.
+
+FMD decorative chapter-divider typography is resolved from the verified short-page index label, retaining all five physical chapter boundaries. The HPAI notice table 3 restores each equipment baseline as a separate row; intentionally missing quantities remain blank and following quantities do not shift into those rows.

@@ -1,9 +1,9 @@
 // Resolve citation scope before making links. An unavailable external act must
 // never fall back to a coincidentally numbered article in the current document.
 const flat=s=>s.replace(/[\s「」『』·ㆍ]/gu,'');
-const number='제\\s*\\d+\\s*조(?:\\s*의\\s*\\d+)?';
+const number='(?:제\\s*)?\\d+\\s*조(?:\\s*의\\s*\\d+)?';
 const suffix='(?:\\s*제\\s*(\\d+)\\s*항)?(?:\\s*제\\s*(\\d+)\\s*호)?';
-const documentPattern=/「[^」]{1,120}」(?:\s*시행(?:령|규칙))?|『[^』]{1,120}』(?:\s*시행(?:령|규칙))?|가축전염병\s*예방법(?:\s*시행(?:령|규칙))?|(?:같은\s*법|(?<![가-힣A-Za-z0-9])이\s*법)(?:\s*시행(?:령|규칙))?|같은\s*(?:영|규칙)|(?<![가-힣A-Za-z0-9])(?:이\s*(?:영|규칙|요령|고시|지침)|시행규칙|시행령|법|영|규칙)(?=\s*(?:\([^\n)]{0,100}\)\s*)?(?:제\s*\d+\s*조|같은\s*조))/gu;
+const documentPattern=/「[^」]{1,120}」(?:\s*시행(?:령|규칙))?|『[^』]{1,120}』(?:\s*시행(?:령|규칙))?|가축전염병\s*예방법(?:\s*시행(?:령|규칙))?|(?:같은\s*법|(?<![가-힣A-Za-z0-9])이\s*법)(?:\s*시행(?:령|규칙))?|같은\s*(?:영|규칙)|(?<![가-힣A-Za-z0-9])(?:이\s*(?:영|규칙|요령|고시|지침)|시행규칙|시행령|법|영|규칙)(?=\s*(?:\([^\n)]{0,100}\)\s*)?(?:(?:제\s*)?\d+\s*조|같은\s*조))/gu;
 const articlePattern=new RegExp('('+number+')'+suffix+'|(?:같은\\s*조|(?<![가-힣A-Za-z0-9])동\\s*조)'+suffix+'|(?:같은\\s*항|(?<![가-힣A-Za-z0-9])동\\s*항)(?:\\s*제\\s*(\\d+)\\s*호)?|제\\s*(\\d{1,3})\\s*항(?:\\s*제\\s*(\\d{1,3})\\s*호)?|제\\s*(\\d{1,3})\\s*호','gu');
 const adjacent=s=>/^(?:\s|\([^)]{0,100}\))*$/u.test(s);
 const continuation=s=>{const rest=s.replace(/\([^)]{0,80}\)/gu,'').replace(/본문|단서|전단|후단/gu,'').replace(/[\s,，ㆍ·~～–—\-]/gu,'');return /^(?:(?:및|또는|부터|까지|내지|에서|와|과))*$/u.test(rest);};
@@ -40,10 +40,13 @@ export function resolveLegalReferences(text,sourceDoc,corpus,{articleIn,legalUni
    continue;
   }
   const explicit=pending&&pending.end<=m.index&&adjacent(text.slice(pending.end,m.index))?pending:null;
+  // Omitted 제 is accepted only immediately after a document name.
+  // Quantities such as '용구 10조' must never become article references.
+  if(m[1]&&!/^제/u.test(flat(m[1]))&&!explicit)continue;
   const gap=last?text.slice(last.end,m.index):'',chain=last&&(continuation(gap)||!/[.!?。]/u.test(gap)&&/(?:과|와|및|또는)\s*$/u.test(gap));
   let scope=explicit||(chain?last.scope:{entries:corpus.filter(e=>e.doc.id===sourceDoc.id),name:flat(sourceDoc.title)});
   let articleNumber,paragraph=null,item=null,relative=false;
-  if(m[1]){articleNumber=flat(m[1]);paragraph=m[2]?+m[2]:null;item=m[3]?+m[3]:null;}
+  if(m[1]){articleNumber='제'+flat(m[1]).replace(/^제/u,'');paragraph=m[2]?+m[2]:null;item=m[3]?+m[3]:null;}
   else if(/^(?:같은|동)\s*조/u.test(m[0])){relative=true;scope=explicit||last?.scope;articleNumber=last?.articleNumber;paragraph=m[4]?+m[4]:null;item=m[5]?+m[5]:null;}
   else if(/^(?:같은|동)\s*항/u.test(m[0])){relative=true;scope=explicit||last?.scope;articleNumber=last?.articleNumber;paragraph=last?.paragraph;item=m[6]?+m[6]:null;}
   else {relative=true;if(!chain&&!ownArticle)continue;scope=chain?last.scope:{entries:corpus.filter(e=>e.doc.id===sourceDoc.id),name:flat(sourceDoc.title)};articleNumber=chain?last.articleNumber:flat(ownArticle);paragraph=m[7]?+m[7]:chain?last.paragraph:null;item=m[8]?+m[8]:m[9]?+m[9]:null;}

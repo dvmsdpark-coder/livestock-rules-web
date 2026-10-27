@@ -1,13 +1,13 @@
 import {maskPageFurniture} from './source-cleanup.js?v=20261026-5';
-import {literalRanges} from './fulltext.js?v=20261027-4';
-import {proseAnnex,previewPage,sectionPreview,annexLayouts,withoutAnnexHeading,joinedAnnexLayouts,annexProseText} from './annex-presentation.js?v=20261027-4';
-import {documentGroup,sourceBlocks} from './reader-format.js?v=20261027-4';
+import {literalRanges} from './fulltext.js?v=20261027-5';
+import {proseAnnex,previewPage,sectionPreview,annexLayouts,withoutAnnexHeading,joinedAnnexLayouts,annexProseText} from './annex-presentation.js?v=20261027-5';
+import {documentGroup,sourceBlocks} from './reader-format.js?v=20261027-5';
 const $=id=>document.getElementById(id);
 const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
 const date=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 let annexData=null,previews=null,findId=0,findTerm='',findResults=[],findShown=0,findJump=false,findScopeTitle='';
 let manifest,documents=[],current,tab='articles',key='',serial=0,pending=0,loading=true,group='법령';
-const worker=new Worker(new URL('./worker.js?v=20261027-4',import.meta.url),{type:'module'});
+const worker=new Worker(new URL('./worker.js?v=20261027-5',import.meta.url),{type:'module'});
 const filters=()=>({asOf:$('readerDate').value,disease:'전체',type:'전체'});
 const disease=d=>({고병원성AI:'고병원성 AI(HPAI)',구제역:'구제역(FMD)',ASF:'아프리카돼지열병(ASF)',공통:'공통'}[d]||d);
 function address(id,k){const u=new URL(location.href);u.search='';u.hash=new URLSearchParams({doc:id,item:k,date:$('readerDate').value}).toString();return u.href;}
@@ -110,4 +110,4 @@ $('copyLocation').onclick=async()=>{try{await navigator.clipboard.writeText(addr
 window.addEventListener('popstate',()=>{const p=new URLSearchParams(location.hash.slice(1));if(p.get('date')&&p.get('date')!==$('readerDate').value){$('readerDate').value=p.get('date');sendCatalogue();}else if(!loading){documentOptions(p.get('doc'),p.get('item'));}});
 const initial=new URLSearchParams(location.hash.slice(1));if(initial.has('article')){initial.set('doc',initial.get('article'));if(initial.get('number'))initial.set('item','a:'+initial.get('number'));for(const field of ['article','number','paragraph','itemNumber'])initial.delete(field);history.replaceState(null,'','#'+initial.toString());}$('readerDate').value=/^\d{4}-\d{2}-\d{2}$/u.test(initial.get('date')||'')?initial.get('date'):date;
 // Preserve existing bookmarked article URLs from the former search home.
-try{const r=await fetch('./data/manifest.json?v=20261026-1');if(!r.ok)throw Error();manifest=await r.json();if(manifest.schema!==1)throw Error();try{const imageResponse=await fetch('./data/page-previews.json?v=20261027-4');if(imageResponse.ok)previews=await imageResponse.json();}catch{}try{const response=await fetch('./data/annex-layouts.json?v=20261027-4');if(response.ok)annexData=await response.json();}catch{}sendCatalogue();}catch{$('readerStatus').textContent='자료를 불러오지 못했습니다. 새로고침해주세요.';}
+try{const r=await fetch('./data/manifest.json?v=20261026-1');if(!r.ok)throw Error();manifest=await r.json();if(manifest.schema!==1)throw Error();try{const imageResponse=await fetch('./data/page-previews.json?v=20261027-5');if(imageResponse.ok)previews=await imageResponse.json();}catch{}try{const response=await fetch('./data/annex-layouts.json?v=20261027-5');if(response.ok)annexData=await response.json();}catch{}sendCatalogue();}catch{$('readerStatus').textContent='자료를 불러오지 못했습니다. 새로고침해주세요.';}

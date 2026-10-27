@@ -1,7 +1,7 @@
-import {resolveLegalReferences} from './legal-references.js?v=20261027-4';
+import {resolveLegalReferences} from './legal-references.js?v=20261027-5';
 import {normalizeQuestion} from './question.js?v=20261026-1';
 import {annexExcerpt} from './annex-excerpts.js?v=20261026-1';
-import {annexReferences} from './annexes.js?v=20261027-2';
+import {annexReferences} from './annexes.js?v=20261027-5';
 // Source-only presentation and internal legal references. No generated legal text.
 import {activeArticles} from './provisions.js?v=20261026-1';
 const squash=s=>s.replace(/\s+/gu,'');
@@ -37,9 +37,9 @@ export function legalUnits(article){
  for(const range of ranges){
   const parent={...range,item:null,label:article.number+(range.paragraph?' 제'+range.paragraph+'항':'')};
   units.push({...parent,parts:slices(src,parent.start,parent.end)});
-  const text=src.text.slice(range.start,range.end),items=[...text.matchAll(/(?:^|\n)[ \t]*(\d+)\.[ \t]*/gu)].filter(m=>Number(m[1])<=100&&!/^\d{1,2}\.\s*\d{1,2}\.\s*>/u.test(text.slice(m.index).trimStart()));
+  const text=src.text.slice(range.start,range.end),items=[...text.matchAll(/(?:^|\n)[ \t]*(\d+(?:의\d+)?)\.[ \t]*/gu)].filter(m=>Number(m[1].split('의')[0])<=100&&!/^\d{1,2}\.\s*\d{1,2}\.\s*>/u.test(text.slice(m.index).trimStart()));
   for(let i=0;i<items.length;i++){
-   const start=range.start+items[i].index,end=range.start+(items[i+1]?.index??text.length),item=Number(items[i][1]);
+   const start=range.start+items[i].index,end=range.start+(items[i+1]?.index??text.length),item=items[i][1].includes('의')?items[i][1]:Number(items[i][1]);
    units.push({start,end,paragraph:range.paragraph,item,label:parent.label+' 제'+item+'호',parts:slices(src,start,end)});
   }
  }

@@ -49,3 +49,10 @@ test('SOP reading preserves physical line breaks for source-furniture masks and 
   assert.equal((p.display.match(/\n/gu)||[]).length,(p.text.match(/\n/gu)||[]).length,'PDF '+p.page);
  }
 });
+
+
+test('FMD source divider chapters group all body items and preserve the standard-action address',()=>{
+ const e=corpus.find(e=>e.doc.type==='SOP'&&e.doc.disease==='구제역'),nodes=contents(e).articles;
+ assert.deepEqual([...new Set(nodes.map(n=>n.chapter.match(/^제\d+장/u)?.[0]))],['제1장','제2장','제3장','제4장','제5장']);
+ const d=readerDetail(corpus,e.doc.id,'s:4');assert.match(d.label,/평시 표준행동요령/u);assert.match(d.chapter,/^제3장/u);
+});
