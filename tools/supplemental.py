@@ -29,7 +29,7 @@ PROFILES = {
 }
 
 # Also accept the SOP notation 제3의1호, alongside 법령 notation 제3호의1.
-ANNEX = re.compile(r'(?m)^[ \t]*(?:[■□][^\n\[]*)?[\[〔](별지|별표)\s*(?:제\s*)?(\d+)(?:\s*호\s*의\s*(\d+)|\s*의\s*(\d+)\s*호?|\s*호)?\s*(?:서식)?[\]〕]([^\n]*)')
+ANNEX = re.compile(r'(?m)^[ \t]*(?:[■□][^\n\[]*)?[\[〔]?(별지|별표)[ \t]*(?:제[ \t]*)?(\d+)(?:[ \t]*호[ \t]*의[ \t]*(\d+)|[ \t]*의[ \t]*(\d+)[ \t]*호?|[ \t]*호)?[ \t]*(?:서식)?(?:[\]〕]|(?=[ \t]*$))([^\n]*)')
 
 def excluded(profile,page):
  return any(start<=page<=end for start,end in profile.get('exclude',[]))
@@ -54,13 +54,22 @@ def curated_procedures(pages,profile):
  return result
 
 def parse_annexes(pages,title):
+ # An SOP's reference division can reproduce a notice and restart numbering.
+ # Scope the standalone attachment division before parsing its headings.
+ start=next((i for i,p in enumerate(pages) if re.match(r'^\s*별\s*표\s*/\s*별\s*지(?:\s|⚫)',p['text_content'])),None)
+ if start is not None:
+  end=next((i for i in range(start+1,len(pages)) if re.match(r'^\s*참\s*고\s*자\s*료(?:\s|⚫)',pages[i]['text_content'])),len(pages));pages=pages[start:end]
+  while pages and not pages[-1]['text_content'].strip():pages=pages[:-1]
  result=[]; current=None
  for page in pages:
   text=page_body(page['text_content'],title); matches=list(ANNEX.finditer(text))
   if not matches:
    if current:current['parts'].append({**page,'text_content':text})
    continue
-  if current and matches[0].start():current['parts'].append({**page,'text_content':text[:matches[0].start()]})
+  if current and matches[0].start():
+   prefix=text[:matches[0].start()]
+   furniture=re.sub(r'별\s*표\s*/\s*별\s*지|'+re.escape(title)+r'|[\s\d⚫]+','',prefix)
+   if furniture.strip():current['parts'].append({**page,'text_content':prefix})
   for i,m in enumerate(matches):
    end=matches[i+1].start() if i+1<len(matches) else len(text)
    following=text[m.end():end].strip().splitlines(); subtitle=following[0].strip() if following else ''

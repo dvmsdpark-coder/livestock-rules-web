@@ -68,6 +68,17 @@ class AnnexLayouts(unittest.TestCase):
    clean=lambda s:''.join(s.split())
    actual={clean(r[0]['text']):[clean(c['text']) for c in r[1:]] for r in rows[1:]}
    self.assertEqual(actual['비누'],['3개','물비누1개포함']);self.assertEqual(actual['고압스프레이어'],['1조','입구설치용']);self.assertEqual(actual['구급약품'],['1조','응급치료용']);self.assertEqual(actual['나침반'],['1개',''])
+ def test_fmd_all_fifteen_appendices_have_native_layouts_and_equipment_rows(self):
+  pages=self.data['documents']['de2a0c26-cb9d-4f83-b3f9-4d31f29fbbef']['pages']
+  self.assertEqual(set(pages),{str(n) for n in range(287,327)})
+  self.assertTrue(all(p['mode']!='image' for p in pages.values()))
+  table=next(b for b in pages['319']['blocks'] if b['kind']=='table');self.assertEqual(len(table['rows']),31)
+  rows={''.join(r[0]['text'].split()):[''.join(c['text'].split()) for c in r[1:]] for r in table['rows'][1:]}
+  self.assertEqual(rows['비누'],['3개','물비누1개포함']);self.assertEqual(rows['고압스프레이어'],['1조','입구설치용']);self.assertEqual(rows['구급약품'],['1조','응급치료용'])
+  body=''.join(b.get('text','') for b in pages['293']['blocks'] if not b.get('furniture'));self.assertIn('1.1',body);self.assertNotIn('별\n표\n/',body);self.assertFalse(body.strip().endswith('287'))
+  self.assertTrue(any(b.get('furniture') and ''.join(b['text'].split())=='별표/별지' for b in pages['293']['blocks']))
+  for n in [288,320,326]:
+   figures=[b for b in pages[str(n)]['blocks'] if b['kind']=='image'];self.assertEqual(len(figures),1);self.assertTrue((ROOT/'site'/figures[0]['crop']['path']).exists())
  def test_residue_fee_child_methods_match_separate_unit_and_price_rows(self):
   p=self.data['documents']['1265dc44-6eb2-4934-a5a8-85b1f2f3638f']['pages']['157'];table=next(b for b in p['blocks'] if b['kind']=='table' and any('그 밖의 대동물' in c['text'] for r in b['rows'] for c in r));rows=table['rows'];start=next(i for i,r in enumerate(rows) if '그 밖의 대동물' in r[0]['text'])
   for row,expected in zip(rows[start:start+2],[('근육·피하주사제','6,180,000원'),('그 밖의 투여경로','4,944,000원')]):self.assertIn(expected[0],row[0]['text']);self.assertEqual(row[1]['text'],'1성분');self.assertEqual(row[2]['text'],expected[1])

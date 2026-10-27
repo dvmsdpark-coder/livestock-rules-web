@@ -7,6 +7,17 @@ import {actualAnnexes,annexReferences} from '../site/assets/annexes.js';
 const decree=corpus.find(e=>e.doc.type==='시행령');
 const income=corpus.find(e=>e.doc.family==='income-support-notice');
 const compensation=corpus.find(e=>e.doc.family==='compensation-notice');
+test('FMD standalone appendix labels recover 15 tables and 10 forms without reference-material duplicates',()=>{
+ const f=corpus.find(e=>e.doc.type==='SOP'&&e.doc.disease==='구제역'),list=actualAnnexes(f.index);
+ assert.equal(list.length,25);assert.equal(list.filter(a=>a.kind==='table').length,15);assert.equal(list.filter(a=>a.kind==='form').length,10);
+ assert.deepEqual(list.map(a=>[a.part.page,a.endPage]),[[287,292],[293,293],[294,297],[298,304],[305,307],[308,311],[312,313],[314,314],[315,317],[318,318],[319,319],[320,320],[321,321],[322,322],[323,326],[327,327],[328,329],[330,331],[332,332],[333,333],[334,334],[335,335],[336,336],[337,337],[338,339]]);
+ assert.equal(new Set(list.map(a=>a.kind+':'+a.number.join(':'))).size,25);
+ for(const a of list){assert(f.index.pages.find(p=>p.page===a.part.page).text.includes(a.part.text));assert(a.endPage<341);}
+ const refs=annexReferences('별표 11과 별지 제6호 서식을 확인한다.',f.doc,corpus);assert.deepEqual(refs.map(r=>[r.annexKind,r.number[0],r.page]),[['table','11',319],['form','6',334]]);
+});
+test('a bare attachment citation outside an explicitly marked appendix division is not recovered',()=>{
+ assert.equal(actualAnnexes({annexes:[],pages:[{page:1,text:'별표 1\n단순한 본문 인용\n설명'}]}).length,0);
+});
 test('supplied notice revisions and substantive appendices are registered',()=>{
  assert.equal(income.doc.from,'2026-10-01');assert.equal(income.doc.pages,11);assert.equal(income.index.articles.length,8);
  assert.equal(compensation.doc.from,'2026-06-02');assert.equal(compensation.doc.pages,41);assert.equal(compensation.index.articles.length,17);

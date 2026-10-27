@@ -11,9 +11,27 @@ ROOT=Path(__file__).resolve().parents[1]
 # Reviewed drawings/labels: dimensions and relative positions carry meaning.
 DRAWINGS={'25ef0494687bf942ebabde909478e218baf7a4d2ec2efe269198d478cd0a6d11':set([94,*range(115,123),141])}
 FIGURE_CROPS={
+ 'f317fe10748e2a09e84db8098071ee71a0d9609490a35428479e6caccb8f3e60':{288:[[83,126,518,453]],320:[[95,193,501,430]],326:[[82,126,518,421]]},
  '8ca92a9774fa4ca4af353140f4fed9741297780d189aeadd5ac72e26153fec4a':{191:[[70,95,520,258]]},
  'a2b814c1053b54f9e772628e60f5dee7abe2e841b3ae69efedc026a6d5a9995d':{197:[[145,85,410,245]],202:[[140,480,415,657]]},
 }
+
+def decoration_candidate(im,page):
+ return (im['width']*im['height']>page.width*page.height*.88
+  or im['width']<page.width*.17 and im['height']>page.height*.65
+  or im['width']>page.width*.82 and im['height']<page.height*.2
+  or im['x0']>page.width*.85 and im['width']<page.width*.1
+  or im['top']<page.height*.2 and im['height']<page.height*.025 and im['width']<page.width*.2)
+
+def sidebar_chars(page):
+ chars=[c for c in page.chars if c['x0']>page.width*.88 and c['bottom']<page.height*.4]
+ return chars if re.sub(r'\s','',''.join(c['text'] for c in chars))=='별표/별지' else []
+
+def footer_chars(page,title):
+ chars=[c for c in page.chars if c['top']>page.height*.86]
+ raw=re.sub(r'\s','',''.join(c['text'] for c in chars));title=re.sub(r'\s','',title)
+ value=raw.replace(title,'').replace('⚫','')
+ return (chars,int(value)) if value.isdigit() and 1<=len(value)<=4 and ('⚫' in raw or title in raw) else ([],None)
 def centre(c,b):return b[0]-.2<=(c['x0']+c['x1'])/2<=b[2]+.2 and b[1]-.2<=(c['top']+c['bottom'])/2<=b[3]+.2
 def text(chars):return restore_prose(chars,pdfplumber.utils.extract_text(chars,x_tolerance=2,y_tolerance=3) or '')
 def count(s):return Counter(c for c in s if not c.isspace())
@@ -190,7 +208,7 @@ def page_layout(p,number,drawings,decorations=frozenset(),reviewed_crops=(),reco
   after=[c for c in p.chars if (c['top']+c['bottom'])/2>=top]
   if after:blocks.append({'kind':'text','text':text(after)})
   return {'mode':'mixed','blocks':blocks}
- images=[im for im in p.images if fingerprint(im) not in decorations]
+ images=[im for im in p.images if not (fingerprint(im) in decorations and decoration_candidate(im,p))]
  if number in drawings or p.curves or any(im['width']*im['height']>p.width*p.height*.015 for im in images):return {'mode':'image','reason':'drawing'}
  p.annex_images=images
  # Recover page-boundary grids from their original vertical rules, closing only
@@ -224,7 +242,7 @@ def page_layout(p,number,drawings,decorations=frozenset(),reviewed_crops=(),reco
   # Keep sub-point dash segments before joining, otherwise score rows disappear.
   tables=p.crop(box).find_tables({'explicit_horizontal_lines':[box[1],box[3]],'explicit_vertical_lines':[box[0],box[2]],'edge_min_length_prefilter':0})
   candidates=[t for t in tables if len(t.columns)>1]
-  if len(candidates)==1:regions.append({'bbox':box,'table':candidates[0]})
+  if len(candidates)==1:regions.append({'bbox':list(candidates[0].bbox),'table':candidates[0]})
   else:regions.append({'bbox':box,'table':None})
  if not regions:
   if images:return {'mode':'image','reason':'embedded-symbol'}
@@ -275,13 +293,25 @@ def build():
   if hashlib.sha256(source.read_bytes()).hexdigest()!=doc['sha256']:raise ValueError('PDF hash mismatch')
   pages={};drawings=DRAWINGS.get(doc['sha256'],set());numbers=sorted(set(n for a in entry['annexes'] for n in range(a['part']['page'],a['endPage']+1)))
   with pdfplumber.open(source) as pdf:
-   repeated=Counter()
+   repeated=Counter();sidebars=0;footer_offsets=Counter()
    for number in numbers:
     page=pdf.pages[number-1]
-    repeated.update(set(fingerprint(im) for im in page.images if im['width']*im['height']>page.width*page.height*.88 or im['width']<page.width*.17 and im['height']>page.height*.65 or im['width']>page.width*.82 and im['height']<page.height*.2))
+    repeated.update(set(fingerprint(im) for im in page.images if decoration_candidate(im,page)))
+    sidebars+=bool(sidebar_chars(page))
+    footer,printed=footer_chars(page,doc['title'])
+    if footer:footer_offsets[printed-number]+=1
    decorations={key for key,n in repeated.items() if n>=3}
    for n in numbers:
-    layout=page_layout(pdf.pages[n-1],n,drawings,decorations,FIGURE_CROPS.get(doc['sha256'],{}).get(n,()));materialise_cells(layout,n,doc,pdf.pages[n-1]);pages[str(n)]=layout
+    original=pdf.pages[n-1];margin=sidebar_chars(original) if sidebars>=3 else [];footer,printed=footer_chars(original,doc['title'])
+    footer=footer if sidebars>=3 and footer and footer_offsets[printed-n]>=3 else []
+    decorations_text=[cs for cs in [margin,footer] if cs];excluded_ids={id(c) for cs in decorations_text for c in cs}
+    page=original.filter(lambda obj:id(obj) not in excluded_ids) if excluded_ids else original
+    layout=page_layout(page,n,drawings,decorations,FIGURE_CROPS.get(doc['sha256'],{}).get(n,()))
+    # Preserve verified margin characters in audit data, outside body/table flow.
+    if decorations_text and layout['mode']!='image':
+     if layout['mode']=='text':layout={'mode':'mixed','blocks':[{'kind':'text','text':layout['text']}]}
+     for chars in decorations_text:layout['blocks'].append({'kind':'text','text':text(chars),'furniture':True,'sourceBox':union([[c['x0'],c['top'],c['x1'],c['bottom']] for c in chars])})
+    materialise_cells(layout,n,doc,original);pages[str(n)]=layout
    for layout in pages.values():stats[layout['mode']]+=1
   output['documents'][doc['id']]={'source_sha256':doc['sha256'],'pages':pages}
  target=ROOT/'site/data/annex-layouts.json';target.write_text(json.dumps(output,ensure_ascii=False,separators=(',',':')),encoding='utf-8');print('Annex layouts:',dict(stats),flush=True)

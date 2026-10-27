@@ -56,7 +56,7 @@ function joinPair(left,right){
 export function joinedAnnexLayouts(pages){
  const result=structuredClone(pages);let previous=null,previousPage=null;
  for(const page of result){if(page.mode!=='mixed'){previous=null;previousPage=page.page;continue;}const blocks=[];
-  for(const b of page.blocks){if(b.kind!=='table'){if(b.text?.trim()||b.kind==='image')previous=null;blocks.push(b);continue;}
+  for(const b of page.blocks){if(b.furniture){blocks.push(b);continue;}if(b.kind!=='table'){if(b.text?.trim()||b.kind==='image')previous=null;blocks.push(b);continue;}
    b.pages=[page.page];for(const cell of b.rows.flat())cell.fragments=[{page:page.page,text:cell.text,...(cell.crop?{crop:cell.crop}:{})}];
    const joined=previous&&page.page===previousPage+1?joinPair(previous,b):null;
    if(joined){Object.assign(previous,joined);}else{blocks.push(b);previous=b;}

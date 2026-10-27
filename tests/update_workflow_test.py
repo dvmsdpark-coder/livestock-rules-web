@@ -11,6 +11,14 @@ sys.path.insert(0,str(REPO/'tools'))
 import update_core as core
 
 class UpdateWorkflowTests(unittest.TestCase):
+    def test_fmd_standalone_appendices_are_suggested_and_reference_copies_are_excluded(self):
+        path=REPO/'site/data/de2a0c26-cb9d-4f83-b3f9-4d31f29fbbef.json'
+        pages=json.loads(path.read_text(encoding='utf-8'))['pages']
+        profile=core.suggested_profile(pages,'구제역 긴급행동지침(SOP)','source-test')
+        self.assertEqual(len(profile['annexes']),25)
+        self.assertEqual([(a['start'],a['end']) for a in profile['annexes'][:3]],[(287,292),(293,293),(294,297)])
+        self.assertEqual([(a['start'],a['end']) for a in profile['annexes'][-3:]],[(336,336),(337,337),(338,339)])
+        self.assertTrue(all(a['end']<341 for a in profile['annexes']))
     def setUp(self):
         test_root=REPO/'private/test-runs'
         test_root.mkdir(parents=True,exist_ok=True)

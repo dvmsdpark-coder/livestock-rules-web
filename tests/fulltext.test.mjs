@@ -2,5 +2,11 @@ import test from 'node:test';import assert from 'node:assert/strict';import fs f
 import {fulltextSearch,literalRanges} from '../site/assets/fulltext.js';
 const root=new URL('../site/',import.meta.url),m=JSON.parse(fs.readFileSync(new URL('data/manifest.json',root))),corpus=m.documents.map(doc=>({doc,index:JSON.parse(fs.readFileSync(new URL(doc.data,root))),asOf:'2026-10-25'}));
 test('literal fulltext preserves source offsets across PDF line breaks and punctuation',()=>{const t='신고는 즉시 실시한다. 생계\n 안정 비용을 지원한다.';const [r]=literalRanges(t,'생계안정비용');assert.equal(t.slice(r.start,r.end),'생계\n 안정 비용');assert.equal(literalRanges(t,'없는말').length,0);});
+test('FMD appendix body and form searches open their actual attachments rather than unrelated SOP sections',()=>{
+ const e=corpus.find(e=>e.doc.type==='SOP'&&e.doc.disease==='구제역');
+ const table=fulltextSearch(corpus,'백신주 검토',e.doc.id).find(r=>r.page===293);assert.equal(table.key,'x:1');assert.match(table.label,/별표 2/u);
+ const form=fulltextSearch(corpus,'구제역 의심축 신고서',e.doc.id).find(r=>r.page===327);assert.equal(form.key,'x:15');assert.match(form.label,/별지 제1호/u);
+ const copied=fulltextSearch(corpus,'구제역 의심축 신고서',e.doc.id).find(r=>r.page===377);assert.equal(copied.key,'p:377');
+});
 test('fulltext finds body-only terms and supports current document or all documents',()=>{const law=corpus.find(e=>e.doc.type==='법률');const r=fulltextSearch(corpus,'생계안정',law.doc.id);assert(r.some(r=>r.key.startsWith('a:')));assert(r.every(r=>r.documentId===law.doc.id));const all=fulltextSearch(corpus,'생계안정');assert(new Set(all.map(r=>r.documentId)).size>1);for(const r of all)assert(r.snippet.slice(r.match.start,r.match.end).replace(/\s/gu,'').includes('생계안정'));});
 test('fulltext includes actual annex content and SOP body pages without modifying source text',()=>{assert(fulltextSearch(corpus,'최초로 신고').some(r=>r.key.startsWith('x:')));const e=corpus.find(e=>e.doc.type==='SOP'&&e.doc.disease==='ASF'),r=fulltextSearch(corpus,'Standstill',e.doc.id);assert(r.length);assert(r.every(r=>r.key.startsWith('s:')||r.key.startsWith('p:')));assert.equal(fulltextSearch(corpus,'   ').length,0);});
