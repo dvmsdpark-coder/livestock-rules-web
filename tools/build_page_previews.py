@@ -2,7 +2,9 @@
 import hashlib,json,os,subprocess
 from pathlib import Path
 import pypdfium2 as pdf
+import pdfplumber
 from sop_visuals import analyse
+from pdf_geometry import render_box,pixel_box
 
 ROOT=Path(__file__).resolve().parents[1]
 def build():
@@ -12,7 +14,7 @@ def build():
     for entry in listing:
         doc=entry['doc'];source=ROOT/'site'/doc['pdf']
         if hashlib.sha256(source.read_bytes()).hexdigest()!=doc['sha256']:raise ValueError('PDF hash mismatch: '+doc['title'])
-        pages={};document=pdf.PdfDocument(str(source))
+        pages={};document=pdf.PdfDocument(str(source));geometry=pdfplumber.open(source)
         analysis={}
         if doc['type']=='SOP':
             overrides=json.loads((ROOT/'maintenance/visual-overrides.json').read_text(encoding='utf-8')).get(doc['sha256'],{})
@@ -21,6 +23,7 @@ def build():
         for number in entry['pages']:
             target=dest/f'{number}.webp'
             page=document[number-1]
+            source_page=geometry.pages[number-1];visible=render_box(source_page)
             if not target.exists():
                 bitmap=page.render(scale=1440/page.get_width())
                 image=bitmap.to_pil().convert('RGB')
@@ -37,18 +40,19 @@ def build():
                 from PIL import Image
                 with Image.open(target) as full:
                     for region in info['regions']:
-                        pixel=[max(0,int(region[0]/info['page_width']*width)),max(0,int(region[1]/info['page_height']*height)),min(width,int(region[2]/info['page_width']*width+.999)),min(height,int(region[3]/info['page_height']*height+.999))]
+                        pixel=pixel_box(region,visible,width,height)
                         if pixel[0]>=pixel[2] or pixel[1]>=pixel[3]:raise ValueError('Empty visual crop')
                         if tuple(pixel) in seen_pixels:continue
                         seen_pixels.add(tuple(pixel))
                         signature=hashlib.sha256(json.dumps(pixel).encode()).hexdigest()[:12]
                         crop_path=dest/f'crop-{number}-{signature}.webp'
                         if not crop_path.exists():full.crop(tuple(pixel)).save(crop_path,'WEBP',quality=86,method=4)
-                        crops.append({'path':crop_path.relative_to(ROOT/'site').as_posix(),'width':pixel[2]-pixel[0],'height':pixel[3]-pixel[1],'bytes':crop_path.stat().st_size,'sha256':hashlib.sha256(crop_path.read_bytes()).hexdigest(),'pixel_box':pixel})
+                        crops.append({'path':crop_path.relative_to(ROOT/'site').as_posix(),'width':pixel[2]-pixel[0],'height':pixel[3]-pixel[1],'bytes':crop_path.stat().st_size,'sha256':hashlib.sha256(crop_path.read_bytes()).hexdigest(),'pixel_box':pixel,'source_box':region,'source_bounds':[v/(info['page_width'] if i%2==0 else info['page_height']) for i,v in enumerate(region)]})
             size=target.stat().st_size
-            pages[str(number)]={'path':target.relative_to(ROOT/'site').as_posix(),'width':width,'height':height,'bytes':size,'sha256':hashlib.sha256(target.read_bytes()).hexdigest(),'visual':visual,'kind':info.get('kind','page'),'mode':info.get('mode','full'),'visuals':crops,'furniture':info.get('furniture',[])}
+            bounds=[[v/(info['page_width'] if i%2==0 else info['page_height']) for i,v in enumerate(region)] for region in info.get('regions',[])]
+            pages[str(number)]={'path':target.relative_to(ROOT/'site').as_posix(),'width':width,'height':height,'bytes':size,'sha256':hashlib.sha256(target.read_bytes()).hexdigest(),'visual':visual,'kind':info.get('kind','page'),'mode':info.get('mode','full'),'visuals':crops,'visual_bounds':bounds,'render_box':visible,'furniture':info.get('furniture',[])}
             count+=1;total+=size;page.close()
-        document.close()
+        document.close();geometry.close()
         # Consecutive full-page table/diagram pages are one source group.
         run=[]
         def finish_run():

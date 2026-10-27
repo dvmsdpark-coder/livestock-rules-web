@@ -1,5 +1,5 @@
 // Build searchable SOP sections from approved body text; preserve physical-page substrings.
-import {sopStructure} from './sop-structure.js?v=20261027-1';
+import {sopStructure} from './sop-structure.js?v=20261027-3';
 const compact=s=>s.replace(/\s/gu,'');
 const cache=new WeakMap();
 const readable=s=>s.replace(/([^\n])\n(?!\s*(?:\d+(?:\.\d+)*[. ]|[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]|[가-힣]\.\s|[-▷※]))/gu,'$1 ').trim();
@@ -55,9 +55,10 @@ function readerSections(entry,legacy){
   const headings=source.headings.filter(h=>h.page===part.page).map(h=>({...h,match:needle(h.heading).exec(part.text)})).filter(h=>h.match).sort((a,b)=>a.match.index-b.match.index);
   let at=0;
   const add=text=>{if(!text.trim())return;if(!current){current={...old,parts:[],units:[],aliases:[]};out.push(current);}current.parts.push({...part,text,display:readable(text)});};
-  for(const h of headings){const prefix=part.text.slice(at,h.match.index),transfer=at===0&&current&&current.parts.at(-1)?.page<part.page;if(!transfer)add(prefix);current={...old,key:entry.doc.id+':reader:'+h.page+':'+h.match.index,heading:h.match[0].trim(),parts:[],units:[],aliases:[]};out.push(current);if(transfer)add(prefix);at=h.match.index;}
+  for(const h of headings){const prefix=part.text.slice(at,h.match.index),transfer=at===0&&current&&current.parts.at(-1)?.page<part.page;if(!transfer)add(prefix);current={...old,key:entry.doc.id+':reader:'+h.page+':'+h.match.index,generatedOrdinal:1000+out.length,heading:h.match[0].trim(),headingPage:h.page,headingTop:h.topRatio,parts:[],units:[],aliases:[]};out.push(current);if(transfer)add(prefix);at=h.match.index;}
   add(part.text.slice(at));
  }
+ if(out.length>1&&out[0].heading==='SOP 본문'&&out[0].parts.every(p=>p.page===out[1].headingPage)&&compact(out[0].parts.map(p=>p.text).join('')).length<200){const prefix=out.shift();out[0].parts.unshift(...prefix.parts);}
  const starts=out.map(s=>({page:s.parts[0].page,offset:entry.index.pages.find(p=>p.page===s.parts[0].page).text.indexOf(s.parts[0].text)}));
  for(let i=0;i<legacy.length;i++){
   const old=legacy[i],page=old.parts[0].page,pageText=entry.index.pages.find(p=>p.page===page).text,offset=needle(old.heading).exec(pageText)?.index??pageText.indexOf(old.parts[0].text);
@@ -65,7 +66,7 @@ function readerSections(entry,legacy){
   let position=0;for(let n=0;n<starts.length;n++)if(starts[n].page<page||starts[n].page===page&&starts[n].offset<=offset)position=n;if(exact>=0)position=exact;
   const owner=out[position];owner.aliases.push('s:'+i);owner.readerOrdinal??=i;
  }
- for(let i=0;i<out.length;i++){out[i].readerOrdinal??=1000+i;out[i].units=[{label:'본문',parts:out[i].parts}];}
+ for(let i=0;i<out.length;i++){out[i].readerOrdinal??=out[i].generatedOrdinal??1000+i;if(out[i].generatedOrdinal!=null&&out[i].generatedOrdinal!==out[i].readerOrdinal)out[i].aliases.push('s:'+out[i].generatedOrdinal);out[i].units=[{label:'본문',parts:out[i].parts}];}
  return out;
 }
 

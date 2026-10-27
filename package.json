@@ -11,7 +11,8 @@
     "audit:links": "node tools/audit-regulation-links.mjs",
     "audit:release": "node tools/check-release.mjs",
     "test:maintenance": "python tests/update_workflow_test.py",
-    "maintain": "python tools/update_manager.py"
+    "maintain": "python tools/update_manager.py",
+    "audit:reading-links": "node tools/audit-reading-links.mjs"
   },
   "engines": {
     "node": ">=22"

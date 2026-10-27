@@ -1,3 +1,4 @@
+import {resolveLegalReferences} from './legal-references.js?v=20261027-3';
 import {normalizeQuestion} from './question.js?v=20261026-1';
 import {annexExcerpt} from './annex-excerpts.js?v=20261026-1';
 import {annexReferences} from './annexes.js?v=20261027-2';
@@ -52,30 +53,7 @@ function locate(article,parts){
  }
  return parsed.units.filter(u=>u.start<=start&&u.end>=end).sort((a,b)=>(a.end-a.start)-(b.end-b.start))[0]||null;
 }
-const numberPattern='제\\s*\\d+\\s*조(?:\\s*의\\s*\\d+)?';
-const referencePattern=new RegExp('(?<![가-힣A-Za-z0-9])(?:(「[^」]{1,100}」|『[^』]{1,100}』|가축전염병\\s*예방법(?:\\s*시행(?:령|규칙))?|(?:같은|이)\\s*(?:법|영|규칙)|법|영|규칙)\\s*(?:\\([^\\n)]{0,80}\\)\\s*)?)?('+numberPattern+')(?:\\s*제\\s*(\\d+)\\s*항)?(?:\\s*제\\s*(\\d+)\\s*호)?','gu');
-export function references(text,sourceDoc,corpus){
- const refs=[];let previousLaw=null;
- const ofType=type=>corpus.filter(e=>e.doc.type===type&&e.doc.disease==='공통');
- for(const m of text.matchAll(referencePattern)){
-  const prefix=clean((m[1]||'').replace(/[「」『』]/gu,'')),number=clean(m[2]),paragraph=m[3]?Number(m[3]):null,item=m[4]?Number(m[4]):null;
-  let candidates=[];
-  if(prefix==='법'||prefix==='이법'){candidates=sourceDoc.type==='법률'?[{doc:sourceDoc}]:ofType('법률');previousLaw=candidates.length===1?clean(candidates[0].doc.title):null;}
-  else if(prefix==='영'||prefix==='이영')candidates=ofType('시행령');
-  else if(prefix==='규칙'||prefix==='이규칙')candidates=ofType('시행규칙');
-  else if(prefix.startsWith('같은'))candidates=previousLaw===null?[]:corpus.filter(e=>clean(e.doc.title)===previousLaw);
-  else if(prefix){previousLaw=prefix;candidates=corpus.filter(e=>clean(e.doc.title)===prefix);}
-  else candidates=corpus.filter(e=>e.doc.id===sourceDoc.id);
-  const resolved=candidates.map(e=>corpus.find(x=>x.doc.id===e.doc.id)).filter(Boolean).map(e=>({entry:e,article:articleIn(e,number)})).filter(x=>x.article);
-  if(resolved.length!==1)continue;
-  const {entry,article}=resolved[0];
-  if(paragraph||item){const matches=legalUnits(article).units.filter(u=>(!paragraph||u.paragraph===paragraph)&&(!item||u.item===item));if(!matches.length)continue;}
-  // Do not turn a displayed article's own heading into a redundant link.
-  if(!prefix&&!paragraph&&!item&&text.slice(m.index+m[0].length).startsWith('('))continue;
-  refs.push({start:m.index,end:m.index+m[0].length,label:m[0],documentId:entry.doc.id,articleNumber:number,paragraph,item});
- }
- return refs;
-}
+export function references(text,sourceDoc,corpus,audit=[]){return resolveLegalReferences(text,sourceDoc,corpus,{articleIn,legalUnits},audit);}
 export function delegationReferences(text,doc,target,corpus){
  if(!target?.articleNumber)return [];
  const result=[];
@@ -90,7 +68,12 @@ export function delegationReferences(text,doc,target,corpus){
  }
  return result;
 }
-function addRefs(parts,doc,corpus,target=null){return parts.map(p=>{const text=p.display||p.text;return {...p,references:[...references(text,doc,corpus),...annexReferences(text,doc,corpus),...delegationReferences(text,doc,target,corpus)].sort((a,b)=>a.start-b.start)};});}
+export function referencesForParts(parts,doc,corpus,target=null){
+ let offset=0;const spans=parts.map(p=>{const text=p.display||p.text,span={...p,rendered:text,start:offset,end:offset+text.length};offset=span.end+1;return span;}),joined=spans.map(p=>p.rendered).join('\n');
+ const all=[...references(joined,doc,corpus),...annexReferences(joined,doc,corpus),...delegationReferences(joined,doc,target,corpus)].sort((a,b)=>a.start-b.start);
+ return spans.map(({rendered,start,end,...part})=>({...part,references:all.flatMap(r=>{const a=Math.max(start,r.start),b=Math.min(end,r.end);return a<b?[{...r,start:a-start,end:b-start,label:rendered.slice(a-start,b-start)}]:[];})}));
+}
+const addRefs=referencesForParts;
 function sopUnits(parts){
  const src=source(parts),markers=[...src.text.matchAll(/(?:^|\n)[ \t]*(\d+(?:\.\d+)+)\.?[ \t]*(?=[가-힣「(<-])/gu)];
  return markers.map((m,i)=>{
@@ -216,10 +199,8 @@ export function articleDetail(corpus,target){
   const seen=new Set();
   for(const a of activeArticles(e,target.asOf||e.asOf||e.doc.from)){
    if(seen.has(a.number)||e.doc.id===entry.doc.id&&a.number===article.number)continue;seen.add(a.number);
-   for(const p of a.parts){
-    const match=references(p.text,e.doc,corpus).find(r=>r.documentId===entry.doc.id&&r.articleNumber===article.number&&(!target.paragraph||!r.paragraph||r.paragraph===Number(target.paragraph))&&(!target.item||!r.item||r.item===Number(target.item)));
-    if(match){citations.push({documentId:e.doc.id,articleNumber:a.number,title:e.doc.title,articleTitle:a.title,label:match.label});break;}
-   }
+   const match=references(a.parts.map(p=>p.text).join('\n'),e.doc,corpus).find(r=>r.documentId===entry.doc.id&&r.articleNumber===article.number&&(!target.paragraph||!r.paragraph||r.paragraph===Number(target.paragraph))&&(!target.item||!r.item||r.item===Number(target.item)));
+   if(match)citations.push({documentId:e.doc.id,articleNumber:a.number,title:e.doc.title,articleTitle:a.title,label:match.label});
   }
  }
  return {doc:entry.doc,number:article.number,title:article.title,target,scopeLabel:scope?.label||article.number,

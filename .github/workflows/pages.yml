@@ -30,6 +30,8 @@ jobs:
         run: npm run evaluate
       - name: Audit registered regulation links and reporting coverage
         run: npm run audit:links
+      - name: Audit reader citation coverage and destinations
+        run: npm run audit:reading-links
       - name: Audit query wording, scope and negative controls
         run: npm run audit:questions
       - name: Verify published revisions and every cutover date
@@ -43,6 +45,7 @@ jobs:
             docs/search-evaluation.json
             docs/regulation-links.json
             docs/question-audit.json
+            docs/reading-link-audit.json
   deploy:
     if: github.event_name != 'pull_request'
     needs: test
@@ -73,6 +76,7 @@ jobs:
         run: |
           python -m pip install -r maintenance/preview-requirements.txt
           python tests/visual_regions_test.py
+          python tests/pdf_geometry_test.py
           python tests/page_furniture_test.py
           python tests/prose_flow_test.py
           python tools/build_page_previews.py

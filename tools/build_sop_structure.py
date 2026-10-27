@@ -38,7 +38,7 @@ def build():
                     full=[c for c in p.chars if abs((c['top']+c['bottom'])/2-y)<4]
                     label=(pdfplumber.utils.extract_text(full,x_tolerance=3,y_tolerance=4) or label).strip()
                     if not re.match(r'^\d{1,2}\.?\s+[가-힣A-Za-z]',label):continue
-                    headings.append({'page':number,'heading':label,'top':round(min(c['top'] for c in row),2),'fontSize':round(min(c['size'] for c in row),2)})
+                    headings.append({'page':number,'heading':label,'top':round(min(c['top'] for c in row),2),'topRatio':round(min(c['top'] for c in row)/p.height,8),'fontSize':round(min(c['size'] for c in row),2)})
                 p.close()
         main_size=Counter(h['fontSize'] for h in headings).most_common(1)[0][0]
         headings=[h for h in headings if h['fontSize']>=main_size-.3]

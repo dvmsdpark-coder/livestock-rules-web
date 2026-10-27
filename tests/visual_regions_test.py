@@ -11,6 +11,9 @@ class VisualRegions(unittest.TestCase):
     def test_plain_paragraph_is_not_attached_as_a_picture_note(self):
         crop=with_caption((100,100,400,300),[((100,310,400,325),'다음의 별도 조치는 본문에서 규정한다.')],595,842)
         self.assertEqual(crop[3],309)
+    def test_short_body_lines_above_are_not_captions_and_padding_cannot_cut_into_prose(self):
+        crop=with_caption((100,100,400,300),[((95,80,405,96),'차이를 보인다.'),((100,304,400,319),'별도의 본문이다.')],595,842)
+        self.assertGreater(crop[1],96);self.assertLess(crop[3],304)
     def test_native_prose_boxes_do_not_become_figures_but_short_diagram_labels_do(self):
         rows=[((100,110+i*20,400,125+i*20),'이 문장은 그림이 아니라 본문의 설명을 담은 문장입니다. 필요한 적용 조건을 확인합니다.') for i in range(5)]
         self.assertTrue(prose_raster((90,100,410,230),rows))

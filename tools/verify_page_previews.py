@@ -3,6 +3,7 @@ import hashlib,json,os,subprocess
 from pathlib import Path
 from PIL import Image
 from page_furniture import compact,NUMBER
+from pdf_geometry import pixel_box
 ROOT=Path(__file__).resolve().parents[1]
 listing=json.loads(subprocess.check_output([os.environ.get('NODE_BINARY','node'),'tools/list-preview-pages.mjs'],cwd=ROOT))
 data=json.loads((ROOT/'site/data/page-previews.json').read_text(encoding='utf-8'))
@@ -33,6 +34,7 @@ for entry in listing:
         for crop in p.get('visuals',[]):
             c=(ROOT/'site'/crop['path']).resolve();assert c.is_relative_to(file.parent)
             x0,y0,x1,y1=crop['pixel_box'];assert 0<=x0<x1<=p['width'] and 0<=y0<y1<=p['height']
+            assert crop['pixel_box']==pixel_box(crop['source_box'],p['render_box'],p['width'],p['height'])
             assert crop['width']==x1-x0 and crop['height']==y1-y0
             assert c.stat().st_size==crop['bytes'] and hashlib.sha256(c.read_bytes()).hexdigest()==crop['sha256']
             with Image.open(c) as image:assert image.size==(crop['width'],crop['height']);image.verify()

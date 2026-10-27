@@ -32,7 +32,7 @@ def with_caption(bounds,rows,width,height):
     # Keep captions and consecutive notes; stop at a separate numbered section.
     import re
     for b,text in reversed(rows):
-        if b[3]<=y0 and y0-b[3]<24 and (re.match(r'^[<〈「\[]?(?:그림|표|사진|도\s*\d|참고|붙임)',text) or len(text)<65 and not re.match(r'^\d+(?:\.\d+)*[. ]',text)):
+        if b[3]<=y0 and y0-b[3]<24 and re.match(r'^[<〈「\[]?(?:그림|표|사진|도\s*\d|참고|붙임)',text):
             x0=min(x0,b[0]);x1=max(x1,b[2]);y0=b[1];break
     in_note=False
     for b,text in rows:
@@ -41,7 +41,12 @@ def with_caption(bounds,rows,width,height):
         note=bool(re.match(r'^(?:주\s*[:：)]|주\d|비고|※|\*|출처|자료\s*[:：]|[<〈\[]?(?:그림|표|사진))',text))
         if not note and (not in_note or re.match(r'^\d+(?:\.\d+)*[. ]',text)):break
         x0=min(x0,b[0]);x1=max(x1,b[2]);y1=b[3];in_note=True
-    return [max(0,x0-9),max(0,y0-9),min(width,x1+9),min(height,y1+9)]
+    top=max(0,y0-9);bottom=min(height,y1+9)
+    above=[b[3] for b,_ in rows if top<=b[3]<=y0]
+    below=[b[1] for b,_ in rows if y1<=b[1]<=bottom]
+    if above:top=max(top,max(above)+1)
+    if below:bottom=min(bottom,min(below)-1)
+    return [max(0,x0-9),top,min(width,x1+9),bottom]
 def analyse(path,index,overrides=None):
     overrides=overrides or {};result={};bg=Counter();furniture=[]
     with pdfplumber.open(path) as document:

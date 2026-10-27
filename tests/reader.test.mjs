@@ -3,6 +3,10 @@ import {contents,readerDetail} from '../site/assets/reader-model.js';
 import {sopIndex} from '../site/assets/sop-index.js';
 const root=new URL('../site/',import.meta.url),manifest=JSON.parse(fs.readFileSync(new URL('data/manifest.json',root)));
 const corpus=manifest.documents.map(doc=>({doc,index:JSON.parse(fs.readFileSync(new URL(doc.data,root))),asOf:'2026-10-25'}));
+test('FMD opens the definition rather than an empty furniture-only SOP item and preserves old addresses',()=>{
+ const e=corpus.find(e=>e.doc.id==='de2a0c26-cb9d-4f83-b3f9-4d31f29fbbef'),nodes=contents(e).articles;assert(!nodes.some(n=>n.label==='SOP 본문'));
+ const d=readerDetail(corpus,e.doc.id,'s:0'),old=readerDetail(corpus,e.doc.id,'s:1001'),pathogen=readerDetail(corpus,e.doc.id,'s:1002');assert.match(d.label,/^1\s*정\s*의/u);assert.equal(old.key,d.key);assert.match(pathogen.label,/^2\s*병원체/u);assert.equal(d.visualRange.endPage,9);assert(d.visualRange.bottom<.5);assert(pathogen.visualRange.top>=d.visualRange.bottom);
+});
 test('SOP reading headings follow source hierarchy and preserve all approved source characters',()=>{
  for(const e of corpus.filter(e=>e.doc.type==='SOP')){const s=sopIndex(e),clean=x=>x.replace(/\s/gu,'');assert.equal(clean(s.readerSections.flatMap(s=>s.parts.map(p=>p.text)).join('')),clean(s.sections.flatMap(s=>s.parts.map(p=>p.text)).join('')));for(const n of s.readerSections)for(const p of n.parts)assert(e.index.pages.find(x=>x.page===p.page).text.includes(p.text));}
  const f=corpus.find(e=>e.doc.disease==='구제역'&&e.doc.type==='SOP'),nodes=contents(f).articles;

@@ -7,6 +7,7 @@ from sop_visuals import fingerprint
 from prose_flow import restore_prose
 from pdfplumber.table import merge_edges
 from PIL import Image
+from pdf_geometry import render_box,pixel_box
 ROOT=Path(__file__).resolve().parents[1]
 # Reviewed drawings/labels: dimensions and relative positions carry meaning.
 DRAWINGS={'25ef0494687bf942ebabde909478e218baf7a4d2ec2efe269198d478cd0a6d11':set([94,*range(115,123),141])}
@@ -280,7 +281,7 @@ def materialise_cells(layout,number,doc,page):
  if not source.exists():raise ValueError('Build page previews before annex cell visuals')
  with Image.open(source) as image:
   for cell in cells:
-   box=cell.pop('cropBox');coords=[max(0,int(box[0]/page.width*image.width)),max(0,int(box[1]/page.height*image.height)),min(image.width,int(box[2]/page.width*image.width+1)),min(image.height,int(box[3]/page.height*image.height+1))]
+   box=cell.pop('cropBox');coords=pixel_box(box,render_box(page),image.width,image.height)
    signature=hashlib.sha256(json.dumps(coords).encode()).hexdigest()[:12];path=f'assets/pages/{doc["sha256"]}/annex-cell-{number}-{signature}.webp';target=ROOT/'site'/path
    crop=image.crop(coords)
    if not target.exists():crop.save(target,'WEBP',quality=90,method=4)

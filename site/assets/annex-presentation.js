@@ -5,6 +5,15 @@ const reviewed={
 };
 export function proseAnnex(doc,annex){return annex.kind==='table'&&(reviewed[doc.sha256]||[]).some(n=>n[0]===annex.number[0]&&(n[1]||null)===(annex.number[1]||null));}
 export function previewPage(previews,doc,page){const entry=previews?.documents?.[doc.id];return entry?.source_sha256===doc.sha256?entry.pages[String(page)]||null:null;}
+// A physical page can contain two SOP sections. Its figures belong to the
+// section containing their source position, rather than every item on that page.
+export function sectionPreview(data,range,page){
+ if(!data||!range)return data;
+ if(page<range.startPage||page>range.endPage)return {...data,visual:false,visuals:[]};
+ const top=page===range.startPage?range.top:0,bottom=page===range.endPage?range.bottom:1,inside=box=>{const middle=(box[1]+box[3])/2;return middle>=top&&middle<bottom;};
+ if(data.mode==='crop'){const visuals=(data.visuals||[]).filter(v=>v.source_bounds?inside(v.source_bounds):!v.pixel_box||inside(v.pixel_box.map((x,i)=>x/(i%2?data.height:data.width))));return {...data,visual:data.visual&&visuals.length>0,visuals};}
+ return data.visual_bounds?.length?{...data,visual:data.visual&&data.visual_bounds.some(inside)}:data;
+}
 
 // Generated layouts are usable only for this exact immutable PDF and complete annex range.
 export function annexLayouts(layouts,doc,annex){

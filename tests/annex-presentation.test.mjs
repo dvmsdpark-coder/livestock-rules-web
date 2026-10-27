@@ -1,7 +1,11 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
-import {proseAnnex,previewPage} from '../site/assets/annex-presentation.js';
+import {proseAnnex,previewPage,sectionPreview} from '../site/assets/annex-presentation.js';
 import {actualAnnexes} from '../site/assets/annexes.js';
 const root=new URL('../site/',import.meta.url),m=JSON.parse(fs.readFileSync(new URL('data/manifest.json',root)));
+test('figures on a shared physical page belong only to the SOP section containing their source position',()=>{
+ const page={visual:true,mode:'crop',width:600,height:840,visuals:[{path:'figure.webp',pixel_box:[100,550,500,675]}]},definition={startPage:9,top:.17,endPage:9,bottom:.4},pathogen={startPage:9,top:.4,endPage:10,bottom:.4};
+ assert.equal(sectionPreview(page,definition,9).visual,false);assert.equal(sectionPreview(page,pathogen,9).visual,true);assert.equal(sectionPreview(page,pathogen,11).visual,false);assert.equal(sectionPreview(page,null,9),page);
+});
 test('reviewed prose includes pig facilities annex and revision changes cannot inherit classification',()=>{const d=m.documents.find(d=>d.type==='시행규칙'),x=JSON.parse(fs.readFileSync(new URL(d.data,root))),a=actualAnnexes(x).find(a=>a.number[0]==='1'&&a.number[1]==='2');assert(proseAnnex(d,a));assert(!proseAnnex({...d,sha256:'new-revision'},a));assert(!proseAnnex(d,{...a,kind:'form'}));});
 test('page preview must match original PDF hash and physical page',()=>{const doc={id:'d',sha256:'correct'},data={documents:{d:{source_sha256:'correct',pages:{55:{path:'assets/pages/correct/55.webp'}}}}};assert(previewPage(data,doc,55));assert.equal(previewPage(data,{...doc,sha256:'changed'},55),null);assert.equal(previewPage(data,doc,56),null);assert.equal(previewPage(null,doc,55),null);});
 

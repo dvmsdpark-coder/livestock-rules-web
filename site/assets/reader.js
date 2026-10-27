@@ -1,13 +1,13 @@
 import {maskPageFurniture} from './source-cleanup.js?v=20261026-5';
-import {literalRanges} from './fulltext.js?v=20261027-2';
-import {proseAnnex,previewPage,annexLayouts,withoutAnnexHeading,joinedAnnexLayouts,annexProseText} from './annex-presentation.js?v=20261027-2';
-import {documentGroup,sourceBlocks} from './reader-format.js?v=20261027-2';
+import {literalRanges} from './fulltext.js?v=20261027-3';
+import {proseAnnex,previewPage,sectionPreview,annexLayouts,withoutAnnexHeading,joinedAnnexLayouts,annexProseText} from './annex-presentation.js?v=20261027-3';
+import {documentGroup,sourceBlocks} from './reader-format.js?v=20261027-3';
 const $=id=>document.getElementById(id);
 const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
 const date=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 let annexData=null,previews=null,findId=0,findTerm='',findResults=[],findShown=0,findJump=false,findScopeTitle='';
 let manifest,documents=[],current,tab='articles',key='',serial=0,pending=0,loading=true,group='법령';
-const worker=new Worker(new URL('./worker.js?v=20261027-2',import.meta.url),{type:'module'});
+const worker=new Worker(new URL('./worker.js?v=20261027-3',import.meta.url),{type:'module'});
 const filters=()=>({asOf:$('readerDate').value,disease:'전체',type:'전체'});
 const disease=d=>({고병원성AI:'고병원성 AI(HPAI)',구제역:'구제역(FMD)',ASF:'아프리카돼지열병(ASF)',공통:'공통'}[d]||d);
 function address(id,k){const u=new URL(location.href);u.search='';u.hash=new URLSearchParams({doc:id,item:k,date:$('readerDate').value}).toString();return u.href;}
@@ -51,7 +51,7 @@ function connections(d){const root=$('readerConnections');root.replaceChildren()
  root.append(el('h3','','이 조문을 인용한 규정'));if(!d.citations?.length)root.append(el('p','side-explanation','확인된 역방향 인용이 없습니다. 관련 규정이 없다는 뜻은 아닙니다.'));for(const c of d.citations||[])root.append(internal(`${c.title} ${c.articleNumber} · ${c.articleTitle}`,c.documentId,'a:'+c.articleNumber));}
 function pageImages(d,root){
  const section=el('section','page-images');let count=0;
- for(const part of d.parts){const data=previewPage(previews,d.doc,part.page);if(!data)continue;
+ for(const part of d.parts){const data=sectionPreview(previewPage(previews,d.doc,part.page),d.visualRange,part.page);if(!data)continue;
   const assets=d.visualOnly&&data.mode==='crop'?data.visuals:[data];
   for(const asset of assets||[]){count++;const cropped=asset!==data,figure=el('figure','page-image'+(cropped?' crop-figure':'')),caption=el('figcaption');caption.append(el('span','',`${cropped?'그림·도표 발췌 · ':''}원문 ${part.page}쪽 · ${Math.ceil(asset.bytes/1024)}KB`));
    if(cropped)caption.append(internal('쪽 전체 보기',d.doc.id,'p:'+part.page));
@@ -67,7 +67,7 @@ function annexText(d,root,layouts){const byPage=new Map((layouts||[]).map(p=>[p.
 function renderSop(d,root){
  if(!d.sourceRange){renderParts(d.parts,root);return;}
  const byPage=new Map(),visualPages=new Set(),outline={};for(const part of d.parts){if(!byPage.has(part.page))byPage.set(part.page,[]);byPage.get(part.page).push(part);}
- for(let page=d.sourceRange.start;page<=d.sourceRange.end;page++){const p=previewPage(previews,d.doc,page);if(p?.visual){visualPages.add(page);for(const n of p.continuation||[])visualPages.add(n);}}
+ for(let page=d.sourceRange.start;page<=d.sourceRange.end;page++){const p=sectionPreview(previewPage(previews,d.doc,page),d.visualRange,page);if(p?.visual){visualPages.add(page);for(const n of p.continuation||[])if(n>=d.sourceRange.start&&n<=d.sourceRange.end&&sectionPreview(previewPage(previews,d.doc,n),d.visualRange,n)?.visual)visualPages.add(n);}}
  for(const page of [...new Set([...byPage.keys(),...visualPages])].sort((a,b)=>a-b)){
   if(byPage.has(page))renderParts(byPage.get(page),root,outline);
   if(visualPages.has(page)){const p=previewPage(previews,d.doc,page),section=el('section','sop-visuals');section.append(el('h3','sop-visual-title',p.mode==='full'?'여러 쪽에 걸친 표·그림 · 원문 전체 쪽':'그림·도표 발췌 · 주석·범례 포함'));pageImages({...d,visualOnly:true,parts:[{page}]},section);root.append(section);}
@@ -107,4 +107,4 @@ $('copyLocation').onclick=async()=>{try{await navigator.clipboard.writeText(addr
 window.addEventListener('popstate',()=>{const p=new URLSearchParams(location.hash.slice(1));if(p.get('date')&&p.get('date')!==$('readerDate').value){$('readerDate').value=p.get('date');sendCatalogue();}else if(!loading){documentOptions(p.get('doc'),p.get('item'));}});
 const initial=new URLSearchParams(location.hash.slice(1));if(initial.has('article')){initial.set('doc',initial.get('article'));if(initial.get('number'))initial.set('item','a:'+initial.get('number'));for(const field of ['article','number','paragraph','itemNumber'])initial.delete(field);history.replaceState(null,'','#'+initial.toString());}$('readerDate').value=/^\d{4}-\d{2}-\d{2}$/u.test(initial.get('date')||'')?initial.get('date'):date;
 // Preserve existing bookmarked article URLs from the former search home.
-try{const r=await fetch('./data/manifest.json?v=20261026-1');if(!r.ok)throw Error();manifest=await r.json();if(manifest.schema!==1)throw Error();try{const imageResponse=await fetch('./data/page-previews.json?v=20261026-5');if(imageResponse.ok)previews=await imageResponse.json();}catch{}try{const response=await fetch('./data/annex-layouts.json?v=20261027-2');if(response.ok)annexData=await response.json();}catch{}sendCatalogue();}catch{$('readerStatus').textContent='자료를 불러오지 못했습니다. 새로고침해주세요.';}
+try{const r=await fetch('./data/manifest.json?v=20261026-1');if(!r.ok)throw Error();manifest=await r.json();if(manifest.schema!==1)throw Error();try{const imageResponse=await fetch('./data/page-previews.json?v=20261027-3');if(imageResponse.ok)previews=await imageResponse.json();}catch{}try{const response=await fetch('./data/annex-layouts.json?v=20261027-3');if(response.ok)annexData=await response.json();}catch{}sendCatalogue();}catch{$('readerStatus').textContent='자료를 불러오지 못했습니다. 새로고침해주세요.';}

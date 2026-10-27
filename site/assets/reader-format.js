@@ -4,6 +4,7 @@ const letters='가나다라마바사아자차카타파하거너더러머버서�
 const order=['numberDot','koreanDot','numberClose','koreanClose','numberParen','koreanParen'];
 const token=new RegExp('(?:^|(?<=\\s))(?:(?<chapter>[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]+[.． ]+|제\\s*\\d+\\s*[장절]\\s*)|(?<decimal>\\d{1,2}(?:[.,]\\d{1,2})+\\.?)(?!\\d)|(?<numberParen>\\(\\d{1,2}\\))|(?<koreanParen>\\(['+letters+']\\))|(?<numberClose>\\d{1,2}\\))|(?<koreanClose>['+letters+']\\))|(?<numberDot>\\d{1,2}\\.)(?!\\d)|(?<koreanDot>['+letters+']\\.)|(?<clause>[①-⑳])|(?<bullet>[-□○◦▷▶](?=[ \\t])|[ㆍ·](?=\\d|[^\\n]{1,24}[：:~～]))|(?<note>※|\\*{1,3}(?=[ \\t])))','gu');
 export function sourceBlocks(text,sop=false,state={},protectedRanges=[]){
+ const initialParenDepth=state.parenthesisDepth??0,parenDepth=s=>{let d=initialParenDepth;for(const c of s)if(c==='('||c==='（')d++;else if(c===')'||c==='）')d=Math.max(0,d-1);return d;};
  const dates=[...text.matchAll(/\d{4}\s*\.\s*\d{1,2}\s*\.\s*\d{1,2}\s*\.?/gu)].map(m=>({start:m.index,end:m.index+m[0].length}));
  const cuts=new Map([[0,{kind:sop?'prose':'paragraph',depth:state.continuationDepth??state.depth??0}]]);
  for(const m of text.matchAll(token)){
@@ -12,6 +13,8 @@ export function sourceBlocks(text,sop=false,state={},protectedRanges=[]){
   if(['chapter','bullet'].includes(family)&&!lineStart)continue;
   if(family==='note'&&!lineStart&&!(state.noteDepth!=null&&state.circleDepth!=null&&marker.startsWith('*')))continue;
   if(family==='bullet'&&/[ㆍ·]/u.test(marker)&&state.mode!=='cell')continue;
+  // A wrapped closing value such as "SAT\n3)" is part of its parenthesis.
+  if(['numberClose','koreanClose'].includes(family)&&parenDepth(text.slice(0,start))>0)continue;
   if(state.nativeLines&&!lineStart&&family!=='clause')continue;
   if(family==='decimal'){
    if(!lineStart&&!sop)continue;
@@ -65,6 +68,6 @@ export function sourceBlocks(text,sop=false,state={},protectedRanges=[]){
   state.continuationDepth=depth;
   if(!['bullet','note'].includes(family))state.depth=depth;
  }
- const entries=[...cuts].sort((a,b)=>a[0]-b[0]);
+ state.parenthesisDepth=parenDepth(text);const entries=[...cuts].sort((a,b)=>a[0]-b[0]);
  return entries.map(([start,format],i)=>{const end=entries[i+1]?.[0]??text.length;return {start,end,...format,text:text.slice(start,end)};});
 }
